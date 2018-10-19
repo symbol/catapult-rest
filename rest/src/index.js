@@ -154,8 +154,10 @@ const registerRoutes = (server, db, services) => {
 			const connectionService = createConnectionService(config, createConnection, catapult.auth.createAuthPromise, winston.verbose);
 			registerRoutes(server, db, { codec: serverAndCodec.codec, config, connectionService });
 
-			winston.info(`listening on port ${config.port}`);
-			server.listen(config.port);
+			connectionService.lease().then(() => {
+				winston.info(`listening on port ${config.port}`);
+				server.listen(config.port);
+			})
 		})
 		.catch(err => {
 			winston.error('rest server is exiting due to error', err);
