@@ -23,12 +23,10 @@ const errors = require('../server/errors');
 const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 
-const parseHeight = params => routeUtils.parseArgument(params, 'height', 'uint');
+const { parsers } = routeUtils;
 
-const getLimit = (validLimits, params) => {
-	const limit = routeUtils.parseArgument(params, 'limit', 'uint');
-	return -1 === validLimits.indexOf(limit) ? undefined : limit;
-};
+const getLimit = (validLimits, limit) =>
+	(-1 === validLimits.indexOf(limit) ? undefined : limit);
 
 const alignDown = (height, alignment) => (Math.floor((height - 1) / alignment) * alignment) + 1;
 
@@ -37,7 +35,9 @@ module.exports = {
 		const validPageSizes = routeUtils.generateValidPageSizes(config.pageSize); // throws if there is not at least one valid page size
 
 		server.get('/block/:height', (req, res, next) => {
-			const height = parseHeight(req.params);
+			const { height } = routeUtils.parseParams(req.params, {
+				height: parsers.uint
+			});
 
 			return dbFacade.runHeightDependentOperation(db, height, () => db.blockAtHeight(height))
 				.then(result => result.payload)
@@ -50,7 +50,9 @@ module.exports = {
 		);
 
 		server.get('/block/:height/transactions', (req, res, next) => {
-			const height = parseHeight(req.params);
+			const { height } = routeUtils.parseParams(req.params, {
+				height: parsers.uint
+			});
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 
 			const operation = () => db.transactionsAtHeight(height, pagingOptions.id, pagingOptions.pageSize);
@@ -66,15 +68,18 @@ module.exports = {
 		});
 
 		server.get('/blocks/:height/limit/:limit', (req, res, next) => {
-			const height = parseHeight(req.params);
-			const limit = getLimit(validPageSizes, req.params);
+			const { height, limit } = routeUtils.parseParams(req.params, {
+				height: parsers.uint,
+				limit: parsers.uint
+			});
+			const requestedLimit = getLimit(validPageSizes, limit);
 
-			const sanitizedLimit = limit || validPageSizes[0];
+			const sanitizedLimit = requestedLimit || validPageSizes[0];
 			const sanitizedHeight = alignDown(height || 1, sanitizedLimit);
-			if (sanitizedHeight !== height || !limit)
+			if (sanitizedHeight !== height || !requestedLimit)
 				return res.redirect(`/blocks/${sanitizedHeight}/limit/${sanitizedLimit}`, next); // redirect calls next
 
-			return db.blocksFrom(height, limit).then(blocks => {
+			return db.blocksFrom(height, requestedLimit).then(blocks => {
 				res.send({ payload: blocks, type: routeResultTypes.block });
 				next();
 			});

@@ -36,9 +36,11 @@ const constants = {
 	}
 };
 
+class ArrayParserError extends Error {}
+
 const isObjectId = str => 24 === str.length && convert.isHexString(str);
 
-const namedParserMap = {
+const parsers = {
 	objectId: str => {
 		if (!isObjectId(str))
 			throw Error('must be 12-byte hex string');
@@ -83,10 +85,39 @@ const namedParserMap = {
 			return convert.hexToUint8(str);
 
 		throw Error(`invalid length of hash512 '${str.length}'`);
+	},
+	// available only for body params
+	array: parser => array => {
+		const parsedArray = [];
+		array.forEach(item => {
+			try {
+				parsedArray.push(parser(item));
+			} catch (err) {
+				throw new ArrayParserError();
+			}
+		});
+		return parsedArray;
 	}
 };
 
 const routeUtils = {
+	parsers,
+
+	parseParams: (requestParams, fields) => {
+		const parsedFields = {};
+		Object.keys(fields).forEach(fieldName => {
+			try {
+				parsedFields[fieldName] = fields[fieldName](requestParams[fieldName]);
+			} catch (err) {
+				if (err instanceof ArrayParserError)
+					throw errors.createInvalidArgumentError(`element in array ${fieldName} has an invalid format`, err);
+
+				throw errors.createInvalidArgumentError(`${fieldName} has an invalid format`, err);
+			}
+		});
+		return parsedFields;
+	},
+
 	/**
 	 * Parses an argument and throws an invalid argument error if it is invalid.
 	 * @param {object} args Container containing the argument to parse.
@@ -96,7 +127,7 @@ const routeUtils = {
 	 */
 	parseArgument: (args, key, parser) => {
 		try {
-			return ('string' === typeof parser ? namedParserMap[parser] : parser)(args[key]);
+			return ('string' === typeof parser ? parsers[parser] : parser)(args[key]);
 		} catch (err) {
 			throw errors.createInvalidArgumentError(`${key} has an invalid format`, err);
 		}
@@ -110,7 +141,7 @@ const routeUtils = {
 	 * @returns {object} Array with parsed values.
 	 */
 	parseArgumentAsArray: (args, key, parser) => {
-		const realParser = 'string' === typeof parser ? namedParserMap[parser] : parser;
+		const realParser = 'string' === typeof parser ? parsers[parser] : parser;
 		if (!Array.isArray(args[key]))
 			throw errors.createInvalidArgumentError(`${key} has an invalid format: not an array`);
 
@@ -128,13 +159,13 @@ const routeUtils = {
 	 */
 	parsePagingArguments: args => {
 		const parsedOptions = { id: undefined, pageSize: 0 };
-		const parsers = {
+		const pagingParsers = {
 			id: { tryParse: str => (isObjectId(str) ? str : undefined), type: 'object id' },
 			pageSize: { tryParse: convert.tryParseUint, type: 'unsigned integer' }
 		};
 
 		Object.keys(parsedOptions).filter(key => args[key]).forEach(key => {
-			const parser = parsers[key];
+			const parser = pagingParsers[key];
 			parsedOptions[key] = parser.tryParse(args[key]);
 			if (!parsedOptions[key])
 				throw errors.createInvalidArgumentError(`${key} is not a valid ${parser.type}`);

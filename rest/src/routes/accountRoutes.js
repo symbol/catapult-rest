@@ -25,13 +25,17 @@ const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 
 const { convert } = catapult.utils;
+const { parsers } = routeUtils;
 
 module.exports = {
 	register: (server, db, services) => {
 		const transactionSender = routeUtils.createSender(routeResultTypes.transaction);
 
 		server.get('/account/:accountId', (req, res, next) => {
-			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+			const [type, accountId] = routeUtils.parseParams(req.params, {
+				accountId: parsers.accountId
+			}).accountId;
+
 			const sender = routeUtils.createSender(routeResultTypes.account);
 			return db.accountsByIds([{ [type]: accountId }])
 				.then(sender.sendOne(req.params.accountId, res, next));
@@ -45,7 +49,9 @@ module.exports = {
 				? { keyName: 'publicKeys', parserName: 'publicKey', type: AccountType.publicKey }
 				: { keyName: 'addresses', parserName: 'address', type: AccountType.address };
 
-			const accountIds = routeUtils.parseArgumentAsArray(req.params, idOptions.keyName, idOptions.parserName);
+			const accountIds = routeUtils.parseParams(req.params, {
+				[idOptions.keyName]: parsers.array(parsers[idOptions.parserName])
+			})[idOptions.keyName];
 			const sender = routeUtils.createSender(routeResultTypes.account);
 
 			return db.accountsByIds(accountIds.map(accountId => ({ [idOptions.type]: accountId })))
@@ -61,9 +67,11 @@ module.exports = {
 
 		transactionStates.concat(services.config.transactionStates).forEach(state => {
 			server.get(`/account/:publicKey/transactions${state.routePostfix}`, (req, res, next) => {
-				const publicKey = routeUtils.parseArgument(req.params, 'publicKey', convert.hexToUint8);
+				const { publicKey, ordering } = routeUtils.parseParams(req.params, {
+					publicKey: convert.hexToUint8,
+					ordering: input => ('id' === input ? 1 : -1)
+				});
 				const pagingOptions = routeUtils.parsePagingArguments(req.params);
-				const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
 				return db[`accountTransactions${state.dbPostfix}`](publicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
 					.then(transactionSender.sendArray('publicKey', res, next));
 			});
