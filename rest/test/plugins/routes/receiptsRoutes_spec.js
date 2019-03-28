@@ -28,14 +28,17 @@ describe('receipts routes', () => {
 	describe('get transaction statements by height', () => {
 		const endpointUnderTest = '/block/:height/receipts';
 
+		const highestHeight = 50;
+		const correctQueriedHeight = highestHeight - 10;
+
 		const transactionStatementData = ['dummyStatement'];
 		const addressResolutionStatementData = ['dummyStatement', 'dummyStatement'];
 		const mosaicResolutionStatementData = ['dummyStatement'];
-		const statementsFakes = [
-			sinon.fake(() => Promise.resolve(transactionStatementData)),
-			sinon.fake(() => Promise.resolve(addressResolutionStatementData)),
-			sinon.fake(() => Promise.resolve(mosaicResolutionStatementData))
-		];
+		const statementsFake = sinon.fake();
+		const orderedStatementsCollections = ['transactionStatements', 'addressResolutionStatements', 'mosaicResolutionStatements'];
+		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[0]).returns(transactionStatementData);
+		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[1]).returns(addressResolutionStatementData);
+		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[2]).returns(mosaicResolutionStatementData);
 
 		const routes = {};
 		const server = {
@@ -44,12 +47,9 @@ describe('receipts routes', () => {
 			}
 		};
 
-		const highestHeight = 50;
 		receiptsRoutes.register(server, {
 			chainInfo: () => Promise.resolve({ height: highestHeight }),
-			transactionStatementsAtHeight: statementsFakes[0],
-			addressResolutionStatementsAtHeight: statementsFakes[1],
-			mosaicResolutionStatementsAtHeight: statementsFakes[2]
+			statementsAtHeight: statementsFake
 		});
 
 		let sentResponse;
@@ -63,19 +63,18 @@ describe('receipts routes', () => {
 			}
 		};
 
-		beforeEach(() => statementsFakes.forEach(fake => fake.resetHistory()));
+		beforeEach(() => statementsFake.resetHistory());
 
 		it('returns result if provided height is valid', () => {
 			// Arrange:
-			const queriedHeight = highestHeight - 10;
-			const req = { params: { height: queriedHeight.toString() } };
+			const req = { params: { height: correctQueriedHeight.toString() } };
 
 			// Act:
 			const route = routes[endpointUnderTest];
 			return route(req, res, next).then(() => {
 				// Assert:
-				statementsFakes.forEach((fake, index) => expect(
-					fake.calledOnceWith(queriedHeight),
+				orderedStatementsCollections.forEach((statementCollection, index) => expect(
+					statementsFake.calledOnceWith(correctQueriedHeight, statementCollection),
 					`failed at index ${index}`
 				).to.equal(true));
 
