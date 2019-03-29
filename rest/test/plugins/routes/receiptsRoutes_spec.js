@@ -34,7 +34,7 @@ describe('receipts routes', () => {
 		const transactionStatementData = ['dummyStatement'];
 		const addressResolutionStatementData = ['dummyStatement', 'dummyStatement'];
 		const mosaicResolutionStatementData = ['dummyStatement'];
-		const statementsFake = sinon.fake();
+		const statementsFake = sinon.stub();
 		const orderedStatementsCollections = ['transactionStatements', 'addressResolutionStatements', 'mosaicResolutionStatements'];
 		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[0]).returns(transactionStatementData);
 		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[1]).returns(addressResolutionStatementData);
@@ -48,7 +48,9 @@ describe('receipts routes', () => {
 		};
 
 		receiptsRoutes.register(server, {
-			chainInfo: () => Promise.resolve({ height: highestHeight }),
+			catapultDb: {
+				chainInfo: () => Promise.resolve({ height: highestHeight }),
+			},
 			statementsAtHeight: statementsFake
 		});
 
@@ -73,8 +75,9 @@ describe('receipts routes', () => {
 			const route = routes[endpointUnderTest];
 			return route(req, res, next).then(() => {
 				// Assert:
+				expect(statementsFake.calledThrice).to.equal(true);
 				orderedStatementsCollections.forEach((statementCollection, index) => expect(
-					statementsFake.calledOnceWith(correctQueriedHeight, statementCollection),
+					statementsFake.calledWith(correctQueriedHeight, statementCollection),
 					`failed at index ${index}`
 				).to.equal(true));
 
@@ -98,7 +101,7 @@ describe('receipts routes', () => {
 			const route = routes[endpointUnderTest];
 			return route(req, res, next).then(() => {
 				// Assert:
-				statementsFakes.forEach((fake, index) => expect(fake.calledOnce, `failed at index ${index}`));
+				expect(statementsFake.calledThrice).to.equal(true);
 				expect(sentResponse.statusCode).to.equal(404);
 				expect(sentResponse.message).to.equal(`no resource exists with id '${highestHeight + 10}'`);
 			});
@@ -116,7 +119,7 @@ describe('receipts routes', () => {
 			apiResponse.throw('height has an invalid format');
 			apiResponse.with.property('statusCode', 409);
 			apiResponse.with.property('message', 'height has an invalid format');
-			statementsFakes.forEach((fake, index) => expect(fake.notCalled, `failed at index ${index}`));
+			expect(statementsFake.notCalled).to.equal(true);
 		});
 	});
 
