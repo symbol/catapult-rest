@@ -49,7 +49,7 @@ describe('receipts routes', () => {
 
 		receiptsRoutes.register(server, {
 			catapultDb: {
-				chainInfo: () => Promise.resolve({ height: highestHeight }),
+				chainInfo: () => Promise.resolve({ height: highestHeight })
 			},
 			statementsAtHeight: statementsFake
 		});
