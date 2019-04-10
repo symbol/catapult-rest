@@ -153,6 +153,10 @@ class ModelSchemaBuilder {
 				communicationTimestamps: { type: ModelType.object, schemaName: 'communicationTimestamps' }
 			},
 
+			serverInfo: {
+
+			},
+
 			storageInfo: {
 			}
 
