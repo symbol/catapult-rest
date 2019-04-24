@@ -47,9 +47,9 @@ describe('diagnostic routes', () => {
 	});
 
 	describe('server info', () => {
-		it('can retrieve info', done => {
+		it('can retrieve info', () => {
 			// Arrange:
-			const endpointUnderTest = '/diagnostic/serverInfo';
+			const endpointUnderTest = '/diagnostic/server';
 			const routes = {};
 			const server = {
 				get: (path, handler) => {
@@ -59,22 +59,23 @@ describe('diagnostic routes', () => {
 
 			diagnosticRoutes.register(server, {});
 
-			let sentResponse;
+			let capturedResponse;
 			const next = () => {};
 			const res = {
 				send: response => {
-					sentResponse = response;
+					capturedResponse = response;
 				},
 				redirect: () => {
 					next();
 				}
 			};
+
 			// Act:
 			const route = routes[endpointUnderTest];
 			route({}, res, next);
 
 			// Assert:
-			expect(sentResponse).to.deep.equal({
+			expect(capturedResponse).to.deep.equal({
 				payload: {
 					serverInfo: {
 						restVersion,
@@ -83,7 +84,6 @@ describe('diagnostic routes', () => {
 				},
 				type: 'serverInfo'
 			});
-			done();
 		});
 	});
 

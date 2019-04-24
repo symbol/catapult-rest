@@ -64,7 +64,7 @@ describe('all routes', () => {
 			'/transaction/:hash/status',
 
 			'/diagnostic/blocks/:height/limit/:limit',
-			'/diagnostic/serverInfo',
+			'/diagnostic/server',
 			'/diagnostic/storage'
 		]);
 	});

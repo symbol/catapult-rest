@@ -36,12 +36,12 @@ module.exports = {
 			});
 		});
 
-		server.get('/diagnostic/serverInfo', (req, res, next) => {
+		server.get('/diagnostic/server', (req, res, next) => {
 			res.send({
 				payload: {
 					serverInfo: {
-						sdkVersion,
-						restVersion
+						restVersion,
+						sdkVersion
 					}
 				},
 				type: routeResultTypes.serverInfo

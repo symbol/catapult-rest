@@ -154,7 +154,6 @@ class ModelSchemaBuilder {
 			},
 
 			serverInfo: {
-
 			},
 
 			storageInfo: {
