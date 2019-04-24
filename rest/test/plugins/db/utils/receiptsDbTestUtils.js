@@ -51,6 +51,12 @@ const createTransactionStatement = height => ({
 			version: 1,
 			type: 8517,
 			artifactId: Long.fromNumber(1234)
+		},
+		{
+			version: 1,
+			type: 8518,
+			mosaicId: Long.fromNumber(4532),
+			amount: Long.fromNumber(200)
 		}
 	]
 });
