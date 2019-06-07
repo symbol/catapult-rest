@@ -18,8 +18,8 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const accountLink = require('./accountLink.js');
-const accountProperties = require('./accountProperties.js');
+const accountLink = require('./empty');
+const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
 const empty = require('./empty');
 const lock = require('./lock');
