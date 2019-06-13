@@ -78,7 +78,7 @@ class MosaicDb {
 
 	/**
 	 * Retrieves transactions that registered the specified namespaces.
-	 * @param {Array.<module:catapult.utils/uint64~uint64>} namespaceIds Namespaces ids.
+	 * @param {Array.<module:catapult.utils/uint64~uint64>} namespaceIds Namespace ids.
 	 * @returns {Promise.<array>} Register namespace transactions.
 	 */
 	registerNamespaceTransactionsByNamespaceIds(namespaceIds) {
