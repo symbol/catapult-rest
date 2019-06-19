@@ -26,9 +26,9 @@ describe('model type enumeration', () => {
 		// Assert:
 		expect(ModelType).to.deep.equal({
 			none: 0,
-			object: 1,
-			array: 2,
-			dictionary: 3,
+			array: 1,
+			dictionary: 2,
+			object: 3,
 			binary: 4,
 			objectId: 5,
 			statusCode: 6,
