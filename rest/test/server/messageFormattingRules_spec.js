@@ -75,17 +75,6 @@ describe('message formatting rules', () => {
 		expect(result).to.equal('catapult');
 	});
 
-	it('can format uint64 type', () => {
-		// Arrange:
-		const object = [1, 2];
-
-		// Act:
-		const result = formattingRules[ModelType.uint64](object);
-
-		// Assert:
-		expect(result).to.deep.equal([1, 2]);
-	});
-
 	it('can format uint16 type', () => {
 		// Arrange:
 		const object = 56;
@@ -95,5 +84,16 @@ describe('message formatting rules', () => {
 
 		// Assert:
 		expect(result).to.deep.equal(56);
+	});
+
+	it('can format uint64 type', () => {
+		// Arrange:
+		const object = [1, 2];
+
+		// Act:
+		const result = formattingRules[ModelType.uint64](object);
+
+		// Assert:
+		expect(result).to.deep.equal([1, 2]);
 	});
 });

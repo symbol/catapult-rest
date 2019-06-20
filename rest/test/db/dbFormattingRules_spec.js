@@ -83,6 +83,17 @@ describe('db formatting rules', () => {
 		});
 	});
 
+	it('can format string type', () => {
+		// Arrange:
+		const object = test.factory.createBinary(Buffer.from('6361746170756C74', 'hex'));
+
+		// Act:
+		const result = formattingRules[ModelType.string](object);
+
+		// Assert:
+		expect(result).to.equal('catapult');
+	});
+
 	it('can format uint16 type', () => {
 		// Act:
 		const result = formattingRules[ModelType.uint16](17434);
