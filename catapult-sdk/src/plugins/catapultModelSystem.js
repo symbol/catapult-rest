@@ -20,7 +20,7 @@
 
 /** @module plugins/catapultModelSystem */
 const accountLink = require('./accountLink');
-const accountRestriction = require('./accountRestriction');
+const accountRestrictions = require('./accountRestrictions');
 const aggregate = require('./aggregate');
 const lock = require('./lock');
 const ModelCodecBuilder = require('../modelBinary/ModelCodecBuilder');
@@ -33,7 +33,7 @@ const receipts = require('./receipts');
 const transfer = require('./transfer');
 
 const plugins = {
-	accountLink, accountRestriction, aggregate, lock, mosaic, multisig, namespace, receipts, transfer
+	accountLink, accountRestrictions, aggregate, lock, mosaic, multisig, namespace, receipts, transfer
 };
 
 /**

@@ -23,10 +23,10 @@ const ModelSchemaBuilder = require('../../src/model/ModelSchemaBuilder');
 const test = require('../binaryTestUtils');
 const { expect } = require('chai');
 
-const accountRestrictionPlugin = require('../../src/plugins/accountRestriction');
-const { AccountRestrictionType } = require('../../src/plugins/accountRestriction');
+const accountRestrictionsPlugin = require('../../src/plugins/accountRestrictions');
+const { AccountRestrictionType } = require('../../src/plugins/accountRestrictions');
 
-describe('account restriction plugin', () => {
+describe('account restrictions plugin', () => {
 	describe('account restriction types enumeration', () => {
 		it('contains valid values', () => {
 			const accountRestrictionTypeBlockOffset = 128;
@@ -42,7 +42,7 @@ describe('account restriction plugin', () => {
 	});
 
 	describe('register schema', () => {
-		it('adds account restriction system schema', () => {
+		it('adds account restrictions system schema', () => {
 			// Arrange:
 			const builder = new ModelSchemaBuilder();
 			const numDefaultKeys = Object.keys(builder.build()).length;
@@ -58,7 +58,7 @@ describe('account restriction plugin', () => {
 			];
 
 			// Act:
-			accountRestrictionPlugin.registerSchema(builder);
+			accountRestrictionsPlugin.registerSchema(builder);
 			const modelSchema = builder.build();
 
 			// Assert:
@@ -67,8 +67,8 @@ describe('account restriction plugin', () => {
 				'accountRestrictionAddress',
 				'accountRestrictionMosaic',
 				'accountRestrictionOperation',
-				'accountRestriction',
-				'accountRestriction.accountRestriction'
+				'accountRestrictions',
+				'accountRestriction.restrictions'
 			].concat(modificationTypeSchemas).concat(accountRestrictionSchemas));
 
 			// - accountRestrictionAddress
@@ -83,9 +83,9 @@ describe('account restriction plugin', () => {
 			expect(Object.keys(modelSchema.accountRestrictionOperation).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.accountRestrictionOperation).to.contain.all.keys(['modifications']);
 
-			// - accountRestriction
-			expect(Object.keys(modelSchema.accountRestriction).length).to.equal(1);
-			expect(modelSchema.accountRestriction).to.contain.all.keys(['accountRestriction']);
+			// - accountRestrictions
+			expect(Object.keys(modelSchema.accountRestrictions).length).to.equal(1);
+			expect(modelSchema.accountRestrictions).to.contain.all.keys(['accountRestrictions']);
 
 			// - accountRestriction modification types
 			modificationTypeSchemas.forEach(schema => {
@@ -93,11 +93,11 @@ describe('account restriction plugin', () => {
 				expect(modelSchema[schema]).to.contain.all.keys(['value']);
 			});
 
-			// - accountRestriction.accountRestriction
-			expect(Object.keys(modelSchema['accountRestriction.accountRestriction']).length).to.equal(2);
-			expect(modelSchema['accountRestriction.accountRestriction']).to.contain.all.keys(['address', 'accountRestrictions']);
+			// - accountRestriction.restrictions
+			expect(Object.keys(modelSchema['accountRestriction.restrictions']).length).to.equal(2);
+			expect(modelSchema['accountRestriction.restrictions']).to.contain.all.keys(['address', 'restrictions']);
 
-			// - accountRestriction restrictions
+			// - accountRestriction address, mosaic, and operation restrictions
 			accountRestrictionSchemas.forEach(schema => {
 				expect(Object.keys(modelSchema[schema]).length).to.equal(1);
 				expect(modelSchema[schema]).to.contain.all.keys(['values']);
@@ -108,22 +108,22 @@ describe('account restriction plugin', () => {
 			it('use the correct conditional schema depending on restriction type', () => {
 				// Arrange:
 				const builder = new ModelSchemaBuilder();
-				accountRestrictionPlugin.registerSchema(builder);
+				accountRestrictionsPlugin.registerSchema(builder);
 				const modelSchema = builder.build();
-				const accountRestrictionSchema = modelSchema['accountRestriction.accountRestriction'].accountRestrictions.schemaName;
+				const accountRestrictionSchema = modelSchema['accountRestriction.restrictions'].restrictions.schemaName;
 
 				// Assert:
-				expect(accountRestrictionSchema({ accountRestrictionType: AccountRestrictionType.addressAllow }))
+				expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.addressAllow }))
 					.to.equal('accountRestriction.addressAccountRestriction');
-				expect(accountRestrictionSchema({ accountRestrictionType: AccountRestrictionType.addressBlock }))
+				expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.addressBlock }))
 					.to.equal('accountRestriction.addressAccountRestriction');
-				expect(accountRestrictionSchema({ accountRestrictionType: AccountRestrictionType.mosaicAllow }))
+				expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.mosaicAllow }))
 					.to.equal('accountRestriction.mosaicAccountRestriction');
-				expect(accountRestrictionSchema({ accountRestrictionType: AccountRestrictionType.mosaicBlock }))
+				expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.mosaicBlock }))
 					.to.equal('accountRestriction.mosaicAccountRestriction');
-				expect(accountRestrictionSchema({ accountRestrictionType: AccountRestrictionType.operationAllow }))
+				expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.operationAllow }))
 					.to.equal('accountRestriction.operationAccountRestriction');
-				expect(accountRestrictionSchema({ accountRestrictionType: AccountRestrictionType.operationBlock }))
+				expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.operationBlock }))
 					.to.equal('accountRestriction.operationAccountRestriction');
 			});
 		});
@@ -132,7 +132,7 @@ describe('account restriction plugin', () => {
 	describe('register codecs', () => {
 		const getCodecs = () => {
 			const codecs = {};
-			accountRestrictionPlugin.registerCodecs({
+			accountRestrictionsPlugin.registerCodecs({
 				addTransactionSupport: (type, codec) => { codecs[type] = codec; }
 			});
 
@@ -155,20 +155,20 @@ describe('account restriction plugin', () => {
 		const addressCodec = getCodecs()[EntityType.accountRestrictionAddress];
 		const mosaicCodec = getCodecs()[EntityType.accountRestrictionMosaic];
 		const operationCodec = getCodecs()[EntityType.accountRestrictionOperation];
-		const addNoModificationTests = (accountRestrictionType, codec) => {
+		const addNoModificationTests = (restrictionType, codec) => {
 			const bufferSize = 1 + 1; // account restriction type (in bytes) + modifications count (in bytes)
 			test.binary.test.addAll(codec, bufferSize, () => ({
 				buffer: Buffer.concat([
-					Buffer.of(accountRestrictionType), // account restriction type
+					Buffer.of(restrictionType), // account restriction type
 					Buffer.of(0x00) // modifications count
 				]),
 				object: {
-					accountRestrictionType,
+					restrictionType,
 					modifications: []
 				}
 			}));
 		};
-		const addModificationTests = (accountRestrictionType, codec, modBuffers, modValues) => {
+		const addModificationTests = (restrictionType, codec, modBuffers, modValues) => {
 			// bufferSize = account restriction type (in bytes) + mods count (in bytes) + (each mod size in bytes) * num mods
 			const bufferSize = 1 + 1 + ((1 + modBuffers[0][1].byteLength) * modBuffers.length);
 
@@ -177,18 +177,18 @@ describe('account restriction plugin', () => {
 			const splitModificationValues = values => {
 				const mods = [];
 				for (let i = 0; i < values.length; ++i)
-					mods.push({ modificationType: values[i][0], value: values[i][1] });
+					mods.push({ type: values[i][0], value: values[i][1] });
 				return mods;
 			};
 
 			test.binary.test.addAll(codec, bufferSize, () => ({
 				buffer: Buffer.concat([
-					Buffer.of(accountRestrictionType), // account restriction type
+					Buffer.of(restrictionType), // account restriction type
 					Buffer.of(modBuffers.length), // modifications count
 					concatModificationBuffers(modBuffers) // modification types and values buffers
 				]),
 				object: {
-					accountRestrictionType,
+					restrictionType,
 					modifications: splitModificationValues(modValues)
 				}
 			}));

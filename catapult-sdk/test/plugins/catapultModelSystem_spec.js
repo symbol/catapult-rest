@@ -45,7 +45,7 @@ describe('catapult model system', () => {
 			// Assert:
 			expect(supportedPluginNames).to.deep.equal([
 				'accountLink',
-				'accountRestriction',
+				'accountRestrictions',
 				'aggregate',
 				'lock',
 				'mosaic',

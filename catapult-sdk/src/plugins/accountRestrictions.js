@@ -18,7 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @module plugins/accountRestriction */
+/** @module plugins/accountRestrictions */
 const EntityType = require('../model/EntityType');
 const ModelType = require('../model/ModelType');
 const sizes = require('../modelBinary/sizes');
@@ -32,25 +32,25 @@ const accountRestrictionTypeFlags = Object.freeze({
 	operation: 4
 });
 
-const accountRestrictionCreateBaseCodec = valueCodec => ({
+const accountRestrictionsCreateBaseCodec = valueCodec => ({
 	deserialize: parser => {
 		const transaction = {};
-		transaction.accountRestrictionType = parser.uint8();
+		transaction.restrictionType = parser.uint8();
 		transaction.modifications = [];
 		const restrictionsCount = parser.uint8();
 		for (let i = 0; i < restrictionsCount; ++i) {
 			transaction.modifications.push({
-				modificationType: parser.uint8(),
+				type: parser.uint8(),
 				value: valueCodec.deserializeValue(parser)
 			});
 		}
 		return transaction;
 	},
 	serialize: (transaction, serializer) => {
-		serializer.writeUint8(transaction.accountRestrictionType);
+		serializer.writeUint8(transaction.restrictionType);
 		serializer.writeUint8(transaction.modifications.length);
 		for (let i = 0; i < transaction.modifications.length; ++i) {
-			serializer.writeUint8(transaction.modifications[i].modificationType);
+			serializer.writeUint8(transaction.modifications[i].type);
 			valueCodec.serializeValue(serializer, transaction.modifications[i].value);
 		}
 	}
@@ -78,10 +78,10 @@ const accountRestrictionTypeDescriptors = [
 ];
 
 /**
- * Creates an account restriction plugin.
+ * Creates an account restrictions plugin.
  * @type {module:plugins/CatapultPlugin}
  */
-const accountRestrictionPlugin = {
+const accountRestrictionsPlugin = {
 	AccountRestrictionType: Object.freeze({
 		addressAllow: accountRestrictionTypeFlags.address,
 		addressBlock: accountRestrictionTypeFlags.address + accountRestrictionTypeBlockOffset,
@@ -111,17 +111,17 @@ const accountRestrictionPlugin = {
 			});
 		});
 
-		// aggregated account restriction schemas
-		builder.addSchema('accountRestriction', {
-			accountRestriction: { type: ModelType.object, schemaName: 'accountRestriction.accountRestriction' }
+		// aggregated account restrictions schemas
+		builder.addSchema('accountRestrictions', {
+			accountRestrictions: { type: ModelType.object, schemaName: 'accountRestriction.restrictions' }
 		});
-		builder.addSchema('accountRestriction.accountRestriction', {
+		builder.addSchema('accountRestriction.restrictions', {
 			address: ModelType.binary,
-			accountRestrictions: {
+			restrictions: {
 				type: ModelType.array,
 				schemaName: entity => {
 					for (let i = 0; i < accountRestrictionTypeDescriptors.length; i++) {
-						if ((entity.accountRestrictionType & 0x7F) === accountRestrictionTypeDescriptors[i].flag)
+						if ((entity.restrictionType & 0x7F) === accountRestrictionTypeDescriptors[i].flag)
 							return `accountRestriction.${accountRestrictionTypeDescriptors[i].schemaPrefix}AccountRestriction`;
 					}
 					return undefined;
@@ -133,7 +133,7 @@ const accountRestrictionPlugin = {
 	registerCodecs: codecBuilder => {
 		codecBuilder.addTransactionSupport(
 			EntityType.accountRestrictionAddress,
-			accountRestrictionCreateBaseCodec({
+			accountRestrictionsCreateBaseCodec({
 				deserializeValue: parser => parser.buffer(constants.sizes.addressDecoded),
 				serializeValue: (serializer, value) => serializer.writeBuffer(value)
 			})
@@ -141,7 +141,7 @@ const accountRestrictionPlugin = {
 
 		codecBuilder.addTransactionSupport(
 			EntityType.accountRestrictionMosaic,
-			accountRestrictionCreateBaseCodec({
+			accountRestrictionsCreateBaseCodec({
 				deserializeValue: parser => parser.uint64(),
 				serializeValue: (serializer, value) => serializer.writeUint64(value)
 			})
@@ -149,7 +149,7 @@ const accountRestrictionPlugin = {
 
 		codecBuilder.addTransactionSupport(
 			EntityType.accountRestrictionOperation,
-			accountRestrictionCreateBaseCodec({
+			accountRestrictionsCreateBaseCodec({
 				deserializeValue: parser => parser.uint16(),
 				serializeValue: (serializer, value) => serializer.writeUint16(value)
 			})
@@ -157,4 +157,4 @@ const accountRestrictionPlugin = {
 	}
 };
 
-module.exports = accountRestrictionPlugin;
+module.exports = accountRestrictionsPlugin;
