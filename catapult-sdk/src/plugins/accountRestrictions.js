@@ -26,7 +26,7 @@ const sizes = require('../modelBinary/sizes');
 const constants = { sizes };
 
 const accountRestrictionTypeBlockOffset = 128;
-const accountRestrictionTypeFlags = Object.freeze({
+const AccountRestrictionTypeFlags = Object.freeze({
 	address: 1,
 	mosaic: 2,
 	operation: 4
@@ -61,19 +61,19 @@ const accountRestrictionTypeDescriptors = [
 		entityType: EntityType.accountRestrictionAddress,
 		schemaPrefix: 'address',
 		valueType: ModelType.binary,
-		flag: accountRestrictionTypeFlags.address
+		flag: AccountRestrictionTypeFlags.address
 	},
 	{
 		entityType: EntityType.accountRestrictionMosaic,
 		schemaPrefix: 'mosaic',
 		valueType: ModelType.uint64,
-		flag: accountRestrictionTypeFlags.mosaic
+		flag: AccountRestrictionTypeFlags.mosaic
 	},
 	{
 		entityType: EntityType.accountRestrictionOperation,
 		schemaPrefix: 'operation',
 		valueType: ModelType.uint16,
-		flag: accountRestrictionTypeFlags.operation
+		flag: AccountRestrictionTypeFlags.operation
 	}
 ];
 
@@ -83,12 +83,12 @@ const accountRestrictionTypeDescriptors = [
  */
 const accountRestrictionsPlugin = {
 	AccountRestrictionType: Object.freeze({
-		addressAllow: accountRestrictionTypeFlags.address,
-		addressBlock: accountRestrictionTypeFlags.address + accountRestrictionTypeBlockOffset,
-		mosaicAllow: accountRestrictionTypeFlags.mosaic,
-		mosaicBlock: accountRestrictionTypeFlags.mosaic + accountRestrictionTypeBlockOffset,
-		operationAllow: accountRestrictionTypeFlags.operation,
-		operationBlock: accountRestrictionTypeFlags.operation + accountRestrictionTypeBlockOffset
+		addressAllow: AccountRestrictionTypeFlags.address,
+		addressBlock: AccountRestrictionTypeFlags.address + accountRestrictionTypeBlockOffset,
+		mosaicAllow: AccountRestrictionTypeFlags.mosaic,
+		mosaicBlock: AccountRestrictionTypeFlags.mosaic + accountRestrictionTypeBlockOffset,
+		operationAllow: AccountRestrictionTypeFlags.operation,
+		operationBlock: AccountRestrictionTypeFlags.operation + accountRestrictionTypeBlockOffset
 	}),
 
 	registerSchema: builder => {
