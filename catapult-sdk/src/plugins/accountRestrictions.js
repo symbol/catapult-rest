@@ -40,7 +40,7 @@ const accountRestrictionsCreateBaseCodec = valueCodec => ({
 		const restrictionsCount = parser.uint8();
 		for (let i = 0; i < restrictionsCount; ++i) {
 			transaction.modifications.push({
-				type: parser.uint8(),
+				restrictionType: parser.uint8(),
 				value: valueCodec.deserializeValue(parser)
 			});
 		}
@@ -50,7 +50,7 @@ const accountRestrictionsCreateBaseCodec = valueCodec => ({
 		serializer.writeUint8(transaction.restrictionType);
 		serializer.writeUint8(transaction.modifications.length);
 		for (let i = 0; i < transaction.modifications.length; ++i) {
-			serializer.writeUint8(transaction.modifications[i].type);
+			serializer.writeUint8(transaction.modifications[i].restrictionType);
 			valueCodec.serializeValue(serializer, transaction.modifications[i].value);
 		}
 	}
