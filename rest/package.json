@@ -40,7 +40,7 @@
     "catapult-sdk": "link:../catapult-sdk",
     "coveralls": "^3.0.1",
     "mongodb": "^3.0.3",
-    "nyc": "^11.8.0",
+    "nyc": "^14.1.1",
     "restify": "^6.3.4",
     "restify-errors": "^6.0.0",
     "winston": "^2.4.0",
