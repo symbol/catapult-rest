@@ -39,17 +39,20 @@
 
   "logging": {
     "console": {
-      "colorize": true,
+      "formats": ["colorize", "simple"],
+
       "level": "verbose",
       "handleExceptions": true,
+
       "prettyPrint": true,
       "timestamp": true
     },
     "file": {
+      "formats": ["prettyPrint"],
+
       "level": "verbose",
       "handleExceptions": true,
-      "prettyPrint": true,
-      "timestamp": true,
+
       "filename": "catapult-rest.log",
       "maxsize": 20971520,
       "maxFiles": 100
