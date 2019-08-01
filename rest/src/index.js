@@ -49,7 +49,7 @@ const configureLogging = config => {
 
 	// configure default logger so that it adds timestamp to all logs
 	winston.configure({
-		format: winston.format.combine(winston.format.timestamp()),
+		format: winston.format.timestamp(),
 		transports
 	});
 };
