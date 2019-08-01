@@ -42,10 +42,7 @@
       "formats": ["colorize", "simple"],
 
       "level": "verbose",
-      "handleExceptions": true,
-
-      "prettyPrint": true,
-      "timestamp": true
+      "handleExceptions": true
     },
     "file": {
       "formats": ["prettyPrint"],

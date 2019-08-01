@@ -32,15 +32,15 @@ const winston = require('winston');
 const fs = require('fs');
 const { createConnection } = require('net');
 
-const createLoggingTransportConfiguration = config => {
-	const transportConfig = Object.assign({}, config);
+const createLoggingTransportConfiguration = loggingConfig => {
+	const transportConfig = Object.assign({}, loggingConfig);
 
 	// map specified formats into a winston function
 	delete transportConfig.formats;
-	const formatters = config.formats.map(name => winston.format[name]());
-	transportConfig.format = winston.format.combine(...formatters);
+	const logFormatters = loggingConfig.formats.map(name => winston.format[name]());
+	transportConfig.format = winston.format.combine(...logFormatters);
 	return transportConfig;
-}
+};
 
 const configureLogging = config => {
 	const transports = [new winston.transports.File(createLoggingTransportConfiguration(config.file))];
