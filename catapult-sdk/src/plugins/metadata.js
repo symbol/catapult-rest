@@ -22,8 +22,13 @@
 const EntityType = require('../model/EntityType');
 const ModelType = require('../model/ModelType');
 const sizes = require('../modelBinary/sizes');
+const convert = require('../utils/convert');
 
 const constants = { sizes };
+
+const parseString = (parser, size) => parser.buffer(size).toString('ascii');
+
+const writeString = (serializer, str) => { serializer.writeBuffer(Buffer.from(str, 'ascii')); };
 
 /**
  * Creates a metadata plugin.
@@ -57,7 +62,7 @@ const metadataPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.targetPublicKey = parser.buffer(constants.sizes.signer);
-				transaction.scopedMetadataKey = parser.parser.uint64();
+				transaction.scopedMetadataKey = parser.uint64();
 				transaction.valueSizeDelta = convert.uint16ToInt16(parser.uint16());
 				const valueSize = parser.uint16();
 				transaction.valueSize = valueSize;
@@ -78,8 +83,8 @@ const metadataPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.targetPublicKey = parser.buffer(constants.sizes.signer);
-				transaction.scopedMetadataKey = parser.parser.uint64();
-				transaction.targetMosaicId = parser.parser.uint64();
+				transaction.scopedMetadataKey = parser.uint64();
+				transaction.targetMosaicId = parser.uint64();
 				transaction.valueSizeDelta = convert.uint16ToInt16(parser.uint16());
 				const valueSize = parser.uint16();
 				transaction.valueSize = valueSize;
@@ -101,8 +106,8 @@ const metadataPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.targetPublicKey = parser.buffer(constants.sizes.signer);
-				transaction.scopedMetadataKey = parser.parser.uint64();
-				transaction.targetNamespaceId = parser.parser.uint64();
+				transaction.scopedMetadataKey = parser.uint64();
+				transaction.targetNamespaceId = parser.uint64();
 				transaction.valueSizeDelta = convert.uint16ToInt16(parser.uint16());
 				const valueSize = parser.uint16();
 				transaction.valueSize = valueSize;
