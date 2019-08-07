@@ -110,7 +110,7 @@ const accountRestrictionsPlugin = {
 				values: { type: ModelType.array, schemaName: restrictionTypeDescriptor.valueType }
 			});
 		});
-		
+
 		// accountrestriction fallback
 		builder.addSchema('accountRestriction.fallback', {});
 
