@@ -111,7 +111,7 @@ const accountRestrictionsPlugin = {
 			});
 		});
 
-		// accountrestriction fallback
+		// account restriction fallback
 		builder.addSchema('accountRestriction.fallback', {});
 
 		// aggregated account restrictions schemas
