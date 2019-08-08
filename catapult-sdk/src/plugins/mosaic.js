@@ -59,60 +59,23 @@ const mosaicPlugin = {
 	},
 
 	registerCodecs: codecBuilder => {
-		const numRequiredProperties = 2; // flags and divisibility
 		codecBuilder.addTransactionSupport(EntityType.mosaicDefinition, {
 			deserialize: parser => {
 				const transaction = {};
-
 				transaction.nonce = parser.uint32();
-
 				transaction.mosaicId = parser.uint64();
-
-				const propertiesCount = parser.uint8();
-
-				transaction.properties = [];
-				for (let i = 0; i < numRequiredProperties; ++i)
-					transaction.properties.push({ key: i, value: uint64.fromUint(parser.uint8()) });
-
-				if (0 < propertiesCount) {
-					for (let i = 0; i < propertiesCount; ++i) {
-						const key = parser.uint8();
-						const value = parser.uint64();
-						transaction.properties.push({ key, value });
-					}
-				}
-
+				transaction.flags = parser.uint8();
+				transaction.divisibility = parser.uint8();
+				transaction.duration = parser.uint64();
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint32(transaction.nonce);
 				serializer.writeUint64(transaction.mosaicId);
-
-				const propertiesCount = transaction.properties.length - numRequiredProperties;
-				if (0 > propertiesCount)
-					throw Error('all required properties must be specified in bag');
-
-				serializer.writeUint8(propertiesCount);
-
-				// notice that required property values are uint8 size
-				for (let i = 0; i < numRequiredProperties; ++i) {
-					const property = transaction.properties[i];
-					if (i !== property.key)
-						throw Error(`unexpected property ${property.key} at position ${i} in bag`);
-
-					const value = uint64.compact(property.value);
-					if ('number' !== typeof value || 0xFF < value)
-						throw Error(`property ${property.key} value is too large`);
-
-					serializer.writeUint8(value);
-				}
-
-				for (let i = 0; i < propertiesCount; ++i) {
-					const property = transaction.properties[numRequiredProperties + i];
-					serializer.writeUint8(property.key);
-					serializer.writeUint64(property.value);
-				}
+				serializer.writeUint8(transaction.flags);
+				serializer.writeUint8(transaction.divisibility);
+				serializer.writeUint64(transaction.duration);
 			}
 		});
 
