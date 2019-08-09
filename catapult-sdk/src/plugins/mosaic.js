@@ -21,7 +21,6 @@
 /** @module plugins/mosaic */
 const EntityType = require('../model/EntityType');
 const ModelType = require('../model/ModelType');
-const uint64 = require('../utils/uint64');
 
 /**
  * Creates a mosaic plugin.
@@ -31,11 +30,7 @@ const mosaicPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.mosaicDefinition, {
 			mosaicId: ModelType.uint64,
-			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
-		});
-
-		builder.addSchema('mosaicDefinition.mosaicProperty', {
-			value: ModelType.uint64
+			duration: ModelType.uint64
 		});
 
 		builder.addTransactionSupport(EntityType.mosaicSupplyChange, {
@@ -55,6 +50,10 @@ const mosaicPlugin = {
 			height: ModelType.uint64,
 			owner: ModelType.binary,
 			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
+		});
+
+		builder.addSchema('mosaicDefinition.mosaicProperty', {
+			value: ModelType.uint64
 		});
 	},
 

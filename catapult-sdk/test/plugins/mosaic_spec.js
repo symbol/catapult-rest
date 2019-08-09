@@ -55,7 +55,7 @@ describe('mosaic plugin', () => {
 
 			// - mosaic definition
 			expect(Object.keys(modelSchema.mosaicDefinition).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
-			expect(modelSchema.mosaicDefinition).to.contain.all.keys(['mosaicId', 'properties']);
+			expect(modelSchema.mosaicDefinition).to.contain.all.keys(['mosaicId', 'duration']);
 
 			// - mosaic property
 			expect(modelSchema['mosaicDefinition.mosaicProperty']).to.deep.equal({
