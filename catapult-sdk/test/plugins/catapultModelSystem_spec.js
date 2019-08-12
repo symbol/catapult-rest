@@ -46,11 +46,11 @@ describe('catapult model system', () => {
 			expect(supportedPluginNames).to.deep.equal([
 				'accountLink',
 				'accountRestrictions',
-				'mosaicRestrictions',
 				'aggregate',
 				'lock',
 				'metadata',
 				'mosaic',
+				'mosaicRestrictions',
 				'multisig',
 				'namespace',
 				'receipts',
