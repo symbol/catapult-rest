@@ -36,8 +36,8 @@ const mosaicRestrictionsPlugin = {
 			mosaicId: ModelType.uint64,
 			restrictionKey: ModelType.uint64,
 			targetAddress: ModelType.binary,
-			previousRestrictionValue: ModelType.binary,
-			newRestrictionValue: ModelType.binary
+			previousRestrictionValue: ModelType.uint64,
+			newRestrictionValue: ModelType.uint64
 		});
 
 		builder.addTransactionSupport(EntityType.mosaicRestrictionGlobal, {
