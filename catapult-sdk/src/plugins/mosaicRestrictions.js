@@ -35,7 +35,7 @@ const mosaicRestrictionsPlugin = {
 		builder.addSchema('mosaicRestrictions.restriction.mosaic.rule', {
 			referenceMosaicId: ModelType.uint64,
 			restrictionValue: ModelType.uint64
-		})
+		});
 
 		builder.addSchema('mosaicRestrictions.restriction.address', {
 			key: ModelType.uint64,
@@ -59,7 +59,6 @@ const mosaicRestrictionsPlugin = {
 			mosaicId: ModelType.uint64,
 			restrictions: { type: ModelType.array, schemaName: 'mosaicRestrictions.restriction.mosaic' }
 		});
-
 	},
 
 	registerCodecs: codecBuilder => {
