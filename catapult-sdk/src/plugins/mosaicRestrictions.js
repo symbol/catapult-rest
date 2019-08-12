@@ -32,32 +32,20 @@ const constants = { sizes };
 const mosaicRestrictionsPlugin = {
 
 	registerSchema: builder => {
-		builder.addSchema('mosaicRestrictions.restriction.mosaic.rule', {
+		builder.addTransactionSupport(EntityType.mosaicRestrictionAddress, {
+			mosaicId: ModelType.uint64,
+			restrictionKey: ModelType.uint64,
+			targetAddress: ModelType.binary,
+			previousRestrictionValue: ModelType.binary,
+			newRestrictionValue: ModelType.binary
+		});
+
+		builder.addTransactionSupport(EntityType.mosaicRestrictionGlobal, {
+			mosaicId: ModelType.uint64,
 			referenceMosaicId: ModelType.uint64,
-			restrictionValue: ModelType.uint64
-		});
-
-		builder.addSchema('mosaicRestrictions.restriction.address', {
-			key: ModelType.uint64,
-			value: ModelType.uint64
-		});
-
-		builder.addSchema('mosaicRestrictions.restriction.mosaic', {
-			key: ModelType.uint64,
-			rule: { type: ModelType.object, schemaName: 'mosaicRestrictions.restriction.mosaic.rule' }
-		});
-
-		builder.addSchema('mosaicRestriction.addressModificationType', {
-			compositeHash: ModelType.binary,
-			mosaicId: ModelType.uint64,
-			address: ModelType.binary,
-			restrictions: { type: ModelType.array, schemaName: 'mosaicRestrictions.restriction.address' }
-		});
-
-		builder.addSchema('mosaicRestriction.globalModificationType', {
-			compositeHash: ModelType.binary,
-			mosaicId: ModelType.uint64,
-			restrictions: { type: ModelType.array, schemaName: 'mosaicRestrictions.restriction.mosaic' }
+			restrictionKey: ModelType.uint64,
+			previousRestrictionValue: ModelType.uint64,
+			newRestrictionValue: ModelType.uint64
 		});
 	},
 

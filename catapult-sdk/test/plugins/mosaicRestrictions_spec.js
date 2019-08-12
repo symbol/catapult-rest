@@ -26,7 +26,42 @@ const { expect } = require('chai');
 
 describe('mosaic restrictions plugin', () => {
 	describe('register schema', () => {
-		// TODO
+		it('adds mosaic restrictions system schema', () => {
+			// Arrange:
+			const builder = new ModelSchemaBuilder();
+			const numDefaultKeys = Object.keys(builder.build()).length;
+
+			// Act:
+			mosaicRestrictionsPlugin.registerSchema(builder);
+			const modelSchema = builder.build();
+
+			// Assert:
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 2);
+			expect(modelSchema).to.contain.all.keys(
+				'mosaicRestrictionAddress',
+				'mosaicRestrictionGlobal'
+			);
+
+			// - mosaic restriction address
+			expect(Object.keys(modelSchema.mosaicRestrictionAddress).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
+			expect(modelSchema.mosaicRestrictionAddress).to.contain.all.keys([
+				'mosaicId',
+				'restrictionKey',
+				'targetAddress',
+				'previousRestrictionValue',
+				'newRestrictionValue'
+			]);
+
+			// - mosaic restriction global
+			expect(Object.keys(modelSchema.mosaicRestrictionGlobal).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
+			expect(modelSchema.mosaicRestrictionGlobal).to.contain.all.keys([
+				'mosaicId',
+				'referenceMosaicId',
+				'restrictionKey',
+				'previousRestrictionValue',
+				'newRestrictionValue'
+			]);
+		});
 	});
 
 	describe('register codecs', () => {
