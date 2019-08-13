@@ -23,7 +23,8 @@ const accountLink = require('./accountLink');
 const accountRestrictions = require('./accountRestrictions');
 const mosaicRestrictions = require('./mosaicRestrictions');
 const aggregate = require('./aggregate');
-const lock = require('./lock');
+const lockHash = require('./lockHash');
+const lockSecret = require('./lockSecret');
 const metadata = require('./metadata');
 const mosaic = require('./mosaic');
 const multisig = require('./multisig');
@@ -35,7 +36,7 @@ const ModelSchemaBuilder = require('../model/ModelSchemaBuilder');
 const ModelCodecBuilder = require('../modelBinary/ModelCodecBuilder');
 
 const plugins = {
-	accountLink, accountRestrictions, aggregate, lock, metadata, mosaic, mosaicRestrictions, multisig, namespace, receipts, transfer
+	accountLink, accountRestrictions, aggregate, lock, lockSecret, metadata, mosaic, mosaicRestrictions, multisig, namespace, receipts, transfer
 };
 
 /**
