@@ -47,7 +47,7 @@ describe('catapult model system', () => {
 				'accountLink',
 				'accountRestrictions',
 				'aggregate',
-				'lock',
+				'lockHash',
 				'lockSecret',
 				'metadata',
 				'mosaic',
