@@ -50,7 +50,7 @@ describe('transfer plugin', () => {
 
 			// - transfer
 			expect(Object.keys(modelSchema.transfer).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
-			expect(modelSchema.transfer).to.contain.all.keys(['recipient', 'message', 'mosaics']);
+			expect(modelSchema.transfer).to.contain.all.keys(['recipientAddress', 'message', 'mosaics']);
 
 			// - message
 			expect(modelSchema['transfer.message']).to.deep.equal({
@@ -88,7 +88,7 @@ describe('transfer plugin', () => {
 				]),
 
 				object: {
-					recipient: Recipient_Buffer
+					recipientAddress: Recipient_Buffer
 				}
 			};
 		};

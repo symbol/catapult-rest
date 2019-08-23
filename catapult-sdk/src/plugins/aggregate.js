@@ -97,7 +97,7 @@ const aggregatePlugin = {
 		builder.addTransactionSupport(EntityType.aggregateBonded, aggregateSchema);
 
 		builder.addSchema('aggregate.cosignature', {
-			signer: ModelType.binary,
+			signerPublicKey: ModelType.binary,
 			signature: ModelType.binary,
 			parentHash: ModelType.binary
 		});

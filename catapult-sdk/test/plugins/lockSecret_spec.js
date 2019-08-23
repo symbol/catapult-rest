@@ -49,12 +49,12 @@ describe('lock secret plugin', () => {
 
 			// - secret lock infos
 			assertSchema(modelSchema['secretLockInfo.lock'], 6,
-				'account', 'accountAddress', 'mosaicId', 'height', 'secret', 'recipient');
+				'account', 'accountAddress', 'mosaicId', 'height', 'secret', 'recipientAddress');
 
 			// - secret lock transactions
 			const transactionSchemaSize = Object.keys(modelSchema.transaction).length;
-			assertSchema(modelSchema.secretLock, transactionSchemaSize + 4, 'mosaicId', 'duration', 'secret', 'recipient');
-			assertSchema(modelSchema.secretProof, transactionSchemaSize + 3, 'secret', 'recipient', 'proof');
+			assertSchema(modelSchema.secretLock, transactionSchemaSize + 4, 'mosaicId', 'duration', 'secret', 'recipientAddress');
+			assertSchema(modelSchema.secretProof, transactionSchemaSize + 3, 'secret', 'recipientAddress', 'proof');
 		});
 	});
 
@@ -100,7 +100,7 @@ describe('lock secret plugin', () => {
 					duration: [0xBBAA0099, 0xFFEEDDCC],
 					hashAlgorithm: 0xFF,
 					secret: secretBuffer,
-					recipient: recipientBuffer
+					recipientAddress: recipientBuffer
 				}
 			}));
 		});
@@ -124,7 +124,7 @@ describe('lock secret plugin', () => {
 					object: {
 						hashAlgorithm: 0xFF,
 						secret: Secret_Buffer,
-						recipient: Recipient_Buffer,
+						recipientAddress: Recipient_Buffer,
 						proof: Proof_Buffer
 					}
 				};

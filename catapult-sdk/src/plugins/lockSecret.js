@@ -40,18 +40,18 @@ const lockSecretPlugin = {
 			mosaicId: ModelType.uint64,
 			height: ModelType.uint64,
 			secret: ModelType.binary,
-			recipient: ModelType.binary
+			recipientAddress: ModelType.binary
 		});
 
 		builder.addTransactionSupport(EntityType.secretLock, {
 			mosaicId: ModelType.uint64,
 			duration: ModelType.uint64,
 			secret: ModelType.binary,
-			recipient: ModelType.binary
+			recipientAddress: ModelType.binary
 		});
 		builder.addTransactionSupport(EntityType.secretProof, {
 			secret: ModelType.binary,
-			recipient: ModelType.binary,
+			recipientAddress: ModelType.binary,
 			proof: ModelType.binary
 		});
 	},
@@ -64,7 +64,7 @@ const lockSecretPlugin = {
 				transaction.duration = parser.uint64();
 				transaction.hashAlgorithm = parser.uint8();
 				transaction.secret = parser.buffer(constants.sizes.hash256);
-				transaction.recipient = parser.buffer(constants.sizes.addressDecoded);
+				transaction.recipientAddress = parser.buffer(constants.sizes.addressDecoded);
 				return transaction;
 			},
 
@@ -73,7 +73,7 @@ const lockSecretPlugin = {
 				serializer.writeUint64(transaction.duration);
 				serializer.writeUint8(transaction.hashAlgorithm);
 				serializer.writeBuffer(transaction.secret);
-				serializer.writeBuffer(transaction.recipient);
+				serializer.writeBuffer(transaction.recipientAddress);
 			}
 		});
 
@@ -82,7 +82,7 @@ const lockSecretPlugin = {
 				const transaction = {};
 				transaction.hashAlgorithm = parser.uint8();
 				transaction.secret = parser.buffer(constants.sizes.hash256);
-				transaction.recipient = parser.buffer(constants.sizes.addressDecoded);
+				transaction.recipientAddress = parser.buffer(constants.sizes.addressDecoded);
 				const proofSize = parser.uint16();
 				transaction.proof = parser.buffer(proofSize);
 				return transaction;
@@ -91,7 +91,7 @@ const lockSecretPlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeUint8(transaction.hashAlgorithm);
 				serializer.writeBuffer(transaction.secret);
-				serializer.writeBuffer(transaction.recipient);
+				serializer.writeBuffer(transaction.recipientAddress);
 				const proofSize = transaction.proof.length;
 				serializer.writeUint16(proofSize);
 				serializer.writeBuffer(transaction.proof);

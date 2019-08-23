@@ -58,7 +58,7 @@ describe('aggregate plugin', () => {
 
 			// - cosignature
 			expect(modelSchema['aggregate.cosignature']).to.deep.equal({
-				signer: ModelType.binary,
+				signerPublicKey: ModelType.binary,
 				signature: ModelType.binary,
 				parentHash: ModelType.binary
 			});
@@ -141,7 +141,7 @@ describe('aggregate plugin', () => {
 					Buffer.alloc(extraSize)
 				]),
 				object: {
-					signer: Signer_Buffer,
+					signerPublicKey: Signer_Buffer,
 					version: 0x812A,
 					type,
 
@@ -185,7 +185,7 @@ describe('aggregate plugin', () => {
 					data.object.cosignatures = [];
 
 				data.object.cosignatures.push({
-					signer: Signer_Buffer,
+					signerPublicKey: Signer_Buffer,
 					signature: Signature_Buffer
 				});
 				return data;
