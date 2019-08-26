@@ -35,7 +35,7 @@ const createTransaction = (options, type) => ({
 
 module.exports = {
 	createRandomTransfer: (options, recipientSelector) => Object.assign(createTransaction(options, catapult.model.EntityType.transfer), {
-		recipient: recipientSelector(),
+		recipientAddress: recipientSelector(),
 		message: {
 			type: 0,
 			payload: Buffer.from(uint64.toHex(uint64.fromUint(options.transferId)), 'hex')

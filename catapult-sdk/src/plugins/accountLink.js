@@ -40,7 +40,7 @@ const accountLinkPlugin = {
 		codecBuilder.addTransactionSupport(EntityType.accountLink, {
 			deserialize: parser => {
 				const transaction = {};
-				transaction.remotePublicKey = parser.buffer(constants.sizes.signer);
+				transaction.remotePublicKey = parser.buffer(constants.sizes.signerPublicKey);
 				transaction.linkAction = parser.uint8();
 				return transaction;
 			},

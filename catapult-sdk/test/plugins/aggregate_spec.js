@@ -130,7 +130,7 @@ describe('aggregate plugin', () => {
 			const type = (options || {}).type || constants.knownTxType;
 			const extraSize = (options || {}).extraSize || 0;
 
-			const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signer));
+			const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signerPublicKey));
 			return {
 				buffer: Buffer.concat([
 					test.buffer.fromSize(constants.sizes.embedded + extraSize),
@@ -170,7 +170,7 @@ describe('aggregate plugin', () => {
 		};
 
 		const addCosignature = generator => {
-			const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signer));
+			const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signerPublicKey));
 			const Signature_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signature));
 
 			return () => {

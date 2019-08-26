@@ -79,7 +79,7 @@ describe('namespace plugin', () => {
 			// - namespaceDescriptor.namespace
 			expect(Object.keys(modelSchema['namespaceDescriptor.namespace']).length).to.equal(9);
 			expect(modelSchema['namespaceDescriptor.namespace']).to.contain.all.keys([
-				'level0', 'level1', 'level2', 'alias', 'parentId', 'owner', 'ownerAddress', 'startHeight', 'endHeight'
+				'level0', 'level1', 'level2', 'alias', 'parentId', 'ownerPublicKey', 'ownerAddress', 'startHeight', 'endHeight'
 			]);
 
 			// - namespaceDescriptor.alias.mosaic
@@ -142,7 +142,7 @@ describe('namespace plugin', () => {
 					level2: null,
 					alias,
 					parentId: null,
-					owner: null,
+					ownerPublicKey: null,
 					ownerAddress: null,
 					startHeight: null,
 					endHeight: null
@@ -162,7 +162,7 @@ describe('namespace plugin', () => {
 				// Assert
 				expect(Object.keys(formattedEntity).length).to.equal(11);
 				expect(formattedEntity).to.contain.all.keys([
-					'type', 'depth', 'level0', 'level1', 'level2', 'alias', 'parentId', 'owner', 'ownerAddress', 'startHeight', 'endHeight'
+					'type', 'depth', 'level0', 'level1', 'level2', 'alias', 'parentId', 'ownerPublicKey', 'ownerAddress', 'startHeight', 'endHeight'
 				]);
 				return formattedEntity.alias;
 			};

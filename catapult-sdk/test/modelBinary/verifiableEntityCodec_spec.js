@@ -24,7 +24,7 @@ const test = require('../binaryTestUtils');
 describe('verifiable entity codec', () => {
 	const generateVerifiableEntity = () => {
 		const Signature_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signature));
-		const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signer));
+		const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signerPublicKey));
 
 		return {
 			buffer: Buffer.concat([
@@ -34,7 +34,7 @@ describe('verifiable entity codec', () => {
 			]),
 			object: {
 				signature: Signature_Buffer,
-				signer: Signer_Buffer,
+				signerPublicKey: Signer_Buffer,
 				version: 0x812A,
 				type: 0x451C
 			}

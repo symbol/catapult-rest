@@ -39,7 +39,7 @@ describe('block header codec', () => {
 				timestamp: [0x8B463A30, 0x54602D15],
 				difficulty: [0x30750286, 0xE87850E8],
 				previousBlockHash: Previous_Block_Hash_Buffer,
-				blockTransactionsHash: Block_Transactions_Hash_Buffer
+				transactionsHash: Block_Transactions_Hash_Buffer
 			}
 		};
 	};

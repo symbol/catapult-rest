@@ -23,7 +23,7 @@ const test = require('../binaryTestUtils');
 
 describe('embedded entity codec', () => {
 	const generateEmbeddedEntity = () => {
-		const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signer));
+		const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signerPublicKey));
 
 		return {
 			buffer: Buffer.concat([
@@ -31,7 +31,7 @@ describe('embedded entity codec', () => {
 				Buffer.of(0x2A, 0x81, 0x1C, 0x45) // version, type
 			]),
 			object: {
-				signer: Signer_Buffer,
+				signerPublicKey: Signer_Buffer,
 				version: 0x812A,
 				type: 0x451C
 			}

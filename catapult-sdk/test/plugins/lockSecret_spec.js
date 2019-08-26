@@ -49,7 +49,7 @@ describe('lock secret plugin', () => {
 
 			// - secret lock infos
 			assertSchema(modelSchema['secretLockInfo.lock'], 6,
-				'account', 'accountAddress', 'mosaicId', 'height', 'secret', 'recipientAddress');
+				'senderPublicKey', 'senderAddress', 'mosaicId', 'height', 'secret', 'recipientAddress');
 
 			// - secret lock transactions
 			const transactionSchemaSize = Object.keys(modelSchema.transaction).length;
@@ -83,7 +83,7 @@ describe('lock secret plugin', () => {
 		const getCodec = entityType => getCodecs()[entityType];
 
 		describe('supports secret lock', () => {
-			const recipientBuffer = test.random.bytes(test.constants.sizes.addressDecoded);
+			const recipientAddressBuffer = test.random.bytes(test.constants.sizes.addressDecoded);
 			const secretBuffer = test.random.bytes(test.constants.sizes.hash256);
 
 			test.binary.test.addAll(getCodec(EntityType.secretLock), 74, () => ({
@@ -92,7 +92,7 @@ describe('lock secret plugin', () => {
 					Buffer.of(0x99, 0x00, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF), // duration
 					Buffer.of(0xFF), // hash algorithm
 					Buffer.from(secretBuffer), // secret 25b
-					Buffer.from(recipientBuffer) // recipient 32b
+					Buffer.from(recipientAddressBuffer) // recipientAddress 32b
 				]),
 
 				object: {
@@ -100,7 +100,7 @@ describe('lock secret plugin', () => {
 					duration: [0xBBAA0099, 0xFFEEDDCC],
 					hashAlgorithm: 0xFF,
 					secret: secretBuffer,
-					recipientAddress: recipientBuffer
+					recipientAddress: recipientAddressBuffer
 				}
 			}));
 		});
