@@ -26,7 +26,7 @@ const { uint64 } = catapult.utils;
 
 const createTransaction = (options, type) => ({
 	signature: new Uint8Array(catapult.constants.sizes.signature),
-	signer: options.signerPublicKey,
+	signerPublicKey: options.signerPublicKey,
 	version: (options.networkId << 8) + 3,
 	type,
 	maxFee: uint64.fromUint(0),

@@ -28,7 +28,7 @@ module.exports = {
 		const aggregateHash = transactionExtensions.hash(codec, transaction);
 
 		if (keyPairs.find(keyPair => aggregateSignerKeyPair.publicKey === keyPair.publicKey))
-			throw Error('aggregate signer pbulic key present in list of cosigners');
+			throw Error('aggregate signer public key present in list of cosigners');
 
 		transaction.cosignatures = keyPairs.map(keyPair => ({
 			signerPublicKey: keyPair.publicKey,

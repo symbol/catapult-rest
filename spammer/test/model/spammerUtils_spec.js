@@ -29,8 +29,8 @@ const modelCodec = catapult.plugins.catapultModelSystem.configure(['transfer', '
 
 describe('spammer utils', () => {
 	describe('sign and stitch aggregate transaction', () => {
-		const createTransaction = signerPublicKey => transactionFactory.createAggregateTransaction({
-			signerPublicKey: signerPublicKey.publicKey, networkId: 0xA5
+		const createTransaction = signer => transactionFactory.createAggregateTransaction({
+			signerPublicKey: signer.publicKey, networkId: 0xA5
 		}, []);
 
 		const createRandomKey = () => createKey(
