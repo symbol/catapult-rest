@@ -130,7 +130,7 @@ const { uint64 } = catapult.utils;
 
 	const createTransfer = (signerPublicKey, recipientAddress, transferId, amount) => {
 		const transfer = transactionFactory.createRandomTransfer(
-			{ signerPublicKey: signerPublicKey, networkId: Mijin_Test_Network, transferId },
+			{ signerPublicKey, networkId: Mijin_Test_Network, transferId },
 			() => recipientAddress
 		);
 

@@ -870,7 +870,9 @@ describe('catapult db', () => {
 			const addTransactions = (transactions, id, signerPublicKey, recipientAddress, numDependentDocuments) => {
 				const aggregateId = test.db.createObjectId(id);
 				const aggregateType = 0 === transactions.length % 2 ? EntityType.aggregateComplete : EntityType.aggregateBonded;
-				const transaction = { type: aggregateType, signerPublicKey: new Binary(signerPublicKey), recipientAddress: new Binary(recipientAddress) };
+				const transaction = {
+					type: aggregateType, signerPublicKey: new Binary(signerPublicKey), recipientAddress: new Binary(recipientAddress)
+				};
 				transactions.push({ _id: aggregateId, meta: createTransactionMetadata(transaction), transaction });
 
 				for (let j = 0; j < numDependentDocuments; ++j)
@@ -903,7 +905,8 @@ describe('catapult db', () => {
 						? createMatchingSenderRecipientPair()
 						: { signerPublicKey: randomKey, recipientAddress: randomAddress };
 					const numDependentDocuments = (options || {}).numDependentDocuments || 0;
-					addTransactions(transactions, id, senderRecipientPair.signerPublicKey, senderRecipientPair.recipientAddress, numDependentDocuments);
+					addTransactions(transactions, id, senderRecipientPair.signerPublicKey, senderRecipientPair.recipientAddress,
+						numDependentDocuments);
 					id += 1 + numDependentDocuments;
 				}
 
@@ -922,7 +925,8 @@ describe('catapult db', () => {
 				curryOutgoing: options => (numMatchingTransactions, key) => {
 					// outgoing signer should match
 					const recipientAddress = keyToAddress(test.random.publicKey());
-					return createAlternatingTransactions(numMatchingTransactions, () => ({ signerPublicKey: key, recipientAddress }), options);
+					return createAlternatingTransactions(numMatchingTransactions,
+						() => ({ signerPublicKey: key, recipientAddress }), options);
 				},
 
 				curryAll: options => (numMatchingTransactions, key) => {
@@ -933,7 +937,8 @@ describe('catapult db', () => {
 					const randomRecipient = keyToAddress(test.random.publicKey());
 					return createAlternatingTransactions(
 						numMatchingTransactions,
-						() => (0 === i++ % 2 ? { signerPublicKey: key, recipientAddress: randomRecipient } : { signerPublicKey: randomSigner, recipientAddress }),
+						() => (0 === i++ % 2 ? { signerPublicKey: key, recipientAddress: randomRecipient }
+							: { signerPublicKey: randomSigner, recipientAddress }),
 						options
 					);
 				}
@@ -1092,7 +1097,9 @@ describe('catapult db', () => {
 				const addresses = keys.map(keyToAddress);
 
 				const createTransactionTemplate = (signerPublicKey, recipientAddress, participants) => {
-					const transaction = { type: aggregateType, signerPublicKey: new Binary(signerPublicKey), recipientAddress: new Binary(recipientAddress) };
+					const transaction = {
+						type: aggregateType, signerPublicKey: new Binary(signerPublicKey), recipientAddress: new Binary(recipientAddress)
+					};
 					return { transaction, participants };
 				};
 
