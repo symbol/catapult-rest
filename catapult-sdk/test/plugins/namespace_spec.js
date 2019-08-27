@@ -162,7 +162,8 @@ describe('namespace plugin', () => {
 				// Assert
 				expect(Object.keys(formattedEntity).length).to.equal(11);
 				expect(formattedEntity).to.contain.all.keys([
-					'type', 'depth', 'level0', 'level1', 'level2', 'alias', 'parentId', 'ownerPublicKey', 'ownerAddress', 'startHeight', 'endHeight'
+					'type', 'depth', 'level0', 'level1', 'level2', 'alias',
+					'parentId', 'ownerPublicKey', 'ownerAddress', 'startHeight', 'endHeight'
 				]);
 				return formattedEntity.alias;
 			};
