@@ -55,10 +55,9 @@ const configureLogging = config => {
 };
 
 const loadConfig = () => {
-	var path = require('path');
 	let configFiles = process.argv.slice(2);
 	if (0 === configFiles.length)
-		configFiles = [path.join(__dirname, '../resources/rest.json')];
+		configFiles = ['../resources/rest.json'];
 
 	let config;
 	configFiles.forEach(configFile => {
