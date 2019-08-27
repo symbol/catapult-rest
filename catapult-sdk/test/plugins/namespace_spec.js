@@ -103,7 +103,7 @@ describe('namespace plugin', () => {
 
 			// - register namespace
 			expect(Object.keys(modelSchema.registerNamespace).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
-			expect(modelSchema.registerNamespace).to.contain.all.keys(['namespaceId', 'parentId', 'duration', 'name']);
+			expect(modelSchema.registerNamespace).to.contain.all.keys(['id', 'parentId', 'duration', 'name']);
 
 			// - mosaic names tuples
 			expect(Object.keys(modelSchema.mosaicNamesTuples).length).to.equal(1);
