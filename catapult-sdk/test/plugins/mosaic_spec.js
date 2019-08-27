@@ -47,7 +47,7 @@ describe('mosaic plugin', () => {
 			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 5);
 			expect(modelSchema).to.contain.all.keys(
 				'mosaicDefinition',
-				'mosaicDefinition.mosaicProperty',
+				'mosaicDefinition.mosaicProperties',
 				'mosaicDescriptor',
 				'mosaicDescriptor.mosaic',
 				'mosaicSupplyChange'
@@ -58,9 +58,7 @@ describe('mosaic plugin', () => {
 			expect(modelSchema.mosaicDefinition).to.contain.all.keys(['id', 'duration']);
 
 			// - mosaic property
-			expect(modelSchema['mosaicDefinition.mosaicProperty']).to.deep.equal({
-				flags: ModelType.uint8,
-				divisibility: ModelType.uint8,
+			expect(modelSchema['mosaicDefinition.mosaicProperties']).to.deep.equal({
 				duration: ModelType.uint64
 			});
 

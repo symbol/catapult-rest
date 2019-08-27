@@ -130,18 +130,18 @@ describe('aggregate plugin', () => {
 			const type = (options || {}).type || constants.knownTxType;
 			const extraSize = (options || {}).extraSize || 0;
 
-			const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signerPublicKey));
+			const SignerPublicKey_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signerPublicKey));
 			return {
 				buffer: Buffer.concat([
 					test.buffer.fromSize(constants.sizes.embedded + extraSize),
-					Signer_Buffer,
+					SignerPublicKey_Buffer,
 					Buffer.of(0x2A, 0x81, type & 0xFF, (type >> 8) & 0xFF), // version, type
 					Buffer.of(0x46, 0x8B, 0x15, 0x2D), // alpha
 					Buffer.of(extraSize, 0x30, 0xE8, 0x50), // beta
 					Buffer.alloc(extraSize)
 				]),
 				object: {
-					signerPublicKey: Signer_Buffer,
+					signerPublicKey: SignerPublicKey_Buffer,
 					version: 0x812A,
 					type,
 

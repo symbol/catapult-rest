@@ -34,9 +34,8 @@ describe('model type enumeration', () => {
 			statusCode: 6,
 			string: 7,
 			uint16: 8,
-			uint32: 9,
-			uint64: 10,
-			max: 10
+			uint64: 9,
+			max: 9
 		});
 	});
 });

@@ -79,16 +79,16 @@ describe('transfer plugin', () => {
 		});
 
 		const generateTransaction = () => {
-			const Recipient_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.addressDecoded));
+			const RecipientAddress_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.addressDecoded));
 
 			return {
 				buffer: Buffer.concat([
-					Recipient_Buffer,
+					RecipientAddress_Buffer,
 					Buffer.of(0x00, 0x00, 0x00) // footer
 				]),
 
 				object: {
-					recipientAddress: Recipient_Buffer
+					recipientAddress: RecipientAddress_Buffer
 				}
 			};
 		};

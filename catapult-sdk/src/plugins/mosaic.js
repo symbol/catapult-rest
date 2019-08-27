@@ -51,12 +51,10 @@ const mosaicPlugin = {
 			ownerPublicKey: ModelType.binary,
 			ownerAddress: ModelType.binary,
 			revision: 'number',
-			properties: { type: ModelType.object, schemaName: 'mosaicDefinition.mosaicProperty' }
+			properties: { type: ModelType.object, schemaName: 'mosaicDefinition.mosaicProperties' }
 		});
 
-		builder.addSchema('mosaicDefinition.mosaicProperty', {
-			flags: ModelType.uint8,
-			divisibility: ModelType.uint8,
+		builder.addSchema('mosaicDefinition.mosaicProperties', {
 			duration: ModelType.uint64
 		});
 	},
