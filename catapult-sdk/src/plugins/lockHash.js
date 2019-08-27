@@ -44,6 +44,7 @@ const lockHashPlugin = {
 
 		builder.addTransactionSupport(EntityType.hashLock, {
 			mosaicId: ModelType.uint64,
+			amount: ModelType.uint64,
 			duration: ModelType.uint64,
 			hash: ModelType.binary
 		});

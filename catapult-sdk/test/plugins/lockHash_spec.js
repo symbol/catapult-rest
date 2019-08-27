@@ -52,7 +52,7 @@ describe('lock hash plugin', () => {
 
 			// - hash lock transaction
 			const transactionSchemaSize = Object.keys(modelSchema.transaction).length;
-			assertSchema(modelSchema.hashLock, transactionSchemaSize + 3, 'duration', 'hash', 'mosaicId');
+			assertSchema(modelSchema.hashLock, transactionSchemaSize + 4, 'duration', 'hash', 'mosaicId', 'amount');
 		});
 	});
 
