@@ -33,7 +33,7 @@ const createMosaic = (id, mosaicId, ownerPublicKey, parentId) => {
 		namespaceId: Long.fromNumber(parentId)
 	};
 
-	return { _id: dbTestUtils.db.createObjectId(id), mosaic, meta: {} };
+	return { _id: dbTestUtils.db.createObjectId(id), mosaic };
 };
 
 const createMosaics = (ownerPublicKey, numNamespaces, numMosaicsPerNamespace) => {
