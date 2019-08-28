@@ -38,15 +38,17 @@ const lockSecretPlugin = {
 			senderPublicKey: ModelType.binary,
 			senderAddress: ModelType.binary,
 			mosaicId: ModelType.uint64,
-			height: ModelType.uint64,
+			amount: ModelType.uint64,
+			endHeight: ModelType.uint64,
 			secret: ModelType.binary,
-			recipientAddress: ModelType.binary
+			recipientAddress: ModelType.binary,
+			compositeHash: ModelType.binary,
 		});
 
 		builder.addTransactionSupport(EntityType.secretLock, {
 			mosaicId: ModelType.uint64,
-			duration: ModelType.uint64,
 			amount: ModelType.uint64,
+			duration: ModelType.uint64,
 			secret: ModelType.binary,
 			recipientAddress: ModelType.binary
 		});
@@ -61,7 +63,8 @@ const lockSecretPlugin = {
 		codecBuilder.addTransactionSupport(EntityType.secretLock, {
 			deserialize: parser => {
 				const transaction = {};
-				transaction.mosaic = parser.uint64();
+				transaction.mosaicId = parser.uint64();
+				transaction.amount = parser.uint64();
 				transaction.duration = parser.uint64();
 				transaction.hashAlgorithm = parser.uint8();
 				transaction.secret = parser.buffer(constants.sizes.hash256);
@@ -70,7 +73,8 @@ const lockSecretPlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeUint64(transaction.mosaic);
+				serializer.writeUint64(transaction.mosaicId);
+				serializer.writeUint64(transaction.amount);
 				serializer.writeUint64(transaction.duration);
 				serializer.writeUint8(transaction.hashAlgorithm);
 				serializer.writeBuffer(transaction.secret);
