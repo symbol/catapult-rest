@@ -42,7 +42,7 @@ const lockSecretPlugin = {
 			endHeight: ModelType.uint64,
 			secret: ModelType.binary,
 			recipientAddress: ModelType.binary,
-			compositeHash: ModelType.binary,
+			compositeHash: ModelType.binary
 		});
 
 		builder.addTransactionSupport(EntityType.secretLock, {
