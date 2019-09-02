@@ -22,27 +22,25 @@ const formatters = require('../../src/server/formatters');
 const { expect } = require('chai');
 
 describe('formatters', () => {
-	const createFormatters = name => {
-		return formatters.create({
-			[name]: {
-				chainStatistic: {
-					format: chainStatistic => {
-						const formatUint64 = uint64 => (uint64 ? [uint64[0], uint64[1] * 2] : undefined);
-						const formatChainStatisticCurrent = chainStatisticCurrent => ({
-							height: formatUint64(chainStatisticCurrent.height),
-							scoreLow: formatUint64(chainStatisticCurrent.scoreLow),
-							scoreHigh: formatUint64(chainStatisticCurrent.scoreHigh)
-						});
+	const createFormatters = name => formatters.create({
+		[name]: {
+			chainStatistic: {
+				format: chainStatistic => {
+					const formatUint64 = uint64 => (uint64 ? [uint64[0], uint64[1] * 2] : undefined);
+					const formatChainStatisticCurrent = chainStatisticCurrent => ({
+						height: formatUint64(chainStatisticCurrent.height),
+						scoreLow: formatUint64(chainStatisticCurrent.scoreLow),
+						scoreHigh: formatUint64(chainStatisticCurrent.scoreHigh)
+					});
 
-						return {
-							id: chainStatistic.id,
-							current: formatChainStatisticCurrent(chainStatistic.current)
-						};
-					}
+					return {
+						id: chainStatistic.id,
+						current: formatChainStatisticCurrent(chainStatistic.current)
+					};
 				}
 			}
-		});
-	};
+		}
+	});
 
 	const addBasicObjectFormattingTests = assertJsonFormat => {
 		// region non-error
@@ -84,8 +82,8 @@ describe('formatters', () => {
 			// Arrange:
 			const object = {
 				payload: [
-					{ current: { height: [1, 2] }},
-					{ current: { height: [8, 7] }}
+					{ current: { height: [1, 2] } },
+					{ current: { height: [8, 7] } }
 				],
 				type: 'chainStatistic'
 			};

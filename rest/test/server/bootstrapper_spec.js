@@ -85,7 +85,7 @@ const addRestRoutes = server => {
 				return undefined; // don't call next below because it is called by res.redirect
 
 			case dummyIds.asyncValid:
-				return Promise.resolve({ current: { height: [11, 11] }})
+				return Promise.resolve({ current: { height: [11, 11] } })
 					.then(chainStatistic => {
 						res.send({ payload: chainStatistic, type: 'chainStatistic' });
 						next();
@@ -289,7 +289,7 @@ describe('server (bootstrapper)', () => {
 					.end((headers, body) => {
 						// Assert:
 						assertPayloadHeaders(headers, 29, methodOptions);
-						expect(body).to.deep.equal({ current: { height: [11, 0] }});
+						expect(body).to.deep.equal({ current: { height: [11, 0] } });
 						done();
 					});
 			});
