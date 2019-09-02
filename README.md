@@ -23,7 +23,7 @@
 | websocket.mq.host | ZeroMQ connection host. |  127.0.0.1 |
 | websocket.mq.port | ZeroMQ [connection port](https://github.com/nemtech/catapult-server/blob/master/resources/config-messaging.properties#L3). | 7902 |
 
-> **Note:** catapult-rest has to reach the API node, ZeroMQ and MongoDB ports. If you are running catapult-server on a VPS, you can bind the ports to your local development environment creating an **SSH tunnel**: ``ssh -L 27017:localhost:27017 -L 7900:localhost:7900 -L 7902:127.0.0.1:7902 -p 2357 <USER>@<VPS_IP>``
+> **Note:** catapult-rest has to reach the API node, ZeroMQ and MongoDB ports. If you are running catapult-server on a VPS, you can bind the ports to your local development environment creating an **SSH tunnel**: ``ssh -L 27017:localhost:27017 -L 7900:localhost:7900 -L 7902:localhost:7902 -p 2357 <USER>@<VPS_IP>``
 
 2. Install the project's dependencies:
 
