@@ -286,7 +286,8 @@ describe('catapult db', () => {
 				createDbEntities(1),
 				db => db.blocksFrom(Long.fromNumber(Default_Height + 1), 10),
 				blocks => expect(blocks).to.deep.equal([])
-			));
+			)
+		);
 
 		const assertBlocks = (actualBlocks, dbEntities, startHeight, numBlocks) => {
 			// Assert: actual blocks should contain `numBlocks` blocks from `startHeight`.
