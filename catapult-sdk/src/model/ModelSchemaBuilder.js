@@ -114,9 +114,16 @@ class ModelSchemaBuilder {
 				addressHeight: ModelType.uint64,
 				publicKey: ModelType.binary,
 				publicKeyHeight: ModelType.uint64,
+				linkedAccountKey: ModelType.binary,
 				importance: ModelType.uint64,
 				importanceHeight: ModelType.uint64,
+				activityBuckets: { type: ModelType.array, schemaName: 'activityBucket' },
 				mosaics: { type: ModelType.array, schemaName: 'mosaic' }
+			},
+			activityBucket: {
+				startHeight: ModelType.uint64,
+				totalFeesPaid: ModelType.uint64,
+				rawScore: ModelType.uint64
 			},
 			mosaic: {
 				id: ModelType.uint64,

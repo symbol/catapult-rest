@@ -82,6 +82,7 @@ describe('model schema builder', () => {
 				'transactionStatus',
 
 				'account',
+				'activityBucket',
 				'mosaic',
 				'accountMeta',
 				'accountWithMetadata',
@@ -165,6 +166,7 @@ describe('model schema builder', () => {
 			expect(matchingProperties).to.deep.equal([
 				'blockHeaderMetadata.subCacheMerkleRoots',
 				'merkleProofInfo.merklePath',
+				'account.activityBuckets',
 				'account.mosaics'
 			]);
 		});
@@ -204,6 +206,7 @@ describe('model schema builder', () => {
 
 				'account.address',
 				'account.publicKey',
+				'account.linkedAccountKey',
 
 				'nodeInfo.publicKey'
 			]);
@@ -231,6 +234,9 @@ describe('model schema builder', () => {
 				'account.publicKeyHeight',
 				'account.importance',
 				'account.importanceHeight',
+				'account.activityBucket.startHeight',
+				'account.activityBucket.totalFeesPaid',
+				'account.activityBucket.rawScore',
 				'mosaic.id',
 				'mosaic.amount',
 
