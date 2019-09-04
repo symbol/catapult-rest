@@ -234,9 +234,9 @@ describe('model schema builder', () => {
 				'account.publicKeyHeight',
 				'account.importance',
 				'account.importanceHeight',
-				'account.activityBucket.startHeight',
-				'account.activityBucket.totalFeesPaid',
-				'account.activityBucket.rawScore',
+				'activityBucket.startHeight',
+				'activityBucket.totalFeesPaid',
+				'activityBucket.rawScore',
 				'mosaic.id',
 				'mosaic.amount',
 
