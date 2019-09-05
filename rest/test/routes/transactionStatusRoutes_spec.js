@@ -40,10 +40,6 @@ describe('transaction status routes', () => {
 		};
 		const services = { config: { transactionStates: [] } };
 
-		const addGetPostDocumentRoutesSpy = sinon.spy(routeUtils, 'addGetPostDocumentRoutes');
-		const routeUtilsCreateSenderSpy = sinon.spy(routeUtils, 'createSender');
-		const transactionStatusesByHashesSpy = sinon.spy(dbFacade, 'transactionStatusesByHashes');
-
 		const routeInfo = {
 			base: '/transaction',
 			singular: 'hash',
@@ -54,9 +50,19 @@ describe('transaction status routes', () => {
 			}
 		};
 
-		// Act:
-		transactionStatusRoutes.register(mockServer.server, db, services);
+		let addGetPostDocumentRoutesSpy = null;
+		let routeUtilsCreateSenderSpy = null;
+		let transactionStatusesByHashesSpy = null;
 
+		before(() => {
+			addGetPostDocumentRoutesSpy = sinon.spy(routeUtils, 'addGetPostDocumentRoutes');
+			routeUtilsCreateSenderSpy = sinon.spy(routeUtils, 'createSender');
+			transactionStatusesByHashesSpy = sinon.spy(dbFacade, 'transactionStatusesByHashes');
+
+			// Act:
+			transactionStatusRoutes.register(mockServer.server, db, services);
+		});
+		
 		// Assert:
 		it('calls addGetPostDocumentRoutes once', () => {
 			expect(addGetPostDocumentRoutesSpy.calledOnce).to.equal(true);
@@ -100,8 +106,10 @@ describe('transaction status routes', () => {
 			expect(calledParser(hexValue)).to.deep.equal(parsedValue);
 		});
 
-		addGetPostDocumentRoutesSpy.restore();
-		routeUtilsCreateSenderSpy.restore();
-		transactionStatusesByHashesSpy.restore();
+		after(() => {
+			addGetPostDocumentRoutesSpy.restore();
+			routeUtilsCreateSenderSpy.restore();
+			transactionStatusesByHashesSpy.restore();
+		});
 	});
 });
