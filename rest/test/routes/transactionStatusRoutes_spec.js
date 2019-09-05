@@ -62,7 +62,7 @@ describe('transaction status routes', () => {
 			// Act:
 			transactionStatusRoutes.register(mockServer.server, db, services);
 		});
-		
+
 		// Assert:
 		it('calls addGetPostDocumentRoutes once', () => {
 			expect(addGetPostDocumentRoutesSpy.calledOnce).to.equal(true);
