@@ -26,7 +26,7 @@ const extractFromMetadata = (group, transaction) => ({
 	height: transaction.meta.height
 });
 
-module.exports = {
+const dbFacade = {
 
 	/**
 	 * Runs a database operation that is dependent on current chain height.
@@ -77,3 +77,5 @@ module.exports = {
 		return Promise.all(promises).then(tuple => [].concat(...tuple));
 	}
 };
+
+module.exports = dbFacade;
