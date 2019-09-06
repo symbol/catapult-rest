@@ -17,6 +17,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
+const dbUtils = require('../../db/dbUtils');
+const catapult = require('catapult-sdk');
+
+const { convertToLong } = dbUtils;
 
 const namespaceUtils = {
 	/**
@@ -86,10 +90,14 @@ const namespaceUtils = {
 								aliasName += `.${uniqueTransactions.find(t => t.namespaceId.equals(n.namespace.level2)).name}`;
 							names.push(aliasName);
 						});
-					return { [aliasFieldName]: id, names };
+					return {
+						[aliasFieldName]: aliasType === catapult.model.namespace.aliasType.mosaic ? convertToLong(id) : id,
+						names
+					};
 				});
 
-				res.send({ payload: { accountNames: namesTuples }, type: schemaName });
+				res.send({ payload: { [schemaName]: namesTuples }, type: schemaName });
+
 				return next();
 			});
 		});

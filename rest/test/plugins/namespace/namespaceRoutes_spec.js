@@ -301,7 +301,7 @@ describe('namespace routes', () => {
 				expect(aliasNamesRoutesProcessorSpy.calledTwice).to.equal(true);
 				expect(aliasNamesRoutesProcessorSpy.firstCall.args[1]).to.equal(catapult.model.namespace.aliasType.mosaic);
 				expect(aliasNamesRoutesProcessorSpy.firstCall.args[4]).to.equal('mosaicId');
-				expect(aliasNamesRoutesProcessorSpy.firstCall.args[5]).to.equal('mosaicNamesTuples');
+				expect(aliasNamesRoutesProcessorSpy.firstCall.args[5]).to.equal('mosaicNames');
 
 				aliasNamesRoutesProcessorSpy.restore();
 			});
@@ -398,7 +398,7 @@ describe('namespace routes', () => {
 				expect(aliasNamesRoutesProcessorSpy.calledTwice).to.equal(true);
 				expect(aliasNamesRoutesProcessorSpy.secondCall.args[1]).to.equal(catapult.model.namespace.aliasType.address);
 				expect(aliasNamesRoutesProcessorSpy.secondCall.args[4]).to.equal('address');
-				expect(aliasNamesRoutesProcessorSpy.secondCall.args[5]).to.equal('accountNamesTuples');
+				expect(aliasNamesRoutesProcessorSpy.secondCall.args[5]).to.equal('accountNames');
 
 				aliasNamesRoutesProcessorSpy.restore();
 			});

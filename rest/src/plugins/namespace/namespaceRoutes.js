@@ -105,7 +105,7 @@ module.exports = {
 			req => routeUtils.parseArgumentAsArray(req.params, 'mosaicIds', uint64.fromHex),
 			(namespace, id) => namespace.namespace.alias.mosaicId.equals(convertToLong(id)),
 			'mosaicId',
-			'mosaicNamesTuples'
+			'mosaicNames'
 		));
 
 		const accountIdToAddress = (type, accountId) => ((AccountType.publicKey === type)
@@ -132,7 +132,7 @@ module.exports = {
 			(namespace, id) => Buffer.from(namespace.namespace.alias.address.value())
 				.equals(Buffer.from(new Binary(Buffer.from(id)).value())),
 			'address',
-			'accountNamesTuples',
+			'accountNames',
 		));
 	}
 };

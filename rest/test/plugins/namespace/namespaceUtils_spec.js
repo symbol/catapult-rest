@@ -153,9 +153,9 @@ describe('namespace utils', () => {
 				// Assert:
 				expect(sendFake.firstCall.args[0]).to.deep.equal({
 					payload: {
-						accountNames: [
+						testSchemaName: [
 							{
-								[fieldName]: 1,
+								[fieldName]: convertToLong(1),
 								names: [
 									'a',
 									'b.c',
@@ -163,7 +163,7 @@ describe('namespace utils', () => {
 								]
 							},
 							{
-								[fieldName]: 2,
+								[fieldName]: convertToLong(2),
 								names: [
 									'a',
 									'b.c',
