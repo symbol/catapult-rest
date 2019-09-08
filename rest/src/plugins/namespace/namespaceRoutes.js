@@ -102,8 +102,8 @@ module.exports = {
 		server.post('/mosaic/names', namespaceUtils.aliasNamesRoutesProcessor(
 			db,
 			catapult.model.namespace.aliasType.mosaic,
-			req => routeUtils.parseArgumentAsArray(req.params, 'mosaicIds', uint64.fromHex),
-			(namespace, id) => namespace.namespace.alias.mosaicId.equals(convertToLong(id)),
+			req => routeUtils.parseArgumentAsArray(req.params, 'mosaicIds', uint64.fromHex).map(convertToLong),
+			(namespace, id) => namespace.namespace.alias.mosaicId.equals(id),
 			'mosaicId',
 			'mosaicNames'
 		));

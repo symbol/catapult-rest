@@ -155,7 +155,7 @@ describe('namespace utils', () => {
 					payload: {
 						testSchemaName: [
 							{
-								[fieldName]: convertToLong(1),
+								[fieldName]: 1,
 								names: [
 									'a',
 									'b.c',
@@ -163,7 +163,7 @@ describe('namespace utils', () => {
 								]
 							},
 							{
-								[fieldName]: convertToLong(2),
+								[fieldName]: 2,
 								names: [
 									'a',
 									'b.c',

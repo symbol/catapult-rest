@@ -321,9 +321,10 @@ describe('namespace routes', () => {
 				it('parses mosaic ids correctly', () => {
 					// Arrange:
 					const req = { params: { mosaicIds: ['78A4895CB6653DE4', '56AB67FF45468988'] } };
+					const parsedValues = [[0xB6653DE4, 0x78A4895C], [0x45468988, 0x56AB67FF]].map(convertToLong);
 
 					// Act + Assert:
-					expect(getParams(req)).to.deep.equal([[0xB6653DE4, 0x78A4895C], [0x45468988, 0x56AB67FF]]);
+					expect(getParams(req)).to.deep.equal(parsedValues);
 				});
 
 				it('parses empty mosaic ids list correctly', () => {
