@@ -600,17 +600,18 @@ describe('route utils', () => {
 		const accountPublicKey = convert.hexToUint8(publicKeys.valid[0]);
 
 		const dbAddressToPublicKeyFake = sinon.fake.resolves({
-				_id: undefined, account: { publicKey: new Binary(Buffer.from(accountPublicKey)) } }
-		);
+			_id: undefined,
+			account: { publicKey: new Binary(Buffer.from(accountPublicKey)) }
+		});
+
 		const db = { addressToPublicKey: dbAddressToPublicKeyFake };
 
-		it('return correct public key from account address ', () => {
+		it('return correct public key from account address ', () =>
 			// Act:
-			return routeUtils.addressToPublicKey(db, accountAddress).then( result => {
-					// Assert:
-					expect(dbAddressToPublicKeyFake.calledOnceWith(accountAddress)).to.equal(true);
-					expect(result.equals(accountPublicKey)).to.be.equal(true);
-				});
-		});
+			routeUtils.addressToPublicKey(db, accountAddress).then(result => {
+				// Assert:
+				expect(dbAddressToPublicKeyFake.calledOnceWith(accountAddress)).to.equal(true);
+				expect(result.equals(accountPublicKey)).to.be.equal(true);
+			}));
 	});
 });

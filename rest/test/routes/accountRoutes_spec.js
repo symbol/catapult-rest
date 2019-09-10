@@ -94,7 +94,7 @@ describe('account routes', () => {
 				const pagingTestsFactory = test.setup.createPagingTestsFactory(
 					{
 						routes: accountRoutes,
-						routeName: `/account/:publicKey/${apiPath}`,
+						routeName: `/account/:accountId/${apiPath}`,
 						createDb: (queriedIdentifiers, transactions) => ({
 							[dbApiPath]: (publicKey, pageId, pageSize) => {
 								queriedIdentifiers.push({ publicKey, pageId, pageSize });
@@ -103,13 +103,13 @@ describe('account routes', () => {
 						}),
 						config: { transactionStates: [{ dbPostfix: 'Partial', routePostfix: '/partial' }] }
 					},
-					{ publicKey: publicKeys.valid[0] },
+					{ accountId: publicKeys.valid[0] },
 					{ publicKey: convert.hexToUint8(publicKeys.valid[0]) },
 					'transactionWithMetadata'
 				);
 
 				pagingTestsFactory.addDefault();
-				pagingTestsFactory.addNonPagingParamFailureTest('publicKey', '12345');
+				pagingTestsFactory.addNonPagingParamFailureTest('accountId', '12345');
 			});
 		};
 
@@ -139,9 +139,9 @@ describe('account routes', () => {
 				// Act:
 				it('queries the database with ordering param', () => test.route.executeSingle(
 					accountRoutes.register,
-					`/account/:publicKey/${apiPath}`,
+					`/account/:accountId/${apiPath}`,
 					'get',
-					Object.assign({}, { publicKey: publicKeys.valid[0] }, { ordering: 'id' }),
+					Object.assign({}, { accountId: publicKeys.valid[0] }, { ordering: 'id' }),
 					db,
 					{ transactionStates: [{ dbPostfix: 'Partial', routePostfix: '/partial' }] },
 					() => {
