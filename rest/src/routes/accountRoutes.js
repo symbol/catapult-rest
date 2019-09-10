@@ -59,6 +59,7 @@ module.exports = {
 		const accountIdToPublicKey = (type, accountId) => {
 			if (AccountType.publicKey === type)
 				return Promise.resolve(accountId);
+
 			return routeUtils.addressToPublicKey(db, accountId);
 		};
 
