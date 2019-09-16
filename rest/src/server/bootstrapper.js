@@ -80,7 +80,7 @@ module.exports = {
 	 * @param {object} formatters Formatters to use for formatting responses.
 	 * @returns {object} Server.
 	 */
-	createServer: (crossDomainHttpMethods, formatters) => {
+	createServer: (crossDomainHttpMethods, formatters, throttlingConfig) => {
 		// create the server using a custom formatter
 		const server = restify.createServer({
 			name: '', // disable server header in response
@@ -97,6 +97,13 @@ module.exports = {
 		server.use(restify.plugins.acceptParser('application/json'));
 		server.use(restify.plugins.queryParser({ mapParams: true }));
 		server.use(restify.plugins.jsonBodyParser({ mapParams: true }));
+
+		if (throttlingConfig && throttlingConfig.burst && throttlingConfig.rate)
+			server.use(restify.plugins.throttle({
+				burst: throttlingConfig.burst,
+				rate: throttlingConfig.rate,
+				ip: true,
+			}));
 
 		// make the server promise aware (only a subset of HTTP methods are supported)
 		const routeDescriptors = [];
