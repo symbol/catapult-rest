@@ -78,6 +78,7 @@ module.exports = {
 	 * Creates a REST api server.
 	 * @param {array} crossDomainHttpMethods HTTP methods that are allowed to be accessed cross-domain.
 	 * @param {object} formatters Formatters to use for formatting responses.
+	 * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
 	 * @returns {object} Server.
 	 */
 	createServer: (crossDomainHttpMethods, formatters, throttlingConfig) => {
@@ -98,12 +99,13 @@ module.exports = {
 		server.use(restify.plugins.queryParser({ mapParams: true }));
 		server.use(restify.plugins.jsonBodyParser({ mapParams: true }));
 
-		if (throttlingConfig && throttlingConfig.burst && throttlingConfig.rate)
+		if (throttlingConfig && throttlingConfig.burst && throttlingConfig.rate) {
 			server.use(restify.plugins.throttle({
 				burst: throttlingConfig.burst,
 				rate: throttlingConfig.rate,
-				ip: true,
+				ip: true
 			}));
+		}
 
 		// make the server promise aware (only a subset of HTTP methods are supported)
 		const routeDescriptors = [];
