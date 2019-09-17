@@ -55,6 +55,31 @@ const metadataPlugin = {
 			targetNamespaceId: ModelType.uint64HexIdentifier,
 			value: ModelType.string
 		});
+
+		builder.addSchema('metadata', {
+			metadataEntries: { type: ModelType.array, schemaName: 'metadata.entry' }
+		});
+
+		builder.addSchema('metadata.entry', {
+			compositeHash: ModelType.binary,
+			senderPublicKey: ModelType.binary,
+			targetPublicKey: ModelType.binary,
+			scopedMetadataKey: ModelType.uint64HexIdentifier,
+			value: ModelType.string
+		});
+
+		builder.addSchema('metadata.key', {
+			keys: { type: ModelType.array, schemaName: 'metadata.key.element' }
+		});
+
+		builder.addSchema('metadata.key.element', {
+			signer: ModelType.binary,
+			value: ModelType.string
+		});
+
+		builder.addSchema('metadata.key.signer', {
+			value: ModelType.string
+		});
 	},
 
 	registerCodecs: codecBuilder => {

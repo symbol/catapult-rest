@@ -36,7 +36,7 @@ describe('metadata plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 3);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 8);
 			expect(modelSchema).to.contain.all.keys(['accountMetadata', 'mosaicMetadata', 'namespaceMetadata']);
 
 			// - accountMetadata
@@ -55,6 +55,35 @@ describe('metadata plugin', () => {
 				'targetNamespaceId',
 				'value'
 			]);
+
+			// - metadata
+			expect(Object.keys(modelSchema.metadata).length).to.equal(1);
+			expect(modelSchema.metadata).to.contain.all.keys(['metadataEntries']);
+
+			// - metadata.entry
+			expect(Object.keys(modelSchema['metadata.entry']).length).to.equal(5);
+			expect(modelSchema['metadata.entry']).to.contain.all.keys([
+				'compositeHash',
+				'senderPublicKey',
+				'targetPublicKey',
+				'scopedMetadataKey',
+				'value'
+			]);
+
+			// - metadata.key
+			expect(Object.keys(modelSchema['metadata.key']).length).to.equal(1);
+			expect(modelSchema['metadata.key']).to.contain.all.keys(['keys']);
+
+			// - metadata.key.element
+			expect(Object.keys(modelSchema['metadata.key.element']).length).to.equal(2);
+			expect(modelSchema['metadata.key.element']).to.contain.all.keys([
+				'signer',
+				'value'
+			]);
+
+			// - metadata.key.signer
+			expect(Object.keys(modelSchema['metadata.key.signer']).length).to.equal(1);
+			expect(modelSchema['metadata.key.signer']).to.contain.all.keys(['value']);
 		});
 	});
 
