@@ -22,6 +22,7 @@ const routeUtils = require('../../routes/routeUtils');
 const AccountType = require('../../plugins/AccountType');
 const catapult = require('catapult-sdk');
 
+const { metadata } = catapult.model;
 const { uint64 } = catapult.utils;
 
 module.exports = {
@@ -33,12 +34,6 @@ module.exports = {
 			return routeUtils.addressToPublicKey(db, accountId);
 		};
 
-		const metadataType = {
-			account: 0,
-			mosaic: 1,
-			namespace: 2
-		};
-
 		// region account metadata
 
 		server.get('/account/:accountId/metadata', (req, res, next) => {
@@ -47,7 +42,7 @@ module.exports = {
 			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.getMetadataWithPagination(metadataType.account, publicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
+				db.getMetadataWithPagination(metadata.metadataType.account, publicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
 					.then(routeUtils.createSender('metadata').sendArray('metadataEntries', res, next)));
 		});
 
@@ -56,7 +51,7 @@ module.exports = {
 			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.getMetadataByKey(metadataType.account, publicKey, scopedMetadataKey)
+				db.getMetadataByKey(metadata.metadataType.account, publicKey, scopedMetadataKey)
 					.then(routeUtils.createSender('metadata.key').sendArray('keys', res, next)));
 		});
 
@@ -66,7 +61,7 @@ module.exports = {
 			const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.getMetadataByKeyAndSigner(metadataType.account, publicKey, scopedMetadataKey, signerPublicKey)
+				db.getMetadataByKeyAndSigner(metadata.metadataType.account, publicKey, scopedMetadataKey, signerPublicKey)
 					.then(routeUtils.createSender('metadata.key.signer').sendOne('value', res, next)));
 		});
 
@@ -79,7 +74,7 @@ module.exports = {
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
 
-			db.getMetadataWithPagination(metadataType.mosaic, mosaicId, pagingOptions.id, pagingOptions.pageSize, ordering)
+			db.getMetadataWithPagination(metadata.metadataType.mosaic, mosaicId, pagingOptions.id, pagingOptions.pageSize, ordering)
 				.then(routeUtils.createSender('metadata').sendArray('metadataEntries', res, next));
 		});
 
@@ -87,7 +82,7 @@ module.exports = {
 			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
 			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
 
-			db.getMetadataByKey(metadataType.mosaic, mosaicId, scopedMetadataKey)
+			db.getMetadataByKey(metadata.metadataType.mosaic, mosaicId, scopedMetadataKey)
 				.then(routeUtils.createSender('metadata.key').sendArray('keys', res, next));
 		});
 
@@ -96,7 +91,7 @@ module.exports = {
 			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
 			const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
 
-			db.getMetadataByKeyAndSigner(metadataType.mosaic, mosaicId, scopedMetadataKey, signerPublicKey)
+			db.getMetadataByKeyAndSigner(metadata.metadataType.mosaic, mosaicId, scopedMetadataKey, signerPublicKey)
 				.then(routeUtils.createSender('metadata.key.signer').sendOne('value', res, next));
 		});
 
@@ -109,7 +104,7 @@ module.exports = {
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
 
-			db.getMetadataWithPagination(metadataType.namespace, namespaceId, pagingOptions.id, pagingOptions.pageSize, ordering)
+			db.getMetadataWithPagination(metadata.metadataType.namespace, namespaceId, pagingOptions.id, pagingOptions.pageSize, ordering)
 				.then(routeUtils.createSender('metadata').sendArray('metadataEntries', res, next));
 		});
 
@@ -117,7 +112,7 @@ module.exports = {
 			const namespaceId = routeUtils.parseArgument(req.params, 'namespaceId', uint64.fromHex);
 			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
 
-			db.getMetadataByKey(metadataType.namespace, namespaceId, scopedMetadataKey)
+			db.getMetadataByKey(metadata.metadataType.namespace, namespaceId, scopedMetadataKey)
 				.then(routeUtils.createSender('metadata.key').sendArray('keys', res, next));
 		});
 
@@ -126,7 +121,7 @@ module.exports = {
 			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
 			const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
 
-			db.getMetadataByKeyAndSigner(metadataType.namespace, namespaceId, scopedMetadataKey, signerPublicKey)
+			db.getMetadataByKeyAndSigner(metadata.metadataType.namespace, namespaceId, scopedMetadataKey, signerPublicKey)
 				.then(routeUtils.createSender('metadata.key.signer').sendOne('value', res, next));
 		});
 
