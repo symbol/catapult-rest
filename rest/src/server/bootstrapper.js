@@ -99,12 +99,16 @@ module.exports = {
 		server.use(restify.plugins.queryParser({ mapParams: true }));
 		server.use(restify.plugins.jsonBodyParser({ mapParams: true }));
 
-		if (throttlingConfig && throttlingConfig.burst && throttlingConfig.rate) {
-			server.use(restify.plugins.throttle({
-				burst: throttlingConfig.burst,
-				rate: throttlingConfig.rate,
-				ip: true
-			}));
+		if (throttlingConfig) {
+			if (throttlingConfig.burst && throttlingConfig.rate) {
+				server.use(restify.plugins.throttle({
+					burst: throttlingConfig.burst,
+					rate: throttlingConfig.rate,
+					ip: true
+				}));
+			} else {
+				winston.warn('throttling was not enabled - configuration is invalid or incomplete');
+			}
 		}
 
 		// make the server promise aware (only a subset of HTTP methods are supported)
