@@ -69,11 +69,11 @@ const metadataPlugin = {
 		});
 
 		builder.addSchema('metadata.key', {
-			keys: { type: ModelType.array, schemaName: 'metadata.key.element' }
+			values: { type: ModelType.array, schemaName: 'metadata.key.element' }
 		});
 
 		builder.addSchema('metadata.key.element', {
-			signer: ModelType.binary,
+			senderPublicKey: ModelType.binary,
 			value: ModelType.string
 		});
 

@@ -18,6 +18,10 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const MongoDb = require('mongodb');
+
+const { Long } = MongoDb;
+
 class MetadataDb {
 	/**
 	 * Creates MetadataDb around CatapultDb.
@@ -30,37 +34,63 @@ class MetadataDb {
 	/**
 	 * Retrieves paginated metadata entries based on metadata type and id.
 	 * @param {int} metadataType Type of metadata.
-	 * @param {Uint8Array} id Target Id or target owner publicKey
-	 * @param {string} pagingOptionsId Paging id.
+	 * @param {object} targetFilter Target filter
+	 * @param {string} pagingId Paging id.
 	 * @param {int} pageSize Page size.
 	 * @param {object} ordering Page ordering.
 	 * @returns {Promise.<array>} Metadata entries.
 	 */
-	getMetadataWithPagination(metadataType, id, pagingOptionsId, pageSize, ordering) {
-		return '';
+	getMetadataWithPagination(metadataType, targetFilter, pagingId, pageSize, ordering) {
+		const conditions = { $and: [targetFilter, { 'metadataEntry.metadataType': metadataType }] };
+		const options = {
+			projection: { 'metadataEntry.metadataType': 0, 'metadataEntry.valueSize': 0 },
+			sortOrder: ordering
+		};
+
+		return this.catapultDb.queryPagedDocuments('metadata', conditions, pagingId, pageSize, options)
+			.then(this.catapultDb.sanitizer.deleteIds);
 	}
 
 	/**
 	 * Retrieves metadata key values based on metadata type, id and scopedMetadataKey.
 	 * @param {int} metadataType Type of metadata.
-	 * @param {Uint8Array} id Target Id or target owner publicKey.
+	 * @param {Uint8Array} targetFilter Target filter
 	 * @param {Uint8Array} scopedMetadataKey scoped metadata key.
 	 * @returns {Promise.<array>} Tuple of metadata signers and values.
 	 */
-	getMetadataByKey(metadataType, id, scopedMetadataKey) {
-		return '';
+	getMetadataByKey(metadataType, targetFilter, scopedMetadataKey) {
+		const conditions = {
+			$and: [
+				targetFilter,
+				{ 'metadataEntry.scopedMetadataKey': new Long(scopedMetadataKey[0], scopedMetadataKey[1]) },
+				{ 'metadataEntry.metadataType': metadataType }
+			]
+		};
+
+		return this.catapultDb.queryDocuments('metadata', conditions);
 	}
 
 	/**
 	 * Retrieves metadata key value based on metadata type, id, scopedMetadataKey and signer.
 	 * @param {int} metadataType Type of metadata.
-	 * @param {Uint8Array} id Target Id or target owner publicKey.
+	 * @param {Uint8Array} targetFilter Target filter
 	 * @param {Uint8Array} scopedMetadataKey scoped metadata key.
 	 * @param {Uint8Array} signerPublicKey signer public key.
 	 * @returns {Promise.<string>} Metadata value.
 	 */
-	getMetadataByKeyAndSigner(metadataType, id, scopedMetadataKey, signerPublicKey) {
-		return '';
+	getMetadataByKeyAndSigner(metadataType, targetFilter, scopedMetadataKey, signerPublicKey) {
+		const conditions = {
+			$and: [
+				targetFilter,
+				{ 'metadataEntry.scopedMetadataKey': new Long(scopedMetadataKey[0], scopedMetadataKey[1]) },
+				{ 'metadataEntry.senderPublicKey': Buffer.from(signerPublicKey) },
+				{ 'metadataEntry.metadataType': metadataType }
+			]
+		};
+		const projection = { 'metadataEntry.value': 1 };
+
+		return this.catapultDb.queryDocument('metadata', conditions, projection)
+			.then(this.catapultDb.sanitizer.deleteId);
 	}
 }
 

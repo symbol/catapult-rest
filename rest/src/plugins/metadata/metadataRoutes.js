@@ -20,8 +20,10 @@
 
 const routeUtils = require('../../routes/routeUtils');
 const AccountType = require('../../plugins/AccountType');
+const MongoDb = require('mongodb');
 const catapult = require('catapult-sdk');
 
+const { Long } = MongoDb;
 const { metadata } = catapult.model;
 const { uint64 } = catapult.utils;
 
@@ -34,6 +36,63 @@ module.exports = {
 			return routeUtils.addressToPublicKey(db, accountId);
 		};
 
+		const accountFilter = publicKey => ({ 'metadataEntry.targetPublicKey': Buffer.from(publicKey) });
+
+		const idFilter = id => ({ 'metadataEntry.targetId': new Long(id[0], id[1]) });
+
+		const processAndSendMetadata = (metadataEntries, res, next) => {
+			const metadatas = { metadataEntries: metadataEntries.map(metadataEntry => metadataEntry.metadataEntry) };
+			return routeUtils.createSender('metadata').sendOne('metadataEntries', res, next)(metadatas);
+		};
+
+		const processAndSendMetadataByKey = (metadataEntries, res, next) => {
+			const metadatas = {
+				values: metadataEntries.map(metadataEntry => ({
+					senderPublicKey: metadataEntry.metadataEntry.senderPublicKey,
+					value: metadataEntry.metadataEntry.value
+				}))
+			};
+			return routeUtils.createSender('metadata.key').sendOne('values', res, next)(metadatas);
+		};
+
+		const processAndSendMetadataByKeyAndSigner = (metadataEntry, res, next) => {
+			const metadataValue = undefined !== metadataEntry ? metadataEntry.metadataEntry : {};
+			return routeUtils.createSender('metadata.key.signer').sendOne('value', res, next)(metadataValue);
+		};
+
+		const addMetadataEndpointsFor = entity => {
+			server.get(`/${entity}/:${entity}Id/metadata`, (req, res, next) => {
+				const entityId = routeUtils.parseArgument(req.params, `${entity}Id`, uint64.fromHex);
+				const pagingOptions = routeUtils.parsePagingArguments(req.params);
+				const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
+
+				return db.getMetadataWithPagination(
+					metadata.metadataType[entity],
+					idFilter(entityId),
+					pagingOptions.id,
+					pagingOptions.pageSize,
+					ordering
+				).then(metadataEntries => processAndSendMetadata(metadataEntries, res, next));
+			});
+
+			server.get(`/${entity}/:${entity}Id/metadata/:key`, (req, res, next) => {
+				const entityId = routeUtils.parseArgument(req.params, `${entity}Id`, uint64.fromHex);
+				const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
+
+				return db.getMetadataByKey(metadata.metadataType[entity], idFilter(entityId), scopedMetadataKey)
+					.then(metadataEntries => processAndSendMetadataByKey(metadataEntries, res, next));
+			});
+
+			server.get(`/${entity}/:${entity}Id/metadata/:key/signer/:publicKey`, (req, res, next) => {
+				const entityId = routeUtils.parseArgument(req.params, `${entity}Id`, uint64.fromHex);
+				const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
+				const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
+
+				return db.getMetadataByKeyAndSigner(metadata.metadataType[entity], idFilter(entityId), scopedMetadataKey, signerPublicKey)
+					.then(metadataEntry => processAndSendMetadataByKeyAndSigner(metadataEntry, res, next));
+			});
+		};
+
 		// region account metadata
 
 		server.get('/account/:accountId/metadata', (req, res, next) => {
@@ -42,8 +101,13 @@ module.exports = {
 			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.getMetadataWithPagination(metadata.metadataType.account, publicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
-					.then(routeUtils.createSender('metadata').sendArray('metadataEntries', res, next)));
+				db.getMetadataWithPagination(
+					metadata.metadataType.account,
+					accountFilter(publicKey),
+					pagingOptions.id,
+					pagingOptions.pageSize,
+					ordering
+				).then(metadataEntries => processAndSendMetadata(metadataEntries, res, next)));
 		});
 
 		server.get('/account/:accountId/metadata/:key', (req, res, next) => {
@@ -51,8 +115,8 @@ module.exports = {
 			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.getMetadataByKey(metadata.metadataType.account, publicKey, scopedMetadataKey)
-					.then(routeUtils.createSender('metadata.key').sendArray('keys', res, next)));
+				db.getMetadataByKey(metadata.metadataType.account, accountFilter(publicKey), scopedMetadataKey)
+					.then(metadataEntries => processAndSendMetadataByKey(metadataEntries, res, next)));
 		});
 
 		server.get('/account/:accountId/metadata/:key/signer/:publicKey', (req, res, next) => {
@@ -61,70 +125,16 @@ module.exports = {
 			const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.getMetadataByKeyAndSigner(metadata.metadataType.account, publicKey, scopedMetadataKey, signerPublicKey)
-					.then(routeUtils.createSender('metadata.key.signer').sendOne('value', res, next)));
+				db.getMetadataByKeyAndSigner(metadata.metadataType.account, accountFilter(publicKey), scopedMetadataKey, signerPublicKey)
+					.then(metadataEntry => processAndSendMetadataByKeyAndSigner(metadataEntry, res, next)));
 		});
 
 		// endregion
 
-		// region mosaic metadata
+		// mosaic metadata
+		addMetadataEndpointsFor('mosaic');
 
-		server.get('/mosaic/:mosaicId/metadata', (req, res, next) => {
-			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
-
-			db.getMetadataWithPagination(metadata.metadataType.mosaic, mosaicId, pagingOptions.id, pagingOptions.pageSize, ordering)
-				.then(routeUtils.createSender('metadata').sendArray('metadataEntries', res, next));
-		});
-
-		server.get('/mosaic/:mosaicId/metadata/:key', (req, res, next) => {
-			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
-			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
-
-			db.getMetadataByKey(metadata.metadataType.mosaic, mosaicId, scopedMetadataKey)
-				.then(routeUtils.createSender('metadata.key').sendArray('keys', res, next));
-		});
-
-		server.get('/mosaic/:mosaicId/metadata/:key/signer/:publicKey', (req, res, next) => {
-			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
-			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
-			const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
-
-			db.getMetadataByKeyAndSigner(metadata.metadataType.mosaic, mosaicId, scopedMetadataKey, signerPublicKey)
-				.then(routeUtils.createSender('metadata.key.signer').sendOne('value', res, next));
-		});
-
-		// endregion
-
-		// region namespace metadata
-
-		server.get('/namespace/:namespaceId/metadata', (req, res, next) => {
-			const namespaceId = routeUtils.parseArgument(req.params, 'namespaceId', uint64.fromHex);
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
-
-			db.getMetadataWithPagination(metadata.metadataType.namespace, namespaceId, pagingOptions.id, pagingOptions.pageSize, ordering)
-				.then(routeUtils.createSender('metadata').sendArray('metadataEntries', res, next));
-		});
-
-		server.get('/namespace/:namespaceId/metadata/:key', (req, res, next) => {
-			const namespaceId = routeUtils.parseArgument(req.params, 'namespaceId', uint64.fromHex);
-			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
-
-			db.getMetadataByKey(metadata.metadataType.namespace, namespaceId, scopedMetadataKey)
-				.then(routeUtils.createSender('metadata.key').sendArray('keys', res, next));
-		});
-
-		server.get('/namespace/:namespaceId/metadata/:key/signer/:publicKey', (req, res, next) => {
-			const namespaceId = routeUtils.parseArgument(req.params, 'namespaceId', uint64.fromHex);
-			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
-			const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
-
-			db.getMetadataByKeyAndSigner(metadata.metadataType.namespace, namespaceId, scopedMetadataKey, signerPublicKey)
-				.then(routeUtils.createSender('metadata.key.signer').sendOne('value', res, next));
-		});
-
-		// endregion
+		// namespace metadata
+		addMetadataEndpointsFor('namespace');
 	}
 };

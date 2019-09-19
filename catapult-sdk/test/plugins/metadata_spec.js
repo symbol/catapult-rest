@@ -72,12 +72,12 @@ describe('metadata plugin', () => {
 
 			// - metadata.key
 			expect(Object.keys(modelSchema['metadata.key']).length).to.equal(1);
-			expect(modelSchema['metadata.key']).to.contain.all.keys(['keys']);
+			expect(modelSchema['metadata.key']).to.contain.all.keys(['values']);
 
 			// - metadata.key.element
 			expect(Object.keys(modelSchema['metadata.key.element']).length).to.equal(2);
 			expect(modelSchema['metadata.key.element']).to.contain.all.keys([
-				'signer',
+				'senderPublicKey',
 				'value'
 			]);
 
