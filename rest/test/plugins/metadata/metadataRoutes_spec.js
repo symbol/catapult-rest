@@ -49,7 +49,8 @@ describe('metadata routes', () => {
 			targetPublicKey: '',
 			scopedMetadataKey: '',
 			targetId: '',
-			value: ''
+			value: '',
+			id: ''
 		}
 	}]);
 
@@ -79,7 +80,8 @@ describe('metadata routes', () => {
 					targetPublicKey: '',
 					scopedMetadataKey: '',
 					targetId: '',
-					value: ''
+					value: '',
+					id: ''
 				}
 			]
 		},
@@ -368,8 +370,8 @@ describe('metadata routes', () => {
 	});
 
 	describe('namespace metadata', () => {
-		const namespaceId = '30AC58CFA34E98AA';
-		const longTypeNamespaceId = new Long(0xA34E98AA, 0x30AC58CF);
+		const namespaceId = '2833BA00C2565877';
+		const longTypeNamespaceId = new Long(0xC2565877, 0x2833BA00);
 
 		describe('get metadata', () => {
 			it('can get metadata', () => {

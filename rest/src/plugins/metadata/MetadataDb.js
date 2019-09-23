@@ -59,8 +59,8 @@ class MetadataDb {
 	 * Retrieves metadata key values based on metadata type, id and scopedMetadataKey.
 	 * @param {int} metadataType Type of metadata.
 	 * @param {Uint8Array} targetFilter Target filter
-	 * @param {Uint8Array} scopedMetadataKey scoped metadata key.
-	 * @returns {Promise.<array>} Tuple of metadata signers and values.
+	 * @param {Uint8Array} scopedMetadataKey Scoped metadata key.
+	 * @returns {Promise.<array>} Metadata entries.
 	 */
 	getMetadataByKey(metadataType, targetFilter, scopedMetadataKey) {
 		const conditions = {
@@ -78,8 +78,8 @@ class MetadataDb {
 	 * Retrieves metadata key value based on metadata type, id, scopedMetadataKey and signer.
 	 * @param {int} metadataType Type of metadata.
 	 * @param {Uint8Array} targetFilter Target filter
-	 * @param {Uint8Array} scopedMetadataKey scoped metadata key.
-	 * @param {Uint8Array} signerPublicKey signer public key.
+	 * @param {Uint8Array} scopedMetadataKey Scoped metadata key.
+	 * @param {Uint8Array} signerPublicKey Signer public key.
 	 * @returns {Promise.<string>} Metadata value.
 	 */
 	getMetadataByKeyAndSigner(metadataType, targetFilter, scopedMetadataKey, signerPublicKey) {
