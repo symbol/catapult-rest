@@ -65,7 +65,8 @@ const metadataPlugin = {
 			senderPublicKey: ModelType.binary,
 			targetPublicKey: ModelType.binary,
 			scopedMetadataKey: ModelType.uint64HexIdentifier,
-			value: ModelType.string
+			value: ModelType.string,
+			id: ModelType.objectId
 		});
 
 		builder.addSchema('metadata.key', {

@@ -61,13 +61,14 @@ describe('metadata plugin', () => {
 			expect(modelSchema.metadata).to.contain.all.keys(['metadataEntries']);
 
 			// - metadata.entry
-			expect(Object.keys(modelSchema['metadata.entry']).length).to.equal(5);
+			expect(Object.keys(modelSchema['metadata.entry']).length).to.equal(6);
 			expect(modelSchema['metadata.entry']).to.contain.all.keys([
 				'compositeHash',
 				'senderPublicKey',
 				'targetPublicKey',
 				'scopedMetadataKey',
-				'value'
+				'value',
+				'id'
 			]);
 
 			// - metadata.key
@@ -158,7 +159,7 @@ describe('metadata plugin', () => {
 			}));
 		});
 
-		describe('supports mosaic metadata', () => {
+		describe('supports namespace metadata', () => {
 			const targetPublicKey = test.random.bytes(test.constants.sizes.signerPublicKey); // 32
 
 			test.binary.test.addAll(getCodec(EntityType.namespaceMetadata), 68, () => ({

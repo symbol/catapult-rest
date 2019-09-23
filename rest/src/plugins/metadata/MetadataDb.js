@@ -48,7 +48,11 @@ class MetadataDb {
 		};
 
 		return this.catapultDb.queryPagedDocuments('metadata', conditions, pagingId, pageSize, options)
-			.then(this.catapultDb.sanitizer.deleteIds);
+			.then(metadataEntries => metadataEntries.map(metadataEntry => {
+				metadataEntry.metadataEntry.id = metadataEntry._id;
+				delete metadataEntry._id;
+				return metadataEntry;
+			}));
 	}
 
 	/**
