@@ -56,7 +56,7 @@ describe('metadata routes', () => {
 
 	const dbGetMetadataWithPaginationFake = sinon.fake.resolves([metadataEntry]);
 	const dbGetMetadataByKeyFake = sinon.fake.resolves([metadataEntry]);
-	const dbGetMetadataByKeyAndSignerFake = sinon.fake.resolves(metadataEntry);
+	const dbGetMetadataByKeyAndSenderFake = sinon.fake.resolves(metadataEntry);
 
 	const processedMetadataOutput = {
 		payload: {
@@ -96,7 +96,7 @@ describe('metadata routes', () => {
 		type: 'metadata'
 	};
 
-	const processedMetadataByKeyAndSignerOutput = {
+	const processedMetadataByKeyAndSenderOutput = {
 		payload: {
 			metadataEntry: {
 				compositeHash: '',
@@ -116,7 +116,7 @@ describe('metadata routes', () => {
 		addressToPublicKey: () => Promise.resolve({ account: { publicKey: new Binary(Buffer.from(uint8TestPublicKey)) } }),
 		getMetadataWithPagination: dbGetMetadataWithPaginationFake,
 		getMetadataByKey: dbGetMetadataByKeyFake,
-		getMetadataByKeyAndSigner: dbGetMetadataByKeyAndSignerFake
+		getMetadataByKeyAndSender: dbGetMetadataByKeyAndSenderFake
 	};
 	metadataRoutes.register(mockServer.server, db, {});
 
@@ -124,7 +124,7 @@ describe('metadata routes', () => {
 		mockServer.resetStats();
 		dbGetMetadataWithPaginationFake.resetHistory();
 		dbGetMetadataByKeyFake.resetHistory();
-		dbGetMetadataByKeyAndSignerFake.resetHistory();
+		dbGetMetadataByKeyAndSenderFake.resetHistory();
 	});
 
 	describe('account metadata', () => {
@@ -169,11 +169,11 @@ describe('metadata routes', () => {
 				});
 			});
 
-			it('can get publicKey from address, getting metadata by key and signer', () => {
+			it('can get publicKey from address, getting metadata by key and sender', () => {
 				// Arrange:
 				const accountFilter = { 'metadataEntry.targetPublicKey': uint8TestPublicKey };
 				const req = { params: { accountId: testAddress, key: scopedMetadataKey, publicKey: senderPublicKey } };
-				const route = mockServer.routes['/account/:accountId/metadata/:key/signer/:publicKey'];
+				const route = mockServer.routes['/account/:accountId/metadata/:key/sender/:publicKey'];
 
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
@@ -181,8 +181,8 @@ describe('metadata routes', () => {
 					expect(addressToPublicKeySpy.calledOnce).to.equal(true);
 					expect(addressToPublicKeySpy.firstCall.args[1]).to.deep.equal(uint8TestAddress);
 
-					expect(dbGetMetadataByKeyAndSignerFake.calledOnce).to.equal(true);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[1]).to.deep.equal(accountFilter);
+					expect(dbGetMetadataByKeyAndSenderFake.calledOnce).to.equal(true);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[1]).to.deep.equal(accountFilter);
 				});
 			});
 		});
@@ -256,22 +256,22 @@ describe('metadata routes', () => {
 			});
 		});
 
-		describe('get metadata by key and signer', () => {
-			it('can get metadata by key and signer', () => {
+		describe('get metadata by key and sender', () => {
+			it('can get metadata by key and sender', () => {
 				// Arrange:
 				const accountFilter = { 'metadataEntry.targetPublicKey': uint8TestPublicKey };
 				const req = { params: { accountId: testPublicKey, key: scopedMetadataKey, publicKey: senderPublicKey } };
-				const route = mockServer.routes['/account/:accountId/metadata/:key/signer/:publicKey'];
+				const route = mockServer.routes['/account/:accountId/metadata/:key/sender/:publicKey'];
 
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbGetMetadataByKeyAndSignerFake.calledOnce).to.equal(true);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[0]).to.equal(metadata.metadataType.account);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[1]).to.deep.equal(accountFilter);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[3]).to.deep.equal(uint8SenderPublicKey);
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyAndSignerOutput);
+					expect(dbGetMetadataByKeyAndSenderFake.calledOnce).to.equal(true);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[0]).to.equal(metadata.metadataType.account);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[1]).to.deep.equal(accountFilter);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[3]).to.deep.equal(uint8SenderPublicKey);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyAndSenderOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -351,22 +351,22 @@ describe('metadata routes', () => {
 			});
 		});
 
-		describe('get metadata by key and signer', () => {
-			it('can get metadata by key and signer', () => {
+		describe('get metadata by key and sender', () => {
+			it('can get metadata by key and sender', () => {
 				// Arrange:
 				const mosaicFilter = { 'metadataEntry.targetId': longTypeMosaicId };
 				const req = { params: { mosaicId, key: scopedMetadataKey, publicKey: senderPublicKey } };
-				const route = mockServer.routes['/mosaic/:mosaicId/metadata/:key/signer/:publicKey'];
+				const route = mockServer.routes['/mosaic/:mosaicId/metadata/:key/sender/:publicKey'];
 
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbGetMetadataByKeyAndSignerFake.calledOnce).to.equal(true);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[0]).to.equal(metadata.metadataType.mosaic);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[1]).to.deep.equal(mosaicFilter);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[3]).to.deep.equal(uint8SenderPublicKey);
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyAndSignerOutput);
+					expect(dbGetMetadataByKeyAndSenderFake.calledOnce).to.equal(true);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[0]).to.equal(metadata.metadataType.mosaic);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[1]).to.deep.equal(mosaicFilter);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[3]).to.deep.equal(uint8SenderPublicKey);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyAndSenderOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -446,22 +446,22 @@ describe('metadata routes', () => {
 			});
 		});
 
-		describe('get metadata by key and signer', () => {
-			it('can get metadata by key and signer', () => {
+		describe('get metadata by key and sender', () => {
+			it('can get metadata by key and sender', () => {
 				// Arrange:
 				const namespaceFilter = { 'metadataEntry.targetId': longTypeNamespaceId };
 				const req = { params: { namespaceId, key: scopedMetadataKey, publicKey: senderPublicKey } };
-				const route = mockServer.routes['/namespace/:namespaceId/metadata/:key/signer/:publicKey'];
+				const route = mockServer.routes['/namespace/:namespaceId/metadata/:key/sender/:publicKey'];
 
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbGetMetadataByKeyAndSignerFake.calledOnce).to.equal(true);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[0]).to.equal(metadata.metadataType.namespace);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[1]).to.deep.equal(namespaceFilter);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
-					expect(dbGetMetadataByKeyAndSignerFake.firstCall.args[3]).to.deep.equal(uint8SenderPublicKey);
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyAndSignerOutput);
+					expect(dbGetMetadataByKeyAndSenderFake.calledOnce).to.equal(true);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[0]).to.equal(metadata.metadataType.namespace);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[1]).to.deep.equal(namespaceFilter);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
+					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[3]).to.deep.equal(uint8SenderPublicKey);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyAndSenderOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});

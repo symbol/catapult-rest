@@ -37,7 +37,7 @@ describe('metadata plugin', () => {
 			['account', 'mosaic', 'namespace'].forEach(entity => {
 				registeredRoutes.push(`/${entity}/:${entity}Id/metadata`);
 				registeredRoutes.push(`/${entity}/:${entity}Id/metadata/:key`);
-				registeredRoutes.push(`/${entity}/:${entity}Id/metadata/:key/signer/:publicKey`);
+				registeredRoutes.push(`/${entity}/:${entity}Id/metadata/:key/sender/:publicKey`);
 			});
 
 			// Act:

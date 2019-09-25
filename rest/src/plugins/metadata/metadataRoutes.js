@@ -63,13 +63,13 @@ module.exports = {
 					.then(metadataEntries => routeUtils.createSender('metadata').sendOne(scopedMetadataKey, res, next)({ metadataEntries }));
 			});
 
-			server.get(`/${entity}/:${entity}Id/metadata/:key/signer/:publicKey`, (req, res, next) => {
+			server.get(`/${entity}/:${entity}Id/metadata/:key/sender/:publicKey`, (req, res, next) => {
 				const entityId = routeUtils.parseArgument(req.params, `${entity}Id`, uint64.fromHex);
 				const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
-				const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
+				const senderPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
 
-				return db.getMetadataByKeyAndSigner(metadata.metadataType[entity], idFilter(entityId), scopedMetadataKey, signerPublicKey)
-					.then(metadataEntry => routeUtils.createSender('metadata.entry').sendOne(signerPublicKey, res, next)(metadataEntry));
+				return db.getMetadataByKeyAndSender(metadata.metadataType[entity], idFilter(entityId), scopedMetadataKey, senderPublicKey)
+					.then(metadataResult => routeUtils.createSender('metadata.entry').sendOne(senderPublicKey, res, next)(metadataResult));
 			});
 		};
 
@@ -99,14 +99,14 @@ module.exports = {
 					.then(metadataEntries => routeUtils.createSender('metadata').sendOne(scopedMetadataKey, res, next)({ metadataEntries })));
 		});
 
-		server.get('/account/:accountId/metadata/:key/signer/:publicKey', (req, res, next) => {
+		server.get('/account/:accountId/metadata/:key/sender/:publicKey', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
-			const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
+			const senderPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.getMetadataByKeyAndSigner(metadata.metadataType.account, accountFilter(publicKey), scopedMetadataKey, signerPublicKey)
-					.then(metadataEntry => routeUtils.createSender('metadata.entry').sendOne(signerPublicKey, res, next)(metadataEntry)));
+				db.getMetadataByKeyAndSender(metadata.metadataType.account, accountFilter(publicKey), scopedMetadataKey, senderPublicKey)
+					.then(metadataResult => routeUtils.createSender('metadata.entry').sendOne(senderPublicKey, res, next)(metadataResult)));
 		});
 
 		// endregion

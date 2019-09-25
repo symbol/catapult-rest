@@ -80,7 +80,7 @@ describe('metadata db', () => {
 				db => db.getMetadataWithPagination(searchedMetadataType, targetFilter),
 				entities => {
 					expect(entities.length).to.equal(1);
-					expect(entities[0].metadataEntry.id).to.equal(searchedId);
+					expect(entities[0].meta.id).to.equal(searchedId);
 				}
 			);
 		});
@@ -106,7 +106,7 @@ describe('metadata db', () => {
 				db => new MetadataDb(db),
 				db => db.getMetadataWithPagination(searchedMetadataType, targetFilter, createObjectId(startingPageId), pageSize, 1),
 				entities => {
-					const pagedIds = entities.map(e => e.metadataEntry.id);
+					const pagedIds = entities.map(e => e.meta.id);
 					expect(pagedIds).to.deep.equal(expectedPagedIds);
 				}
 			);
@@ -132,7 +132,7 @@ describe('metadata db', () => {
 				db => new MetadataDb(db),
 				db => db.getMetadataWithPagination(searchedMetadataType, targetFilter, undefined, pageSize, 1),
 				entities => {
-					const pagedIds = entities.map(e => e.metadataEntry.id);
+					const pagedIds = entities.map(e => e.meta.id);
 					expect(pagedIds).to.deep.equal(expectedPagedIds);
 				}
 			);
@@ -222,11 +222,12 @@ describe('metadata db', () => {
 		});
 	});
 
-	describe('get metadata by key and signer', () => {
-		it('gets metadata by key and signer', () => {
+	describe('get metadata by key and sender', () => {
+		it('gets metadata by key and sender', () => {
 			// Arrange:
 			const metadataDbEntities = [];
-			metadataDbEntities.push(createMetadata(-1, 1, testPublicKey.one, scopedMetadataKey.one, senderPublicKey.one, 'apple'));
+			const appleId = createObjectId(126);
+			metadataDbEntities.push(createMetadata(appleId, 1, testPublicKey.one, scopedMetadataKey.one, senderPublicKey.one, 'apple'));
 			metadataDbEntities.push(createMetadata(-1, 1, testPublicKey.one, scopedMetadataKey.one, senderPublicKey.two, 'banana'));
 			metadataDbEntities.push(createMetadata(-1, 1, testPublicKey.one, scopedMetadataKey.two, senderPublicKey.one, 'cherrie'));
 			metadataDbEntities.push(createMetadata(-1, 2, testPublicKey.one, scopedMetadataKey.one, senderPublicKey.two, 'dates'));
@@ -237,14 +238,26 @@ describe('metadata db', () => {
 				metadataDbEntities,
 				'metadata',
 				db => new MetadataDb(db),
-				db => db.getMetadataByKeyAndSigner(
+				db => db.getMetadataByKeyAndSender(
 					1,
 					targetFilter,
 					scopedMetadataKey.one,
 					Buffer.from(convert.hexToUint8(senderPublicKey.one))
 				),
 				metadataEntry => {
-					expect(metadataEntry).to.deep.equal({ metadataEntry: { value: new Binary('apple') } });
+					expect(metadataEntry).to.deep.equal({
+						meta: { id: appleId },
+						metadataEntry: {
+							compositeHash: {},
+							metadataType: 1,
+							scopedMetadataKey: new Long(scopedMetadataKey.one[0], scopedMetadataKey.one[1]),
+							senderPublicKey: new Binary(Buffer.from(convert.hexToUint8(senderPublicKey.one))),
+							targetId: 0,
+							targetPublicKey: new Binary(Buffer.from(convert.hexToUint8(testPublicKey.one))),
+							value: new Binary('apple'),
+							valueSize: 5
+						}
+					});
 				}
 			);
 		});
@@ -261,7 +274,7 @@ describe('metadata db', () => {
 				metadataDbEntities,
 				'metadata',
 				db => new MetadataDb(db),
-				db => db.getMetadataByKeyAndSigner(
+				db => db.getMetadataByKeyAndSender(
 					1,
 					{ 'metadataEntry.nonExistingField': '' },
 					scopedMetadataKey.one,
@@ -284,7 +297,7 @@ describe('metadata db', () => {
 				metadataDbEntities,
 				'metadata',
 				db => new MetadataDb(db),
-				db => db.getMetadataByKeyAndSigner(
+				db => db.getMetadataByKeyAndSender(
 					1,
 					targetFilter,
 					scopedMetadataKey.two,
@@ -296,7 +309,7 @@ describe('metadata db', () => {
 			);
 		});
 
-		it('returns undefined when there are no metadata with supplied signer', () => {
+		it('returns undefined when there are no metadata with supplied sender', () => {
 			// Arrange:
 			const metadataDbEntities = [];
 			metadataDbEntities.push(createMetadata(-1, 1, testPublicKey.one, scopedMetadataKey.one, senderPublicKey.one, 'apple'));
@@ -307,7 +320,7 @@ describe('metadata db', () => {
 				metadataDbEntities,
 				'metadata',
 				db => new MetadataDb(db),
-				db => db.getMetadataByKeyAndSigner(
+				db => db.getMetadataByKeyAndSender(
 					1,
 					targetFilter,
 					scopedMetadataKey.one,

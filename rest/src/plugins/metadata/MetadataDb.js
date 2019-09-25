@@ -45,11 +45,8 @@ class MetadataDb {
 		const options = { sortOrder: ordering };
 
 		return this.catapultDb.queryPagedDocuments('metadata', conditions, pagingId, pageSize, options)
-			.then(metadataEntries => metadataEntries.map(metadataEntry => {
-				metadataEntry.metadataEntry.id = metadataEntry._id;
-				delete metadataEntry._id;
-				return metadataEntry;
-			}));
+			.then(metadataEntries => metadataEntries.map(metadataEntry => ({ ...metadataEntry, ...{ meta: {} } })))
+			.then(this.catapultDb.sanitizer.copyAndDeleteIds);
 	}
 
 	/**
@@ -68,29 +65,32 @@ class MetadataDb {
 			]
 		};
 
-		return this.catapultDb.queryDocuments('metadata', conditions);
+		return this.catapultDb.queryDocuments('metadata', conditions)
+			.then(metadataEntries => metadataEntries.map(metadataEntry => ({ ...metadataEntry, ...{ meta: {} } })))
+			.then(this.catapultDb.sanitizer.copyAndDeleteIds);
 	}
 
 	/**
-	 * Retrieves metadata key value based on metadata type, id, scopedMetadataKey and signer.
+	 * Retrieves metadata key value based on metadata type, id, scopedMetadataKey and sender.
 	 * @param {int} metadataType Type of metadata.
 	 * @param {Uint8Array} targetFilter Target filter
 	 * @param {Uint8Array} scopedMetadataKey Scoped metadata key.
-	 * @param {Uint8Array} signerPublicKey Signer public key.
+	 * @param {Uint8Array} senderPublicKey Sender public key.
 	 * @returns {Promise.<string>} Metadata value.
 	 */
-	getMetadataByKeyAndSigner(metadataType, targetFilter, scopedMetadataKey, signerPublicKey) {
+	getMetadataByKeyAndSender(metadataType, targetFilter, scopedMetadataKey, senderPublicKey) {
 		const conditions = {
 			$and: [
 				targetFilter,
 				{ 'metadataEntry.scopedMetadataKey': new Long(scopedMetadataKey[0], scopedMetadataKey[1]) },
-				{ 'metadataEntry.senderPublicKey': Buffer.from(signerPublicKey) },
+				{ 'metadataEntry.senderPublicKey': Buffer.from(senderPublicKey) },
 				{ 'metadataEntry.metadataType': metadataType }
 			]
 		};
 
 		return this.catapultDb.queryDocument('metadata', conditions)
-			.then(this.catapultDb.sanitizer.deleteId);
+			.then(metadata => metadata ? ({ ...metadata, ...{ meta: {} } }) : metadata)
+			.then(this.catapultDb.sanitizer.copyAndDeleteId);
 	}
 }
 
