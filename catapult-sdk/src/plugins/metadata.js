@@ -68,19 +68,6 @@ const metadataPlugin = {
 			value: ModelType.string,
 			id: ModelType.objectId
 		});
-
-		builder.addSchema('metadata.key', {
-			values: { type: ModelType.array, schemaName: 'metadata.key.element' }
-		});
-
-		builder.addSchema('metadata.key.element', {
-			senderPublicKey: ModelType.binary,
-			value: ModelType.string
-		});
-
-		builder.addSchema('metadata.key.signer', {
-			value: ModelType.string
-		});
 	},
 
 	registerCodecs: codecBuilder => {

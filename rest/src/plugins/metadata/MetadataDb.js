@@ -42,10 +42,7 @@ class MetadataDb {
 	 */
 	getMetadataWithPagination(metadataType, targetFilter, pagingId, pageSize, ordering) {
 		const conditions = { $and: [targetFilter, { 'metadataEntry.metadataType': metadataType }] };
-		const options = {
-			projection: { 'metadataEntry.metadataType': 0, 'metadataEntry.valueSize': 0 },
-			sortOrder: ordering
-		};
+		const options = { sortOrder: ordering };
 
 		return this.catapultDb.queryPagedDocuments('metadata', conditions, pagingId, pageSize, options)
 			.then(metadataEntries => metadataEntries.map(metadataEntry => {
@@ -91,9 +88,8 @@ class MetadataDb {
 				{ 'metadataEntry.metadataType': metadataType }
 			]
 		};
-		const projection = { 'metadataEntry.value': 1 };
 
-		return this.catapultDb.queryDocument('metadata', conditions, projection)
+		return this.catapultDb.queryDocument('metadata', conditions)
 			.then(this.catapultDb.sanitizer.deleteId);
 	}
 }

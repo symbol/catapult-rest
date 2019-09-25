@@ -40,26 +40,6 @@ module.exports = {
 
 		const idFilter = id => ({ 'metadataEntry.targetId': new Long(id[0], id[1]) });
 
-		const processAndSendMetadata = (metadataEntries, res, next) => {
-			const metadatas = { metadataEntries: metadataEntries.map(metadataEntry => metadataEntry.metadataEntry) };
-			return routeUtils.createSender('metadata').sendOne('metadataEntries', res, next)(metadatas);
-		};
-
-		const processAndSendMetadataByKey = (metadataEntries, res, next) => {
-			const metadatas = {
-				values: metadataEntries.map(metadataEntry => ({
-					senderPublicKey: metadataEntry.metadataEntry.senderPublicKey,
-					value: metadataEntry.metadataEntry.value
-				}))
-			};
-			return routeUtils.createSender('metadata.key').sendOne('values', res, next)(metadatas);
-		};
-
-		const processAndSendMetadataByKeyAndSigner = (metadataEntry, res, next) => {
-			const metadataValue = undefined !== metadataEntry ? metadataEntry.metadataEntry : {};
-			return routeUtils.createSender('metadata.key.signer').sendOne('value', res, next)(metadataValue);
-		};
-
 		const addMetadataEndpointsFor = entity => {
 			server.get(`/${entity}/:${entity}Id/metadata`, (req, res, next) => {
 				const entityId = routeUtils.parseArgument(req.params, `${entity}Id`, uint64.fromHex);
@@ -72,7 +52,7 @@ module.exports = {
 					pagingOptions.id,
 					pagingOptions.pageSize,
 					ordering
-				).then(metadataEntries => processAndSendMetadata(metadataEntries, res, next));
+				).then(metadataEntries => routeUtils.createSender('metadata').sendOne(entityId, res, next)({ metadataEntries }));
 			});
 
 			server.get(`/${entity}/:${entity}Id/metadata/:key`, (req, res, next) => {
@@ -80,7 +60,7 @@ module.exports = {
 				const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
 
 				return db.getMetadataByKey(metadata.metadataType[entity], idFilter(entityId), scopedMetadataKey)
-					.then(metadataEntries => processAndSendMetadataByKey(metadataEntries, res, next));
+					.then(metadataEntries => routeUtils.createSender('metadata').sendOne(scopedMetadataKey, res, next)({ metadataEntries }));
 			});
 
 			server.get(`/${entity}/:${entity}Id/metadata/:key/signer/:publicKey`, (req, res, next) => {
@@ -89,7 +69,7 @@ module.exports = {
 				const signerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
 
 				return db.getMetadataByKeyAndSigner(metadata.metadataType[entity], idFilter(entityId), scopedMetadataKey, signerPublicKey)
-					.then(metadataEntry => processAndSendMetadataByKeyAndSigner(metadataEntry, res, next));
+					.then(metadataEntry => routeUtils.createSender('metadata.entry').sendOne(signerPublicKey, res, next)(metadataEntry));
 			});
 		};
 
@@ -107,7 +87,7 @@ module.exports = {
 					pagingOptions.id,
 					pagingOptions.pageSize,
 					ordering
-				).then(metadataEntries => processAndSendMetadata(metadataEntries, res, next)));
+				).then(metadataEntries => routeUtils.createSender('metadata').sendOne(accountId, res, next)({ metadataEntries })));
 		});
 
 		server.get('/account/:accountId/metadata/:key', (req, res, next) => {
@@ -116,7 +96,7 @@ module.exports = {
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
 				db.getMetadataByKey(metadata.metadataType.account, accountFilter(publicKey), scopedMetadataKey)
-					.then(metadataEntries => processAndSendMetadataByKey(metadataEntries, res, next)));
+					.then(metadataEntries => routeUtils.createSender('metadata').sendOne(scopedMetadataKey, res, next)({ metadataEntries })));
 		});
 
 		server.get('/account/:accountId/metadata/:key/signer/:publicKey', (req, res, next) => {
@@ -126,7 +106,7 @@ module.exports = {
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
 				db.getMetadataByKeyAndSigner(metadata.metadataType.account, accountFilter(publicKey), scopedMetadataKey, signerPublicKey)
-					.then(metadataEntry => processAndSendMetadataByKeyAndSigner(metadataEntry, res, next)));
+					.then(metadataEntry => routeUtils.createSender('metadata.entry').sendOne(signerPublicKey, res, next)(metadataEntry)));
 		});
 
 		// endregion
