@@ -19,6 +19,7 @@
  */
 
 const routeUtils = require('../../routes/routeUtils');
+const errors = require('../../server/errors');
 const AccountType = require('../AccountType');
 const catapult = require('catapult-sdk');
 
@@ -43,14 +44,43 @@ module.exports = {
 
 		server.get('/mosaic/:mosaicId/restrictions/account/:accountId', (req, res, next) => {
 			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
-			const mosaicRestrictionsSender = routeUtils.createSender('');
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+			const mosaicRestrictionsSender = routeUtils.createSender('');
 
 			return db.mosaicRestrictionsByMosaicAndAddresses(
 				mosaicId,
 				[accountIdToAddress(type, accountId)],
 				mosaicRestriction.restrictionType.address
 			).then(mosaicRestrictionsSender.sendOne(req.params.accountId, res, next));
+		});
+
+		server.post('/mosaic/restrictions', (req, res, next) => {
+			const mosaicIds = routeUtils.parseArgumentAsArray(req.params, 'mosaicIds', uint64.fromHex);
+			const mosaicRestrictionsSender = routeUtils.createSender('');
+
+			return db.mosaicRestrictionsByMosaicIds(
+				mosaicIds,
+				mosaicRestriction.restrictionType.global
+			).then(mosaicRestrictionsSender.sendArray('mosaicIds', res, next));
+		});
+
+		server.post('/mosaic/:mosaicId/restrictions', (req, res, next) => {
+			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
+			if (req.params.publicKeys && req.params.addresses)
+				throw errors.createInvalidArgumentError('publicKeys and addresses cannot both be provided');
+
+			const idOptions = Array.isArray(req.params.publicKeys)
+				? { keyName: 'publicKeys', parserName: 'publicKey', type: AccountType.publicKey }
+				: { keyName: 'addresses', parserName: 'address', type: AccountType.address };
+
+			const accountIds = routeUtils.parseArgumentAsArray(req.params, idOptions.keyName, idOptions.parserName);
+			const mosaicRestrictionsSender = routeUtils.createSender('');
+
+			return db.mosaicRestrictionsByMosaicAndAddresses(
+				mosaicId,
+				accountIds.map(accountId => accountIdToAddress(idOptions.type, accountId)),
+				mosaicRestriction.restrictionType.address
+			).then(mosaicRestrictionsSender.sendArray(idOptions.keyName, res, next));
 		});
 	}
 };
