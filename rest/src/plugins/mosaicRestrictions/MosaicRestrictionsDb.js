@@ -18,8 +18,10 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const catapult = require('catapult-sdk');
 const MongoDb = require('mongodb');
 
+const { mosaicRestriction } = catapult.model;
 const { Long } = MongoDb;
 
 class MosaicRestrictionsDb {
@@ -50,19 +52,17 @@ class MosaicRestrictionsDb {
 	}
 
 	/**
-	 * Retrieves mosaic restrictions of the given mosaic id and target addresses.
+	 * Retrieves mosaic address restrictions of the given mosaic id and target addresses.
 	 * @param {array<object>} mosaicId Given mosaic id.
 	 * @param {array<object>} addresses Given addresses.
-	 * @param {int} restrictionType Restriction type.
-	 * @returns {Promise.<array>} Mosaic restrictions.
+	 * @returns {Promise.<array>} Mosaic address restrictions.
 	 */
-	mosaicRestrictionsByMosaicAndAddresses(mosaicId, addresses, restrictionType) {
-		const mosaicIdLong = new Long(mosaicId[0], mosaicId[1]);
+	mosaicAddressRestrictions(mosaicId, addresses) {
 		const addressesBuffers = addresses.map(address => Buffer.from(address));
 		const conditions = {
 			$and: [
-				{ 'mosaicRestrictionEntry.mosaicId': mosaicIdLong },
-				{ 'mosaicRestrictionEntry.entryType': restrictionType },
+				{ 'mosaicRestrictionEntry.mosaicId': new Long(mosaicId[0], mosaicId[1]) },
+				{ 'mosaicRestrictionEntry.entryType': mosaicRestriction.restrictionType.address },
 				{ 'mosaicRestrictionEntry.targetAddress': { $in: addressesBuffers } }
 			]
 		};

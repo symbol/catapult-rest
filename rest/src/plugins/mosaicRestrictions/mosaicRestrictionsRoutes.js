@@ -47,10 +47,9 @@ module.exports = {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			const mosaicRestrictionsSender = routeUtils.createSender('');
 
-			return db.mosaicRestrictionsByMosaicAndAddresses(
+			return db.mosaicAddressRestrictions(
 				mosaicId,
-				[accountIdToAddress(type, accountId)],
-				mosaicRestriction.restrictionType.address
+				[accountIdToAddress(type, accountId)]
 			).then(mosaicRestrictionsSender.sendOne(req.params.accountId, res, next));
 		});
 
@@ -76,10 +75,9 @@ module.exports = {
 			const accountIds = routeUtils.parseArgumentAsArray(req.params, idOptions.keyName, idOptions.parserName);
 			const mosaicRestrictionsSender = routeUtils.createSender('');
 
-			return db.mosaicRestrictionsByMosaicAndAddresses(
+			return db.mosaicAddressRestrictions(
 				mosaicId,
-				accountIds.map(accountId => accountIdToAddress(idOptions.type, accountId)),
-				mosaicRestriction.restrictionType.address
+				accountIds.map(accountId => accountIdToAddress(idOptions.type, accountId))
 			).then(mosaicRestrictionsSender.sendArray(idOptions.keyName, res, next));
 		});
 	}
