@@ -53,7 +53,7 @@ class MetadataDb {
 	 * Retrieves metadata key values based on metadata type, id and scopedMetadataKey.
 	 * @param {int} metadataType Type of metadata.
 	 * @param {Uint8Array} targetFilter Target filter
-	 * @param {Uint8Array} scopedMetadataKey Scoped metadata key.
+	 * @param {Array.<module:catapult.utils/uint64~uint64>} scopedMetadataKey Scoped metadata key.
 	 * @returns {Promise.<array>} Metadata entries.
 	 */
 	getMetadataByKey(metadataType, targetFilter, scopedMetadataKey) {
@@ -74,7 +74,7 @@ class MetadataDb {
 	 * Retrieves metadata key value based on metadata type, id, scopedMetadataKey and sender.
 	 * @param {int} metadataType Type of metadata.
 	 * @param {Uint8Array} targetFilter Target filter
-	 * @param {Uint8Array} scopedMetadataKey Scoped metadata key.
+	 * @param {Array.<module:catapult.utils/uint64~uint64>} scopedMetadataKey Scoped metadata key.
 	 * @param {Uint8Array} senderPublicKey Sender public key.
 	 * @returns {Promise.<string>} Metadata value.
 	 */
@@ -89,7 +89,7 @@ class MetadataDb {
 		};
 
 		return this.catapultDb.queryDocument('metadata', conditions)
-			.then(metadata => metadata ? ({ ...metadata, ...{ meta: {} } }) : metadata)
+			.then(metadata => (metadata ? ({ ...metadata, ...{ meta: {} } }) : metadata))
 			.then(this.catapultDb.sanitizer.copyAndDeleteId);
 	}
 }

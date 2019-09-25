@@ -60,7 +60,8 @@ module.exports = {
 				const scopedMetadataKey = routeUtils.parseArgument(req.params, 'key', uint64.fromHex);
 
 				return db.getMetadataByKey(metadata.metadataType[entity], idFilter(entityId), scopedMetadataKey)
-					.then(metadataEntries => routeUtils.createSender('metadata').sendOne(scopedMetadataKey, res, next)({ metadataEntries }));
+					.then(metadataEntries =>
+						routeUtils.createSender('metadata').sendOne(scopedMetadataKey, res, next)({ metadataEntries }));
 			});
 
 			server.get(`/${entity}/:${entity}Id/metadata/:key/sender/:publicKey`, (req, res, next) => {
@@ -96,7 +97,8 @@ module.exports = {
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
 				db.getMetadataByKey(metadata.metadataType.account, accountFilter(publicKey), scopedMetadataKey)
-					.then(metadataEntries => routeUtils.createSender('metadata').sendOne(scopedMetadataKey, res, next)({ metadataEntries })));
+					.then(metadataEntries =>
+						routeUtils.createSender('metadata').sendOne(scopedMetadataKey, res, next)({ metadataEntries })));
 		});
 
 		server.get('/account/:accountId/metadata/:key/sender/:publicKey', (req, res, next) => {

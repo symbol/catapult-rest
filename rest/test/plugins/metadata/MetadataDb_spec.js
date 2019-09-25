@@ -229,7 +229,7 @@ describe('metadata db', () => {
 			const appleId = createObjectId(126);
 			metadataDbEntities.push(createMetadata(appleId, 1, testPublicKey.one, scopedMetadataKey.one, senderPublicKey.one, 'apple'));
 			metadataDbEntities.push(createMetadata(-1, 1, testPublicKey.one, scopedMetadataKey.one, senderPublicKey.two, 'banana'));
-			metadataDbEntities.push(createMetadata(-1, 1, testPublicKey.one, scopedMetadataKey.two, senderPublicKey.one, 'cherrie'));
+			metadataDbEntities.push(createMetadata(-1, 1, testPublicKey.one, scopedMetadataKey.two, senderPublicKey.one, 'cherry'));
 			metadataDbEntities.push(createMetadata(-1, 2, testPublicKey.one, scopedMetadataKey.one, senderPublicKey.two, 'dates'));
 			metadataDbEntities.push(createMetadata(-1, 1, testPublicKey.two, scopedMetadataKey.one, senderPublicKey.one, 'entawak'));
 
