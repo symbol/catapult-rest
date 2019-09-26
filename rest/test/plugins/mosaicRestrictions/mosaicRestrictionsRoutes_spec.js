@@ -94,7 +94,23 @@ describe('mosaic restrictions routes', () => {
 
 	describe('mosaic global restrictions', () => {
 		it('can get global restrictions by one mosaic id, (GET)', () => {
-			expect.fail();
+			// Arrange:
+			const req = { params: { mosaicId: testMosaicIds.one.id } };
+			const route = mockServer.routes['/mosaic/:mosaicId/restrictions'];
+
+			// Act:
+			return mockServer.callRoute(route, req).then(() => {
+				// Assert:
+				expect(dbMosaicRestrictionsByMosaicIdsFake.calledOnce).to.equal(true);
+				expect(dbMosaicRestrictionsByMosaicIdsFake.firstCall.args[0]).to.deep.equal([testMosaicIds.one.uInt64]);
+				expect(dbMosaicRestrictionsByMosaicIdsFake.firstCall.args[1]).to.deep.equal(mosaicRestriction.restrictionType.global);
+
+				expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+					payload: mosaicGlobalRestrictionEntrySample,
+					type: 'mosaicRestriction.mosaicGlobalRestriction'
+				});
+				expect(mockServer.next.calledOnce).to.equal(true);
+			});
 		});
 
 		it('can get global restrictions by several mosaic ids, (POST)', () => {
@@ -114,7 +130,7 @@ describe('mosaic restrictions routes', () => {
 
 				expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 					payload: [mosaicGlobalRestrictionEntrySample],
-					type: ''
+					type: 'mosaicRestriction.mosaicGlobalRestriction'
 				});
 				expect(mockServer.next.calledOnce).to.equal(true);
 			});
@@ -160,7 +176,7 @@ describe('mosaic restrictions routes', () => {
 					// Assert:
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: mosaicAddressRestrictionEntrySample,
-						type: ''
+						type: 'mosaicRestriction.mosaicAddressRestriction'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
@@ -205,7 +221,7 @@ describe('mosaic restrictions routes', () => {
 					// Assert:
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: [mosaicAddressRestrictionEntrySample],
-						type: ''
+						type: 'mosaicRestriction.mosaicAddressRestriction'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});

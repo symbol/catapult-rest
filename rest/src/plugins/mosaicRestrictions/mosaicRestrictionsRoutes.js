@@ -32,35 +32,35 @@ module.exports = {
 			? address.publicKeyToAddress(accountId, networkInfo.networks[services.config.network.name].id)
 			: accountId);
 
+		const mosaicGlobalRestrictionsSender = routeUtils.createSender('mosaicRestriction.mosaicGlobalRestriction');
+		const mosaicAddressRestrictionsSender = routeUtils.createSender('mosaicRestriction.mosaicAddressRestriction');
+
 		server.get('/mosaic/:mosaicId/restrictions', (req, res, next) => {
 			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
-			const mosaicRestrictionsSender = routeUtils.createSender('');
 
 			return db.mosaicRestrictionsByMosaicIds(
 				[mosaicId],
 				mosaicRestriction.restrictionType.global
-			).then(mosaicRestrictionsSender.sendOne(req.params.mosaicId, res, next));
+			).then(mosaicGlobalRestrictionsSender.sendOne(req.params.mosaicId, res, next));
 		});
 
 		server.get('/mosaic/:mosaicId/restrictions/account/:accountId', (req, res, next) => {
 			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-			const mosaicRestrictionsSender = routeUtils.createSender('');
 
 			return db.mosaicAddressRestrictions(
 				mosaicId,
 				[accountIdToAddress(type, accountId)]
-			).then(mosaicRestrictionsSender.sendOne(req.params.accountId, res, next));
+			).then(mosaicAddressRestrictionsSender.sendOne(req.params.accountId, res, next));
 		});
 
 		server.post('/mosaic/restrictions', (req, res, next) => {
 			const mosaicIds = routeUtils.parseArgumentAsArray(req.params, 'mosaicIds', uint64.fromHex);
-			const mosaicRestrictionsSender = routeUtils.createSender('');
 
 			return db.mosaicRestrictionsByMosaicIds(
 				mosaicIds,
 				mosaicRestriction.restrictionType.global
-			).then(mosaicRestrictionsSender.sendArray('mosaicIds', res, next));
+			).then(mosaicGlobalRestrictionsSender.sendArray('mosaicIds', res, next));
 		});
 
 		server.post('/mosaic/:mosaicId/restrictions', (req, res, next) => {
@@ -73,12 +73,11 @@ module.exports = {
 				: { keyName: 'addresses', parserName: 'address', type: AccountType.address };
 
 			const accountIds = routeUtils.parseArgumentAsArray(req.params, idOptions.keyName, idOptions.parserName);
-			const mosaicRestrictionsSender = routeUtils.createSender('');
 
 			return db.mosaicAddressRestrictions(
 				mosaicId,
 				accountIds.map(accountId => accountIdToAddress(idOptions.type, accountId))
-			).then(mosaicRestrictionsSender.sendArray(idOptions.keyName, res, next));
+			).then(mosaicAddressRestrictionsSender.sendArray(idOptions.keyName, res, next));
 		});
 	}
 };
