@@ -49,67 +49,19 @@ describe('metadata routes', () => {
 			targetPublicKey: '',
 			scopedMetadataKey: '',
 			targetId: '',
+			metadataType: '',
+			valueSize: '',
 			value: '',
 			id: ''
 		}
 	};
 
+	const expectedArrayMetadataOutput = { payload: { metadataEntries: [metadataEntry] }, type: 'metadata' };
+	const expectedSingleMetadataOutput = { payload: metadataEntry, type: 'metadata.entry' };
+
 	const dbGetMetadataWithPaginationFake = sinon.fake.resolves([metadataEntry]);
 	const dbGetMetadataByKeyFake = sinon.fake.resolves([metadataEntry]);
 	const dbGetMetadataByKeyAndSenderFake = sinon.fake.resolves(metadataEntry);
-
-	const processedMetadataOutput = {
-		payload: {
-			metadataEntries: [
-				{
-					metadataEntry: {
-						compositeHash: '',
-						senderPublicKey: '',
-						targetPublicKey: '',
-						scopedMetadataKey: '',
-						targetId: '',
-						value: '',
-						id: ''
-					}
-				}
-			]
-		},
-		type: 'metadata'
-	};
-
-	const processedMetadataByKeyOutput = {
-		payload: {
-			metadataEntries: [
-				{
-					metadataEntry: {
-						compositeHash: '',
-						senderPublicKey: '',
-						targetPublicKey: '',
-						scopedMetadataKey: '',
-						targetId: '',
-						value: '',
-						id: ''
-					}
-				}
-			]
-		},
-		type: 'metadata'
-	};
-
-	const processedMetadataByKeyAndSenderOutput = {
-		payload: {
-			metadataEntry: {
-				compositeHash: '',
-				senderPublicKey: '',
-				targetPublicKey: '',
-				scopedMetadataKey: '',
-				targetId: '',
-				value: '',
-				id: ''
-			}
-		},
-		type: 'metadata.entry'
-	};
 
 	const mockServer = new MockServer();
 	const db = {
@@ -201,7 +153,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[0]).to.equal(metadata.metadataType.account);
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[1]).to.deep.equal(accountFilter);
 
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedArrayMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -230,7 +182,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[3]).to.equal(10);
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[4]).to.equal(1);
 
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedArrayMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -250,7 +202,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataByKeyFake.firstCall.args[0]).to.equal(metadata.metadataType.account);
 					expect(dbGetMetadataByKeyFake.firstCall.args[1]).to.deep.equal(accountFilter);
 					expect(dbGetMetadataByKeyFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedArrayMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -271,7 +223,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[1]).to.deep.equal(accountFilter);
 					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
 					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[3]).to.deep.equal(uint8SenderPublicKey);
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyAndSenderOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedSingleMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -296,7 +248,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[0]).to.equal(metadata.metadataType.mosaic);
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[1]).to.deep.equal(mosaicFilter);
 
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedArrayMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -325,7 +277,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[3]).to.equal(10);
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[4]).to.equal(1);
 
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedArrayMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -345,7 +297,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataByKeyFake.firstCall.args[0]).to.equal(metadata.metadataType.mosaic);
 					expect(dbGetMetadataByKeyFake.firstCall.args[1]).to.deep.equal(mosaicFilter);
 					expect(dbGetMetadataByKeyFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedArrayMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -366,7 +318,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[1]).to.deep.equal(mosaicFilter);
 					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
 					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[3]).to.deep.equal(uint8SenderPublicKey);
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyAndSenderOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedSingleMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -391,7 +343,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[0]).to.equal(metadata.metadataType.namespace);
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[1]).to.deep.equal(namespaceFilterFilter);
 
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedArrayMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -420,7 +372,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[3]).to.equal(10);
 					expect(dbGetMetadataWithPaginationFake.firstCall.args[4]).to.equal(1);
 
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedArrayMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -440,7 +392,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataByKeyFake.firstCall.args[0]).to.equal(metadata.metadataType.namespace);
 					expect(dbGetMetadataByKeyFake.firstCall.args[1]).to.deep.equal(namespaceFilter);
 					expect(dbGetMetadataByKeyFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedArrayMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
@@ -461,7 +413,7 @@ describe('metadata routes', () => {
 					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[1]).to.deep.equal(namespaceFilter);
 					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[2]).to.deep.equal(uInt64ScopedMetadataKey);
 					expect(dbGetMetadataByKeyAndSenderFake.firstCall.args[3]).to.deep.equal(uint8SenderPublicKey);
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal(processedMetadataByKeyAndSenderOutput);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal(expectedSingleMetadataOutput);
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
 			});
