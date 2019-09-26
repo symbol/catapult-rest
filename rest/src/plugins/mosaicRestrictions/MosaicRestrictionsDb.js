@@ -35,7 +35,7 @@ class MosaicRestrictionsDb {
 
 	/**
 	 * Retrieves mosaic restrictions of the given mosaic ids.
-	 * @param {array<object>} mosaicIds Given mosaic ids.
+	 * @param {array<module:catapult.utils/uint64~uint64>} mosaicIds Given mosaic ids.
 	 * @param {int} restrictionType Restriction type.
 	 * @returns {Promise.<array>} Mosaic restrictions.
 	 */
@@ -53,8 +53,8 @@ class MosaicRestrictionsDb {
 
 	/**
 	 * Retrieves mosaic address restrictions of the given mosaic id and target addresses.
-	 * @param {array<object>} mosaicId Given mosaic id.
-	 * @param {array<object>} addresses Given addresses.
+	 * @param {array<module:catapult.utils/uint64~uint64>} mosaicId Given mosaic id.
+	 * @param {array<module:catapult.model/address~address>} addresses Given addresses.
 	 * @returns {Promise.<array>} Mosaic address restrictions.
 	 */
 	mosaicAddressRestrictions(mosaicId, addresses) {
