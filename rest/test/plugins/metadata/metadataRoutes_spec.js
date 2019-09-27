@@ -72,7 +72,7 @@ describe('metadata routes', () => {
 		catapultDb: {
 			addressToPublicKey: searchedAddress => {
 				if (Buffer.from(searchedAddress).equals(Buffer.from(uint8NonExistingTestAddress)))
-					return Promise.resolve(undefined);
+					return Promise.reject(Error('account not found'));
 
 				return Promise.resolve({ account: { publicKey: new Binary(Buffer.from(uint8TestPublicKey)) } });
 			}
