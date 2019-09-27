@@ -36,7 +36,7 @@ const toRestError = err => {
 };
 
 const createCrossDomainHeaderAdder = crossDomainConfig => (req, res) => {
-	if (!req.headers.origin || !crossDomainConfig.allowedHosts || !crossDomainConfig.allowedMethods)
+	if (!req.headers.origin || !crossDomainConfig)
 		return;
 
 	const crossDomainResponseHeaders = {};
@@ -115,7 +115,7 @@ module.exports = {
 		server.use(restify.plugins.queryParser({ mapParams: true }));
 		server.use(restify.plugins.jsonBodyParser({ mapParams: true }));
 
-		if (!crossDomainConfig || !crossDomainConfig.allowedHosts || !crossDomainConfig.allowedMethods)
+		if (!crossDomainConfig)
 			winston.warn('CORS was not enabled - configuration incomplete');
 
 		if (throttlingConfig) {

@@ -54,6 +54,11 @@ const configureLogging = config => {
 	});
 };
 
+const validateConfig = config => {
+	if (config.crossDomain && (!config.crossDomain.allowedHosts || !config.crossDomain.allowedMethods))
+		throw Error('provided CORS configuration is incomplete')
+};
+
 const loadConfig = () => {
 	let configFiles = process.argv.slice(2);
 	if (0 === configFiles.length)
@@ -73,6 +78,8 @@ const loadConfig = () => {
 			config = partialConfig;
 		}
 	});
+
+	validateConfig(config);
 
 	return config;
 };
