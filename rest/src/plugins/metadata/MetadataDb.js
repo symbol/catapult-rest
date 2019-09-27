@@ -46,8 +46,9 @@ class MetadataDb {
 
 		return this.catapultDb.queryPagedDocuments('metadata', conditions, pagingId, pageSize, options)
 			.then(metadataEntries => metadataEntries.map(metadataEntry => {
-				metadataEntry['id'] = metadataEntry._id;
+				metadataEntry.id = metadataEntry._id;
 				delete metadataEntry._id;
+				return metadataEntry;
 			}));
 	}
 
@@ -67,10 +68,11 @@ class MetadataDb {
 			]
 		};
 
-		return this.catapultDb.queryDocuments('metadata', conditions)
+		return this.catapultDb.queryRawDocuments('metadata', conditions)
 			.then(metadataEntries => metadataEntries.map(metadataEntry => {
-				metadataEntry['id'] = metadataEntry._id;
+				metadataEntry.id = metadataEntry._id;
 				delete metadataEntry._id;
+				return metadataEntry;
 			}));
 	}
 
@@ -95,9 +97,10 @@ class MetadataDb {
 		return this.catapultDb.queryDocument('metadata', conditions)
 			.then(metadata => {
 				if (metadata) {
-					metadata['id'] = metadata._id;
+					metadata.id = metadata._id;
 					delete metadata._id;
 				}
+				return metadata;
 			});
 	}
 }

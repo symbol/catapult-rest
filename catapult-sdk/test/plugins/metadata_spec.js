@@ -36,15 +36,14 @@ describe('metadata plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 7);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 6);
 			expect(modelSchema).to.contain.all.keys([
 				'accountMetadata',
 				'mosaicMetadata',
 				'namespaceMetadata',
 				'metadata',
 				'metadata.entry',
-				'metadata.entry.element',
-				'metadata.meta'
+				'metadata.entry.element'
 			]);
 
 			// - accountMetadata
@@ -70,22 +69,17 @@ describe('metadata plugin', () => {
 
 			// - metadata.entry
 			expect(Object.keys(modelSchema['metadata.entry']).length).to.equal(2);
-			expect(modelSchema['metadata.entry']).to.contain.all.keys(['metadataEntry', 'meta']);
+			expect(modelSchema['metadata.entry']).to.contain.all.keys(['metadataEntry', 'id']);
 
 			// - metadata.entry.element
-			expect(Object.keys(modelSchema['metadata.entry.element']).length).to.equal(6);
+			expect(Object.keys(modelSchema['metadata.entry.element']).length).to.equal(5);
 			expect(modelSchema['metadata.entry.element']).to.contain.all.keys([
 				'compositeHash',
 				'senderPublicKey',
 				'targetPublicKey',
 				'scopedMetadataKey',
-				'value',
-				'id'
+				'value'
 			]);
-
-			// - metadata.meta
-			expect(Object.keys(modelSchema['metadata.meta']).length).to.equal(1);
-			expect(modelSchema['metadata.meta']).to.contain.all.keys(['id']);
 		});
 	});
 

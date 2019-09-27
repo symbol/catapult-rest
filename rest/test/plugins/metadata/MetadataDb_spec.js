@@ -80,7 +80,7 @@ describe('metadata db', () => {
 				db => db.getMetadataWithPagination(searchedMetadataType, targetFilter),
 				entities => {
 					expect(entities.length).to.equal(1);
-					expect(entities[0].meta.id).to.equal(searchedId);
+					expect(entities[0].id).to.equal(searchedId);
 				}
 			);
 		});
@@ -106,7 +106,7 @@ describe('metadata db', () => {
 				db => new MetadataDb(db),
 				db => db.getMetadataWithPagination(searchedMetadataType, targetFilter, createObjectId(startingPageId), pageSize, 1),
 				entities => {
-					const pagedIds = entities.map(e => e.meta.id);
+					const pagedIds = entities.map(e => e.id);
 					expect(pagedIds).to.deep.equal(expectedPagedIds);
 				}
 			);
@@ -132,7 +132,7 @@ describe('metadata db', () => {
 				db => new MetadataDb(db),
 				db => db.getMetadataWithPagination(searchedMetadataType, targetFilter, undefined, pageSize, 1),
 				entities => {
-					const pagedIds = entities.map(e => e.meta.id);
+					const pagedIds = entities.map(e => e.id);
 					expect(pagedIds).to.deep.equal(expectedPagedIds);
 				}
 			);
@@ -246,7 +246,7 @@ describe('metadata db', () => {
 				),
 				metadataEntry => {
 					expect(metadataEntry).to.deep.equal({
-						meta: { id: appleId },
+						id: appleId,
 						metadataEntry: {
 							compositeHash: {},
 							metadataType: 1,
