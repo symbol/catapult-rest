@@ -35,7 +35,7 @@ module.exports = {
 		const mosaicGlobalRestrictionsSender = routeUtils.createSender('mosaicRestriction.mosaicGlobalRestriction');
 		const mosaicAddressRestrictionsSender = routeUtils.createSender('mosaicRestriction.mosaicAddressRestriction');
 
-		server.get('/mosaic/:mosaicId/restrictions', (req, res, next) => {
+		server.get('/restrictions/mosaic/:mosaicId', (req, res, next) => {
 			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
 
 			return db.mosaicRestrictionsByMosaicIds(
@@ -44,7 +44,7 @@ module.exports = {
 			).then(mosaicGlobalRestrictionsSender.sendOne(req.params.mosaicId, res, next));
 		});
 
-		server.get('/mosaic/:mosaicId/restrictions/account/:accountId', (req, res, next) => {
+		server.get('/restrictions/mosaic/:mosaicId/address/:accountId', (req, res, next) => {
 			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 
@@ -54,7 +54,7 @@ module.exports = {
 			).then(mosaicAddressRestrictionsSender.sendOne(req.params.accountId, res, next));
 		});
 
-		server.post('/mosaic/restrictions', (req, res, next) => {
+		server.post('/restrictions/mosaic', (req, res, next) => {
 			const mosaicIds = routeUtils.parseArgumentAsArray(req.params, 'mosaicIds', uint64.fromHex);
 
 			return db.mosaicRestrictionsByMosaicIds(
@@ -63,7 +63,7 @@ module.exports = {
 			).then(mosaicGlobalRestrictionsSender.sendArray('mosaicIds', res, next));
 		});
 
-		server.post('/mosaic/:mosaicId/restrictions', (req, res, next) => {
+		server.post('/restrictions/mosaic/:mosaicId', (req, res, next) => {
 			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
 			if (req.params.publicKeys && req.params.addresses)
 				throw errors.createInvalidArgumentError('publicKeys and addresses cannot both be provided');

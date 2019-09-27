@@ -96,7 +96,7 @@ describe('mosaic restrictions routes', () => {
 		it('can get global restrictions by one mosaic id, (GET)', () => {
 			// Arrange:
 			const req = { params: { mosaicId: testMosaicIds.one.id } };
-			const route = mockServer.getRoute('/mosaic/:mosaicId/restrictions').get();
+			const route = mockServer.getRoute('/restrictions/mosaic/:mosaicId').get();
 
 			// Act:
 			return mockServer.callRoute(route, req).then(() => {
@@ -116,7 +116,7 @@ describe('mosaic restrictions routes', () => {
 		it('can get global restrictions by several mosaic ids, (POST)', () => {
 			// Arrange:
 			const req = { params: { mosaicIds: [testMosaicIds.one.id, testMosaicIds.two.id] } };
-			const route = mockServer.getRoute('/mosaic/restrictions').post();
+			const route = mockServer.getRoute('/restrictions/mosaic').post();
 
 			// Act:
 			return mockServer.callRoute(route, req).then(() => {
@@ -139,7 +139,7 @@ describe('mosaic restrictions routes', () => {
 
 	describe('mosaic address restrictions', () => {
 		describe('can get mosaic address restrictions (GET)', () => {
-			const route = mockServer.getRoute('/mosaic/:mosaicId/restrictions/account/:accountId').get();
+			const route = mockServer.getRoute('/restrictions/mosaic/:mosaicId/address/:accountId').get();
 
 			it('can get from publicKey', () => {
 				// Arrange:
@@ -184,7 +184,7 @@ describe('mosaic restrictions routes', () => {
 		});
 
 		describe('can get mosaic address restrictions (POST)', () => {
-			const route = mockServer.getRoute('/mosaic/:mosaicId/restrictions').post();
+			const route = mockServer.getRoute('/restrictions/mosaic/:mosaicId').post();
 
 			it('can get from publicKey', () => {
 				// Arrange:
@@ -232,7 +232,7 @@ describe('mosaic restrictions routes', () => {
 			it('does not support publicKeys and addresses provided at the same time', () => {
 				// Arrange:
 				const req = { params: { mosaicId: testMosaicIds.one.id, publicKeys: [''], addresses: [''] } };
-				const route = mockServer.getRoute('/mosaic/:mosaicId/restrictions').post();
+				const route = mockServer.getRoute('/restrictions/mosaic/:mosaicId').post();
 
 				// Act + Assert:
 				expect(() => mockServer.callRoute(route, req)).to.throw('publicKeys and addresses cannot both be provided');
