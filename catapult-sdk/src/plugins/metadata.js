@@ -61,8 +61,8 @@ const metadataPlugin = {
 		});
 
 		builder.addSchema('metadata.entry', {
-			metadataEntry: { type: ModelType.object, schemaName: 'metadata.entry.element' },
-			meta: { type: ModelType.object, schemaName: 'metadata.meta' }
+			id: ModelType.objectId,
+			metadataEntry: { type: ModelType.object, schemaName: 'metadata.entry.element' }
 		});
 
 		builder.addSchema('metadata.entry.element', {
@@ -71,11 +71,7 @@ const metadataPlugin = {
 			targetPublicKey: ModelType.binary,
 			scopedMetadataKey: ModelType.uint64HexIdentifier,
 			value: ModelType.binary,
-			id: ModelType.objectId
-		});
-
-		builder.addSchema('metadata.meta', {
-			id: ModelType.objectId
+			
 		});
 	},
 

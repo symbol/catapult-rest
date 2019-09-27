@@ -45,8 +45,10 @@ class MetadataDb {
 		const options = { sortOrder: ordering };
 
 		return this.catapultDb.queryPagedDocuments('metadata', conditions, pagingId, pageSize, options)
-			.then(metadataEntries => metadataEntries.map(metadataEntry => ({ ...metadataEntry, ...{ meta: {} } })))
-			.then(this.catapultDb.sanitizer.copyAndDeleteIds);
+			.then(metadataEntries => metadataEntries.map(metadataEntry => {
+				metadataEntry['id'] = metadataEntry._id;
+				delete metadataEntry._id;
+			}));
 	}
 
 	/**
@@ -66,8 +68,10 @@ class MetadataDb {
 		};
 
 		return this.catapultDb.queryDocuments('metadata', conditions)
-			.then(metadataEntries => metadataEntries.map(metadataEntry => ({ ...metadataEntry, ...{ meta: {} } })))
-			.then(this.catapultDb.sanitizer.copyAndDeleteIds);
+			.then(metadataEntries => metadataEntries.map(metadataEntry => {
+				metadataEntry['id'] = metadataEntry._id;
+				delete metadataEntry._id;
+			}));
 	}
 
 	/**
@@ -89,8 +93,12 @@ class MetadataDb {
 		};
 
 		return this.catapultDb.queryDocument('metadata', conditions)
-			.then(metadata => (metadata ? ({ ...metadata, ...{ meta: {} } }) : metadata))
-			.then(this.catapultDb.sanitizer.copyAndDeleteId);
+			.then(metadata => {
+				if (metadata) {
+					metadata['id'] = metadata._id;
+					delete metadata._id;
+				}
+			});
 	}
 }
 
