@@ -143,9 +143,7 @@ class CatapultDb {
 	}
 
 	queryRawDocuments(collectionName, conditions) {
-		const collection = this.database.collection(collectionName);
-		return collection.find(conditions)
-			.toArray();
+		return this.database.collection(collectionName).find(conditions).toArray();
 	}
 
 	queryDocumentsAndCopyIds(collectionName, conditions, options = {}) {
