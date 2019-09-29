@@ -56,7 +56,7 @@ const configureLogging = config => {
 
 const validateConfig = config => {
 	if (config.crossDomain && (!config.crossDomain.allowedHosts || !config.crossDomain.allowedMethods))
-		throw Error('provided CORS configuration is incomplete')
+		throw Error('provided CORS configuration is incomplete');
 };
 
 const loadConfig = () => {
