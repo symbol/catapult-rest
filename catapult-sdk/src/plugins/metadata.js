@@ -26,8 +26,6 @@ const convert = require('../utils/convert');
 
 const constants = { sizes };
 
-const parseString = (parser, size) => parser.buffer(size).toString('ascii');
-
 const writeString = (serializer, str) => { serializer.writeBuffer(Buffer.from(str, 'ascii')); };
 
 /**
@@ -82,9 +80,10 @@ const metadataPlugin = {
 				transaction.targetPublicKey = parser.buffer(constants.sizes.signerPublicKey);
 				transaction.scopedMetadataKey = parser.uint64();
 				transaction.valueSizeDelta = convert.uint16ToInt16(parser.uint16());
+
 				const valueSize = parser.uint16();
-				transaction.valueSize = valueSize;
-				transaction.value = parseString(parser, valueSize);
+				transaction.value = 0 < valueSize ? parser.buffer(valueSize) : [];
+
 				return transaction;
 			},
 
@@ -92,8 +91,8 @@ const metadataPlugin = {
 				serializer.writeBuffer(transaction.targetPublicKey);
 				serializer.writeUint64(transaction.scopedMetadataKey);
 				serializer.writeUint16(convert.int16ToUint16(transaction.valueSizeDelta));
-				serializer.writeUint16(transaction.valueSize);
-				writeString(serializer, transaction.value);
+				serializer.writeUint16(transaction.value.length);
+				serializer.writeBuffer(transaction.value);
 			}
 		});
 
@@ -104,9 +103,10 @@ const metadataPlugin = {
 				transaction.scopedMetadataKey = parser.uint64();
 				transaction.targetMosaicId = parser.uint64();
 				transaction.valueSizeDelta = convert.uint16ToInt16(parser.uint16());
+
 				const valueSize = parser.uint16();
-				transaction.valueSize = valueSize;
-				transaction.value = parseString(parser, valueSize);
+				transaction.value = 0 < valueSize ? parser.buffer(valueSize) : [];
+
 				return transaction;
 			},
 
@@ -115,8 +115,8 @@ const metadataPlugin = {
 				serializer.writeUint64(transaction.scopedMetadataKey);
 				serializer.writeUint64(transaction.targetMosaicId);
 				serializer.writeUint16(convert.int16ToUint16(transaction.valueSizeDelta));
-				serializer.writeUint16(transaction.valueSize);
-				writeString(serializer, transaction.value);
+				serializer.writeUint16(transaction.value.length);
+				serializer.writeBuffer(transaction.value);
 			}
 		});
 
@@ -127,9 +127,10 @@ const metadataPlugin = {
 				transaction.scopedMetadataKey = parser.uint64();
 				transaction.targetNamespaceId = parser.uint64();
 				transaction.valueSizeDelta = convert.uint16ToInt16(parser.uint16());
+
 				const valueSize = parser.uint16();
-				transaction.valueSize = valueSize;
-				transaction.value = parseString(parser, valueSize);
+				transaction.value = 0 < valueSize ? parser.buffer(valueSize) : [];
+
 				return transaction;
 			},
 
@@ -138,8 +139,8 @@ const metadataPlugin = {
 				serializer.writeUint64(transaction.scopedMetadataKey);
 				serializer.writeUint64(transaction.targetNamespaceId);
 				serializer.writeUint16(convert.int16ToUint16(transaction.valueSizeDelta));
-				serializer.writeUint16(transaction.valueSize);
-				writeString(serializer, transaction.value);
+				serializer.writeUint16(transaction.value.length);
+				serializer.writeBuffer(transaction.value);
 			}
 		});
 	}
