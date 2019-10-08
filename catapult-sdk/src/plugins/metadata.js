@@ -26,8 +26,6 @@ const convert = require('../utils/convert');
 
 const constants = { sizes };
 
-const writeString = (serializer, str) => { serializer.writeBuffer(Buffer.from(str, 'ascii')); };
-
 /**
  * Creates a metadata plugin.
  * @type {module:plugins/CatapultPlugin}
