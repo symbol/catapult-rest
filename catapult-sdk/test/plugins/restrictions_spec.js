@@ -21,7 +21,7 @@
 const EntityType = require('../../src/model/EntityType');
 const ModelSchemaBuilder = require('../../src/model/ModelSchemaBuilder');
 const restrictionsPlugin = require('../../src/plugins/restrictions');
-const { AccountRestrictionType } = require('../../src/plugins/accountRestrictions');
+const { AccountRestrictionType } = require('../../src/plugins/restrictions');
 const test = require('../binaryTestUtils');
 const { expect } = require('chai');
 
