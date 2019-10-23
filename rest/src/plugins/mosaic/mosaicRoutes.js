@@ -41,9 +41,8 @@ module.exports = {
 
 		server.get('/account/:accountId/mosaics', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 
-			return db.mosaicsByOwners(type, [accountId], pagingOptions.id, pagingOptions.pageSize)
+			return db.mosaicsByOwners(type, [accountId])
 				.then(ownedMosaicsSender.sendArray('accountId', res, next));
 		});
 
@@ -56,8 +55,7 @@ module.exports = {
 				: { keyName: 'addresses', parserName: 'address', type: AccountType.address };
 
 			const accountIds = routeUtils.parseArgumentAsArray(req.params, idOptions.keyName, idOptions.parserName);
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			return db.mosaicsByOwners(idOptions.type, accountIds, pagingOptions.id, pagingOptions.pageSize)
+			return db.mosaicsByOwners(idOptions.type, accountIds)
 				.then(ownedMosaicsSender.sendArray(idOptions.keyName, res, next));
 		});
 	}

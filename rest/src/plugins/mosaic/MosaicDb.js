@@ -53,16 +53,14 @@ class MosaicDb {
 	 * Retrieves mosaics owned by specified owners.
 	 * @param {module:db/AccountType} type Type of account ids.
 	 * @param {array<object>} accountIds Account ids.
-	 * @param {string} id Paging id.
-	 * @param {int} pageSize Page size.
 	 * @returns {Promise.<array>} Owned mosaics.
 	 */
-	mosaicsByOwners(type, accountIds, id, pageSize) {
+	mosaicsByOwners(type, accountIds) {
 		const buffers = accountIds.map(accountId => Buffer.from(accountId));
 		const fieldName = (AccountType.publicKey === type) ? 'mosaic.ownerPublicKey' : 'mosaic.ownerAddress';
 		const conditions = { [fieldName]: { $in: buffers } };
 
-		return this.catapultDb.queryPagedDocuments('mosaics', conditions, id, pageSize)
+		return this.catapultDb.queryDocuments('mosaics', conditions)
 			.then(mosaics => mosaics.map(mosaic => mosaic.mosaic));
 	}
 
