@@ -34,5 +34,14 @@ module.exports = {
 			params => db.mosaicsByIds(params),
 			uint64.fromHex
 		);
+
+		server.get('/account/:accountId/mosaics', (req, res, next) => {
+			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
+			const ownedMosaicsSender = routeUtils.createSender('');
+
+			return db.mosaicsByOwners(type, [accountId], pagingOptions.id, pagingOptions.pageSize)
+				.then(ownedMosaicsSender.sendArray('accountId', res, next));
+		});
 	}
 };
