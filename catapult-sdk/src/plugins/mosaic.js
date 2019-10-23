@@ -51,6 +51,15 @@ const mosaicPlugin = {
 			ownerAddress: ModelType.binary,
 			duration: ModelType.uint64
 		});
+
+		builder.addSchema('ownedMosaicDescriptor', {
+			id: ModelType.uint64HexIdentifier,
+			supply: ModelType.uint64,
+			startHeight: ModelType.uint64,
+			ownerPublicKey: ModelType.binary,
+			ownerAddress: ModelType.binary,
+			duration: ModelType.uint64
+		});
 	},
 
 	registerCodecs: codecBuilder => {

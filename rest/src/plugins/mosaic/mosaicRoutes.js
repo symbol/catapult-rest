@@ -37,7 +37,7 @@ module.exports = {
 			uint64.fromHex
 		);
 
-		const ownedMosaicsSender = routeUtils.createSender('');
+		const ownedMosaicsSender = routeUtils.createSender('ownedMosaicDescriptor');
 
 		server.get('/account/:accountId/mosaics', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');

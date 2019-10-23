@@ -62,7 +62,8 @@ class MosaicDb {
 		const fieldName = (AccountType.publicKey === type) ? 'mosaic.ownerPublicKey' : 'mosaic.ownerAddress';
 		const conditions = { [fieldName]: { $in: buffers } };
 
-		return this.catapultDb.queryPagedDocuments('mosaics', conditions, id, pageSize);
+		return this.catapultDb.queryPagedDocuments('mosaics', conditions, id, pageSize)
+			.then(mosaics => mosaics.map(mosaic => mosaic.mosaic));
 	}
 
 	// endregion
