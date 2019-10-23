@@ -19,6 +19,8 @@
  */
 
 const routeUtils = require('../../routes/routeUtils');
+const errors = require('../../server/errors');
+const AccountType = require('../AccountType');
 const catapult = require('catapult-sdk');
 
 const { uint64 } = catapult.utils;
@@ -35,13 +37,28 @@ module.exports = {
 			uint64.fromHex
 		);
 
+		const ownedMosaicsSender = routeUtils.createSender('');
+
 		server.get('/account/:accountId/mosaics', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const ownedMosaicsSender = routeUtils.createSender('');
 
 			return db.mosaicsByOwners(type, [accountId], pagingOptions.id, pagingOptions.pageSize)
 				.then(ownedMosaicsSender.sendArray('accountId', res, next));
+		});
+
+		server.post('/account/mosaics', (req, res, next) => {
+			if (req.params.publicKeys && req.params.addresses)
+				throw errors.createInvalidArgumentError('publicKeys and addresses cannot both be provided');
+
+			const idOptions = Array.isArray(req.params.publicKeys)
+				? { keyName: 'publicKeys', parserName: 'publicKey', type: AccountType.publicKey }
+				: { keyName: 'addresses', parserName: 'address', type: AccountType.address };
+
+			const accountIds = routeUtils.parseArgumentAsArray(req.params, idOptions.keyName, idOptions.parserName);
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
+			return db.mosaicsByOwners(idOptions.type, accountIds, pagingOptions.id, pagingOptions.pageSize)
+				.then(ownedMosaicsSender.sendArray(idOptions.keyName, res, next));
 		});
 	}
 };
