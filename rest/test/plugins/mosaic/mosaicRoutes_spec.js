@@ -68,7 +68,7 @@ describe('mosaic routes', () => {
 			duration: ''
 		};
 
-		const dbmosaicsByOwnersFake = sinon.fake((type, accountIds) => {
+		const dbMosaicsByOwnersFake = sinon.fake((type, accountIds) => {
 			if (Buffer.from(accountIds[0]).equals(Buffer.from(address.stringToAddress(nonExistingTestAddress)))
 				|| Buffer.from(accountIds[0]).equals(Buffer.from(convert.hexToUint8(nonExistingPublicKey))))
 				return Promise.resolve([]);
@@ -77,12 +77,12 @@ describe('mosaic routes', () => {
 		});
 
 		const mockServer = new MockServer();
-		const db = { mosaicsByOwners: dbmosaicsByOwnersFake };
+		const db = { mosaicsByOwners: dbMosaicsByOwnersFake };
 		mosaicRoutes.register(mockServer.server, db);
 
 		beforeEach(() => {
 			mockServer.resetStats();
-			dbmosaicsByOwnersFake.resetHistory();
+			dbMosaicsByOwnersFake.resetHistory();
 		});
 
 		describe('GET', () => {
@@ -94,13 +94,13 @@ describe('mosaic routes', () => {
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbmosaicsByOwnersFake.calledOnce).to.equal(true);
-					expect(dbmosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.address);
-					expect(dbmosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([address.stringToAddress(nonExistingTestAddress)]);
+					expect(dbMosaicsByOwnersFake.calledOnce).to.equal(true);
+					expect(dbMosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.address);
+					expect(dbMosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([address.stringToAddress(nonExistingTestAddress)]);
 
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: [],
-						type: 'ownedMosaicDescriptor'
+						type: 'mosaicDescriptor.mosaic'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
@@ -114,13 +114,13 @@ describe('mosaic routes', () => {
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbmosaicsByOwnersFake.calledOnce).to.equal(true);
-					expect(dbmosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.publicKey);
-					expect(dbmosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(nonExistingPublicKey)]);
+					expect(dbMosaicsByOwnersFake.calledOnce).to.equal(true);
+					expect(dbMosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.publicKey);
+					expect(dbMosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(nonExistingPublicKey)]);
 
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: [],
-						type: 'ownedMosaicDescriptor'
+						type: 'mosaicDescriptor.mosaic'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
@@ -134,13 +134,13 @@ describe('mosaic routes', () => {
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbmosaicsByOwnersFake.calledOnce).to.equal(true);
-					expect(dbmosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.address);
-					expect(dbmosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([address.stringToAddress(testAddress)]);
+					expect(dbMosaicsByOwnersFake.calledOnce).to.equal(true);
+					expect(dbMosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.address);
+					expect(dbMosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([address.stringToAddress(testAddress)]);
 
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: [ownedMosaicsSample],
-						type: 'ownedMosaicDescriptor'
+						type: 'mosaicDescriptor.mosaic'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
@@ -154,13 +154,13 @@ describe('mosaic routes', () => {
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbmosaicsByOwnersFake.calledOnce).to.equal(true);
-					expect(dbmosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.publicKey);
-					expect(dbmosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(testPublicKey)]);
+					expect(dbMosaicsByOwnersFake.calledOnce).to.equal(true);
+					expect(dbMosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.publicKey);
+					expect(dbMosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(testPublicKey)]);
 
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: [ownedMosaicsSample],
-						type: 'ownedMosaicDescriptor'
+						type: 'mosaicDescriptor.mosaic'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
@@ -185,13 +185,13 @@ describe('mosaic routes', () => {
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbmosaicsByOwnersFake.calledOnce).to.equal(true);
-					expect(dbmosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.address);
-					expect(dbmosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([address.stringToAddress(nonExistingTestAddress)]);
+					expect(dbMosaicsByOwnersFake.calledOnce).to.equal(true);
+					expect(dbMosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.address);
+					expect(dbMosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([address.stringToAddress(nonExistingTestAddress)]);
 
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: [],
-						type: 'ownedMosaicDescriptor'
+						type: 'mosaicDescriptor.mosaic'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
@@ -205,13 +205,13 @@ describe('mosaic routes', () => {
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbmosaicsByOwnersFake.calledOnce).to.equal(true);
-					expect(dbmosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.publicKey);
-					expect(dbmosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(nonExistingPublicKey)]);
+					expect(dbMosaicsByOwnersFake.calledOnce).to.equal(true);
+					expect(dbMosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.publicKey);
+					expect(dbMosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(nonExistingPublicKey)]);
 
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: [],
-						type: 'ownedMosaicDescriptor'
+						type: 'mosaicDescriptor.mosaic'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
@@ -225,13 +225,13 @@ describe('mosaic routes', () => {
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbmosaicsByOwnersFake.calledOnce).to.equal(true);
-					expect(dbmosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.address);
-					expect(dbmosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([address.stringToAddress(testAddress)]);
+					expect(dbMosaicsByOwnersFake.calledOnce).to.equal(true);
+					expect(dbMosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.address);
+					expect(dbMosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([address.stringToAddress(testAddress)]);
 
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: [ownedMosaicsSample],
-						type: 'ownedMosaicDescriptor'
+						type: 'mosaicDescriptor.mosaic'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
@@ -245,13 +245,13 @@ describe('mosaic routes', () => {
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(dbmosaicsByOwnersFake.calledOnce).to.equal(true);
-					expect(dbmosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.publicKey);
-					expect(dbmosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(testPublicKey)]);
+					expect(dbMosaicsByOwnersFake.calledOnce).to.equal(true);
+					expect(dbMosaicsByOwnersFake.firstCall.args[0]).to.deep.equal(AccountType.publicKey);
+					expect(dbMosaicsByOwnersFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(testPublicKey)]);
 
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: [ownedMosaicsSample],
-						type: 'ownedMosaicDescriptor'
+						type: 'mosaicDescriptor.mosaic'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
 				});
