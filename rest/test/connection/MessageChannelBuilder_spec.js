@@ -237,7 +237,7 @@ describe('message channel builder', () => {
 						Buffer.of(55, 0, 0, 0), // status
 						Buffer.of(66, 0, 0, 0, 0, 0, 0, 0) // deadline
 					]);
-					const topicParam = "SCJFR55L7KWHERD2VW6C3NR2MBZLVDQWDHCHH6ZP";
+					const topicParam = 'SCJFR55L7KWHERD2VW6C3NR2MBZLVDQWDHCHH6ZP';
 					const encodedAddressByteArray = catapult.model.address.stringToAddress(topicParam);
 					const topic = Buffer.concat([Buffer.of('s'.charCodeAt(0)), Buffer.from(encodedAddressByteArray)]);
 					handler(codec, eventData => emitted.push(eventData))(topic, buffer, 99);
