@@ -1057,9 +1057,9 @@ describe('catapult db', () => {
 				['all', 'unconfirmed', 'partial'].forEach(key => {
 					describe(key, () => {
 						addTests(Object.assign({
-						getAccount2Transactions: basicTraits.curryFromIndexes([7, 5, 4, 3, 1]),
-						getAccount2FilteredTransactions: basicTraits.curryFromIndexes([3, 1]),
-						createPagingSeedTransactions: createPagingSeedTransactionsFactory.curryAll()
+							getAccount2Transactions: basicTraits.curryFromIndexes([7, 5, 4, 3, 1]),
+							getAccount2FilteredTransactions: basicTraits.curryFromIndexes([3, 1]),
+							createPagingSeedTransactions: createPagingSeedTransactionsFactory.curryAll()
 						}, basicTraits, dbTransactionTraits[key]));
 					});
 				});
