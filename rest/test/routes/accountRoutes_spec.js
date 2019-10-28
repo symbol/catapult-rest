@@ -180,6 +180,7 @@ describe('account routes', () => {
 		describe('incoming', () => {
 			const testAddress = 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXWV';
 			const testPublicKey = '7DE16AEDF57EB9561D3E6EFA4AE66F27ABDA8AEC8BC020B6277360E31619DCE7';
+			const testObjectId = '112233445566778899AABBCC';
 
 			const transactionSample = { meta: { height: 1, index: 0 }, transaction: { id: 12345 } };
 			const sentPayload = { payload: [transactionSample], type: 'transactionWithMetadata' };
@@ -196,10 +197,10 @@ describe('account routes', () => {
 				dbIncomingFake.resetHistory();
 			});
 
-			describe('by publicKey', () => {
+			const testBy = accountId => {
 				it('basic query', () => {
 					// Arrange:
-					const req = { params: { accountId: testPublicKey } };
+					const req = { params: { accountId } };
 
 					// Act:
 					return mockServer.callRoute(route, req).then(() => {
@@ -211,21 +212,72 @@ describe('account routes', () => {
 					});
 				});
 
-				it('query with pageId, pageSize and ordering', () => {});
-				it('returns 500 if not array', () => {});
-				it('returns 409 if invalid pageId', () => {});
-				it('returns 409 if invalid pageSize', () => {});
-				it('returns 409 accountId is invalid', () => {});
-			});
+				it('query with pageId, pageSize and ordering', () => {
+					// Arrange:
+					const req = {
+						params: {
+							accountId,
+							id: testObjectId,
+							pageSize: '50',
+							ordering: 'id'
+						}
+					};
 
-			describe('by address', () => {
-				it('basic query', () => {});
-				it('query with pageId, pageSize and ordering', () => {});
-				it('returns 500 if not array', () => {});
-				it('returns 409 if invalid pageId', () => {});
-				it('returns 409 if invalid pageSize', () => {});
-				it('returns 409 accountId is invalid', () => {});
-			});
+					// Act:
+					return mockServer.callRoute(route, req).then(() => {
+						// Assert:
+						expect(dbIncomingFake.calledOnce).to.equal(true);
+						expect(dbIncomingFake.firstCall.args[0]).to.deep.equal(address.stringToAddress(testAddress));
+						expect(dbIncomingFake.firstCall.args[1]).to.deep.equal(testObjectId);
+						expect(dbIncomingFake.firstCall.args[2]).to.deep.equal(50);
+						expect(dbIncomingFake.firstCall.args[3]).to.deep.equal(1);
+						expect(mockServer.send.firstCall.args[0]).to.deep.equal(sentPayload);
+						expect(mockServer.next.calledOnce).to.equal(true);
+					});
+				});
+
+				it('throws error if invalid pageId', () => {
+					// Arrange:
+					const req = {
+						params: {
+							accountId,
+							id: 'alice',
+							pageSize: '50',
+							ordering: 'id'
+						}
+					};
+
+					// Act + Assert:
+					expect(() => mockServer.callRoute(route, req)).to.throw('id is not a valid object id');
+				});
+
+				it('throws error if invalid pageSize', () => {
+					// Arrange:
+					const req = {
+						params: {
+							accountId,
+							id: testObjectId,
+							pageSize: 'alice',
+							ordering: 'id'
+						}
+					};
+
+					// Act + Assert:
+					expect(() => mockServer.callRoute(route, req)).to.throw('pageSize is not a valid unsigned integer');
+				});
+
+				it('throws error if accountId is invalid', () => {
+					// Arrange:
+					const req = { params: { accountId: 'ABCD' } };
+
+					// Act + Assert:
+					expect(() => mockServer.callRoute(route, req)).to.throw('accountId has an invalid format');
+				});
+			};
+
+			describe('by publicKey', () => testBy(testPublicKey));
+
+			describe('by address', () => testBy(testAddress));
 		});
 	});
 });
