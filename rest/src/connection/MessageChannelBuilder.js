@@ -96,8 +96,7 @@ class MessageChannelBuilder {
 				const status = parser.uint32();
 				const deadline = parser.uint64();
 
-				// removing the markerChart from topic.
-				// Format of the address will be 9002AA85058850D31F81F3745F1557E9EC9E9D13A2E1C2B2B0 as byte array.
+				// removing the markerChart from topic
 				const address = topic.subarray(1);
 				emit({
 					type: 'transactionStatus',

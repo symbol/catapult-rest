@@ -21,7 +21,6 @@
 const MessageChannelBuilder = require('../../src/connection/MessageChannelBuilder');
 const test = require('../testUtils');
 const { expect } = require('chai');
-const catapult = require('catapult-sdk');
 
 describe('message channel builder', () => {
 	const addressTemplate = {
@@ -237,9 +236,7 @@ describe('message channel builder', () => {
 						Buffer.of(55, 0, 0, 0), // status
 						Buffer.of(66, 0, 0, 0, 0, 0, 0, 0) // deadline
 					]);
-					const topicParam = 'SCJFR55L7KWHERD2VW6C3NR2MBZLVDQWDHCHH6ZP';
-					const encodedAddressByteArray = catapult.model.address.stringToAddress(topicParam);
-					const topic = Buffer.concat([Buffer.of('s'.charCodeAt(0)), Buffer.from(encodedAddressByteArray)]);
+					const topic = Buffer.concat([Buffer.of('s'.charCodeAt(0)), addressTemplate.decoded]);
 					handler(codec, eventData => emitted.push(eventData))(topic, buffer, 99);
 
 					// Assert:
@@ -251,7 +248,7 @@ describe('message channel builder', () => {
 						type: 'transactionStatus',
 						payload: {
 							hash: Buffer.alloc(test.constants.sizes.hash256, 41),
-							address: encodedAddressByteArray,
+							address: addressTemplate.decoded,
 							status: 55,
 							deadline: [66, 0]
 						}
