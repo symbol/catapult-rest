@@ -76,7 +76,7 @@ describe('namespace routes', () => {
 					factory.createNamespacePagingRouteInfo('/account/:accountId/namespaces', 'get'),
 					traits.valid.params,
 					traits.valid.expected,
-					'namespaceDescriptor'
+					'namespaces'
 				);
 
 				pagingTestsFactory.addDefault();
@@ -112,7 +112,7 @@ describe('namespace routes', () => {
 					factory.createNamespacePagingRouteInfo('/account/namespaces', 'post'),
 					traits.valid.params,
 					traits.valid.expected,
-					'namespaceDescriptor'
+					'namespaces'
 				);
 
 				pagingTestsFactory.addDefault();
