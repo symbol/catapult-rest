@@ -964,7 +964,7 @@ describe('catapult db', () => {
 						db => db[traits.dbFunctionName](
 							traits.dbFunctionName === dbTransactionTraits.incoming.dbFunctionName
 								? keyToAddress(keys[1])
-								: keys[1],
+								: keys[1]
 						),
 						transactions => {
 							// Assert: only the transactions matching the second account were returned
@@ -1164,7 +1164,7 @@ describe('catapult db', () => {
 					db => db[traits.dbFunctionName](
 						traits.dbFunctionName === dbTransactionTraits.incoming.dbFunctionName
 							? keyToAddress(key)
-							: key,
+							: key
 					),
 					transactions => {
 						// Assert: expected transactions are available
