@@ -79,5 +79,18 @@ module.exports = {
 				next();
 			});
 		});
+
+		server.get('/block/:height/state/:state/hash/:hash/merkle', (req, res, next) => {
+			const height = routeUtils.parseArgument(req.params, 'height', 'uint');
+			const state = req.params.state;
+			const hash = routeUtils.parseArgument(req.params, 'hash', 'hash256');
+
+			const { connections } = services;
+			const { timeout } = services.config.apiNode;
+
+
+
+
+		});
 	}
 };

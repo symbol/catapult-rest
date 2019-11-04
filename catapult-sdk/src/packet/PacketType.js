@@ -47,7 +47,18 @@ const PacketType = {
 	nodeDiscoveryPullPing: 601,
 
 	/** Node time information has been requested by a peer. */
-	timeSyncNodeTime: 700
+	timeSyncNodeTime: 700,
+
+	/** State path has been requested by a peer. */
+	accountStatePath: 800 + 0x43,
+	hashLockStatePath: 800 + 0x48,
+	secretLockStatePath: 800 + 0x52,
+	metadataStatePath: 800 + 0x44,
+	mosaicStatePath: 800 + 0x4D,
+	multisigStatePath: 800 + 0x55,
+	namespaceStatePath: 800 + 0x4E,
+	accountRestrictionsStatePath: 800 + 0x50,
+	mosaicRestrictionsStatePath: 800 + 0x51
 };
 
 module.exports = PacketType;
