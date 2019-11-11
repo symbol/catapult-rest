@@ -89,25 +89,39 @@ describe('model codec builder', () => {
 	};
 
 	const generateBlockHeader = () => {
-		const Previous_Block_Hash_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.hash256));
-		const Block_Transactions_Hash_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.hash256));
+		const previousBlockHashBuffer = Buffer.from(test.random.bytes(test.constants.sizes.hash256));
+		const transactionsHashBuffer = Buffer.from(test.random.bytes(test.constants.sizes.hash256));
+		const receiptsHashBuffer = Buffer.from(test.random.bytes(test.constants.sizes.hash256));
+		const stateHashBuffer = Buffer.from(test.random.bytes(test.constants.sizes.hash256));
+		const beneficiaryPublicKey = test.random.bytes(test.constants.sizes.signerPublicKey); // 32
+		const feeMultiplierBuffer = Buffer.of(0x0A, 0x00, 0x00, 0x00);
 
-		const data = generateVerifiableEntity(constants.sizes.blockHeader, 0x8000);
+		const data = generateVerifiableEntity(constants.sizes.blockHeader + 32 + 32 + 32 + 4 + 4, 0x8000);
 		data.buffer = Buffer.concat([
 			data.buffer,
 			Buffer.of(0x97, 0x87, 0x45, 0x0E, 0xE1, 0x6C, 0xB6, 0x62), // height
 			Buffer.of(0x30, 0x3A, 0x46, 0x8B, 0x15, 0x2D, 0x60, 0x54), // timestamp
 			Buffer.of(0x86, 0x02, 0x75, 0x30, 0xE8, 0x50, 0x78, 0xE8), // difficulty
-			Previous_Block_Hash_Buffer,
-			Block_Transactions_Hash_Buffer
+			previousBlockHashBuffer, // 32b
+			transactionsHashBuffer, // 32b
+			receiptsHashBuffer, // 32b
+			stateHashBuffer, // 32b
+			Buffer.from(beneficiaryPublicKey), // key 32b
+			feeMultiplierBuffer, // 4b
+			Buffer.of(0x00, 0x00, 0x00, 0x00) // block header reserved 1 4b
 		]);
 
 		Object.assign(data.object, {
 			height: [0x0E458797, 0x62B66CE1],
 			timestamp: [0x8B463A30, 0x54602D15],
 			difficulty: [0x30750286, 0xE87850E8],
-			previousBlockHash: Previous_Block_Hash_Buffer,
-			transactionsHash: Block_Transactions_Hash_Buffer
+			previousBlockHash: previousBlockHashBuffer,
+			transactionsHash: transactionsHashBuffer,
+			receiptsHash: receiptsHashBuffer,
+			stateHash: stateHashBuffer,
+			beneficiaryPublicKey,
+			feeMultiplier: 10,
+			blockHeader_Reserved1: 0
 		});
 		return data;
 	};
@@ -144,7 +158,7 @@ describe('model codec builder', () => {
 	};
 
 	describe('block', () => {
-		test.binary.test.addAll(getCodec(), constants.sizes.blockHeader, generateBlockHeader);
+		test.binary.test.addAll(getCodec(), constants.sizes.blockHeader + 32 + 32 + 32 + 4 + 4, generateBlockHeader);
 	});
 
 	describe('block with transactions', () => {
