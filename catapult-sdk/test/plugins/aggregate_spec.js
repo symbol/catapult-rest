@@ -30,10 +30,11 @@ const { expect } = require('chai');
 const constants = {
 	knownTxType: 0x0022,
 	sizes: {
-		aggregate: 120 + 4, // includes transaction header
+		aggregate: 120 + 32 + 4 + 4, // transaction header + transactionshash + payload size + aggregateTransactionHeader_Reserved1
 		transaction: 120,
 		embedded: 40 + 8,
-		cosignature: 96
+		cosignature: 96,
+		transactionsHash: 32
 	}
 };
 
@@ -116,15 +117,28 @@ describe('aggregate plugin', () => {
 			return txCodecs;
 		};
 
-		const generateAggregate = () => ({
-			buffer: Buffer.concat([
-				Buffer.of(0x00, 0x00, 0x00, 0x00) // payload size
-			]),
+		const generateAggregate = () => {
+			const transactionsHash = Buffer.concat([
+				Buffer.of(0x02, 0x04, 0x80, 0xDE, 0xA4, 0x33, 0xC0, 0x3C),
+				Buffer.of(0x53, 0x33, 0x98, 0x67, 0x55, 0x40, 0x33, 0x22),
+				Buffer.of(0x05, 0x23, 0xF4, 0x5C, 0xD2, 0xE3, 0xE2, 0xEE),
+				Buffer.of(0x09, 0xFF, 0xFF, 0x0F, 0xF0, 0x10, 0xA0, 0x02)
+			]);
 
-			// notice that payloadSize, like size, should not be in returned object
-			object: {
-			}
-		});
+			return {
+				buffer: Buffer.concat([
+					transactionsHash, // transactionsHash 32 bytes
+					Buffer.of(0x00, 0x00, 0x00, 0x00), // payload size
+					Buffer.of(0x00, 0x00, 0x00, 0x00) // aggregate transaction header reserved 1
+				]),
+
+				// notice that payloadSize, like size, should not be in returned object
+				object: {
+					transactionsHash,
+					aggregateTransactionHeader_Reserved1: 0
+				}
+			};
+		};
 
 		const generateTransaction = options => {
 			const type = (options || {}).type || constants.knownTxType;
@@ -159,8 +173,10 @@ describe('aggregate plugin', () => {
 				txData.buffer
 			]);
 
-			const payloadSize = data.buffer.readUInt32LE(0) + constants.sizes.embedded + ((options || {}).extraSize || 0);
-			data.buffer.writeUInt32LE(payloadSize, 0);
+			const payloadSize = data.buffer.readUInt32LE(constants.sizes.transactionsHash)
+				+ constants.sizes.embedded
+				+ ((options || {}).extraSize || 0);
+			data.buffer.writeUInt32LE(payloadSize, constants.sizes.transactionsHash);
 
 			if (!data.object.transactions)
 				data.object.transactions = [];
@@ -288,7 +304,9 @@ describe('aggregate plugin', () => {
 						[1, constants.sizes.aggregate, constants.sizes.aggregate + 1, constants.sizes.embedded].forEach(delta => {
 							// - increase reported payload size
 							const data = addTransaction(addTransaction(addTransaction(generateAggregate)))();
-							data.buffer.writeUInt32LE(data.buffer.readUInt32LE() + delta);
+							data.buffer.writeUInt32LE(
+								data.buffer.readUInt32LE(constants.sizes.transactionsHash) + delta, constants.sizes.transactionsHash
+							);
 
 							// Assert:
 							assertDeserializationError(
