@@ -60,13 +60,21 @@ const multisigPlugin = {
 				transaction.minRemovalDelta = convert.uint8ToInt8(parser.uint8());
 				transaction.minApprovalDelta = convert.uint8ToInt8(parser.uint8());
 
-				const modificationsCount = parser.uint8();
-				transaction.modifications = [];
+				const publicKeyAdditionsCount = parser.uint8();
+				const publicKeyDeletionsCount = parser.uint8();
 
-				while (transaction.modifications.length < modificationsCount) {
-					const modificationAction = parser.uint8();
+				transaction.multisigAccountModificationTransactionBody_Reserved1 = parser.uint32();
+
+				transaction.publicKeyAdditions = [];
+				while (transaction.publicKeyAdditions.length < publicKeyAdditionsCount) {
 					const cosignatoryPublicKey = parser.buffer(constants.sizes.signerPublicKey);
-					transaction.modifications.push({ modificationAction, cosignatoryPublicKey });
+					transaction.publicKeyAdditions.push(cosignatoryPublicKey);
+				}
+
+				transaction.publicKeyDeletions = [];
+				while (transaction.publicKeyDeletions.length < publicKeyDeletionsCount) {
+					const cosignatoryPublicKey = parser.buffer(constants.sizes.signerPublicKey);
+					transaction.publicKeyDeletions.push(cosignatoryPublicKey);
 				}
 
 				return transaction;
@@ -75,10 +83,14 @@ const multisigPlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeUint8(convert.int8ToUint8(transaction.minRemovalDelta));
 				serializer.writeUint8(convert.int8ToUint8(transaction.minApprovalDelta));
-				serializer.writeUint8(transaction.modifications.length);
-				transaction.modifications.forEach(modification => {
-					serializer.writeUint8(modification.modificationAction);
-					serializer.writeBuffer(modification.cosignatoryPublicKey);
+				serializer.writeUint8(transaction.publicKeyAdditions.length);
+				serializer.writeUint8(transaction.publicKeyDeletions.length);
+				serializer.writeUint32(transaction.multisigAccountModificationTransactionBody_Reserved1);
+				transaction.publicKeyAdditions.forEach(key => {
+					serializer.writeBuffer(key);
+				});
+				transaction.publicKeyDeletions.forEach(key => {
+					serializer.writeBuffer(key);
 				});
 			}
 		});
