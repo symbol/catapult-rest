@@ -18,23 +18,17 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = {
-	// with meta data
-	account: 'accountWithMetadata',
-	block: 'blockHeaderWithMetadata',
-	transaction: 'transactionWithMetadata',
+/** @module sockets/stateTreesCodec */
 
-	// other
-	chainStatistic: 'chainStatistic',
-	chainStatisticCurrent: 'chainStatisticCurrent',
-	merkleProofInfo: 'merkleProofInfo',
-	receipts: 'receipts',
-	stateTree: 'stateTree',
-	transactionStatus: 'transactionStatus',
-	nodeInfo: 'nodeInfo',
-	nodeTime: 'nodeTime',
-
-	// diagnostic
-	serverInfo: 'serverInfo',
-	storageInfo: 'storageInfo'
+const stateTreesCodec = {
+	/**
+	 * Parses node communication timestamps.
+	 * @param {object} parser Parser.
+	 * @returns {object} Parsed node info.
+	 */
+	deserialize: parser => ({
+		tree: parser.uint64()
+	})
 };
+
+module.exports = stateTreesCodec;

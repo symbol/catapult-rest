@@ -22,6 +22,11 @@ const dbFacade = require('./dbFacade');
 const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 const errors = require('../server/errors');
+const stateTreesCodec = require('../sockets/stateTreesCodec');
+const catapult = require('catapult-sdk');
+
+const packetHeader = catapult.packet.header;
+const { StatePathPacketTypes } = catapult.packet;
 
 const parseHeight = params => routeUtils.parseArgument(params, 'height', 'uint');
 
@@ -80,15 +85,31 @@ module.exports = {
 			});
 		});
 
-		server.get('/block/:height/state/:state/hash/:hash/merkle', (req, res, next) => {
+		const buildResponse = (packet, codec, resultType) => {
+			const binaryParser = new BinaryParser();
+			binaryParser.push(packet.payload);
+			return { payload: codec.deserialize(binaryParser), type: resultType, formatter: 'ws' };
+		};
+
+		server.get('/block/:height/state/:state/hash/:hash/patricia', (req, res, next) => {
 			const height = routeUtils.parseArgument(req.params, 'height', 'uint');
 			const state = req.params.state;
 			const hash = routeUtils.parseArgument(req.params, 'hash', 'hash256');
+
+			// TODO Validate state
+			const packetType = undefined;
 
 			const { connections } = services;
 			const { timeout } = services.config.apiNode;
 
 
+			const packetBuffer = packetHeader.createBuffer(packetType, packetHeader.size);
+			return connections.singleUse()
+				.then(connection => connection.pushPull(packetBuffer, timeout))
+				.then(packet => {
+					res.send(buildResponse(packet, stateTreesCodec, routeResultTypes.nodeInfo));
+					next();
+				});
 
 
 		});

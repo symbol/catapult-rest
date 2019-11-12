@@ -61,4 +61,17 @@ const PacketType = {
 	mosaicRestrictionsStatePath: 800 + 0x51
 };
 
-module.exports = PacketType;
+module.exports = {
+	PacketType,
+	StatePathPacketTypes: [
+		PacketType.accountStatePath,
+		PacketType.hashLockStatePath,
+		PacketType.secretLockStatePath,
+		PacketType.metadataStatePath,
+		PacketType.mosaicStatePath,
+		PacketType.multisigStatePath,
+		PacketType.namespaceStatePath,
+		PacketType.accountRestrictionsStatePath,
+		PacketType.mosaicRestrictionsStatePath
+	]
+};
