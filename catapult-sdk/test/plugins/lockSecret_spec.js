@@ -87,22 +87,20 @@ describe('lock secret plugin', () => {
 			const recipientAddressBuffer = test.random.bytes(test.constants.sizes.addressDecoded);
 			const secretBuffer = test.random.bytes(test.constants.sizes.hash256);
 
-			test.binary.test.addAll(getCodec(EntityType.secretLock), 82, () => ({
+			test.binary.test.addAll(getCodec(EntityType.secretLock), 74, () => ({
 				buffer: Buffer.concat([
-					Buffer.of(0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF), // mosaicId
-					Buffer.of(0xCA, 0xD0, 0x8E, 0x6E, 0xFF, 0x21, 0x2F, 0x49), // amount
+					Buffer.from(secretBuffer), // secret 25b
+					Buffer.of(0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF), // mosaic
 					Buffer.of(0x99, 0x00, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF), // duration
 					Buffer.of(0xFF), // hash algorithm
-					Buffer.from(secretBuffer), // secret 25b
 					Buffer.from(recipientAddressBuffer) // recipientAddress 32b
 				]),
 
 				object: {
-					mosaicId: [0x78563412, 0xEFCDAB90],
-					amount: [0x6E8ED0CA, 0x492F21FF],
+					secret: secretBuffer,
+					mosaic: [0x78563412, 0xEFCDAB90],
 					duration: [0xBBAA0099, 0xFFEEDDCC],
 					hashAlgorithm: 0xFF,
-					secret: secretBuffer,
 					recipientAddress: recipientAddressBuffer
 				}
 			}));
@@ -117,21 +115,21 @@ describe('lock secret plugin', () => {
 			const generateTransaction = () => {
 				const data = {
 					buffer: Buffer.concat([
-						Buffer.of(0xFF), // hash algorithm
 						Secret_Buffer, // secret 32b
-						RecipientAddress_Buffer, // recipient 25b
 						Buffer.of(0x00, 0x00), // proof size 2b
+						Buffer.of(0xFF), // hash algorithm
+						RecipientAddress_Buffer, // recipient 25b
 						Proof_Buffer // proofBufferSize
 					]),
 
 					object: {
-						hashAlgorithm: 0xFF,
 						secret: Secret_Buffer,
+						hashAlgorithm: 0xFF,
 						recipientAddress: RecipientAddress_Buffer,
 						proof: Proof_Buffer
 					}
 				};
-				data.buffer.writeUInt16LE(Proof_Buffer.length, 1 + 32 + 25);
+				data.buffer.writeUInt16LE(Proof_Buffer.length, 32);
 				return data;
 			};
 
