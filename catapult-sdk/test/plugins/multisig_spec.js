@@ -53,8 +53,8 @@ describe('multisig plugin', () => {
 			]);
 
 			// - modify multisig account
-			expect(Object.keys(modelSchema.modifyMultisigAccount).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
-			expect(modelSchema.modifyMultisigAccount).to.contain.all.keys(['modifications']);
+			expect(Object.keys(modelSchema.modifyMultisigAccount).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
+			expect(modelSchema.modifyMultisigAccount).to.contain.all.keys(['publicKeyAdditions', 'publicKeyDeletions']);
 
 			// - cosignatory modification
 			expect(modelSchema['modifyMultisigAccount.modification']).to.deep.equal({
