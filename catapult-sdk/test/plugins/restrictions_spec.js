@@ -238,44 +238,44 @@ describe('restrictions plugin', () => {
 			const addressCodec = getCodecs()[EntityType.accountRestrictionAddress];
 			const mosaicCodec = getCodecs()[EntityType.accountRestrictionMosaic];
 			const operationCodec = getCodecs()[EntityType.accountRestrictionOperation];
-			const addNoModificationTests = (restrictionType, codec) => {
-				const bufferSize = 1 + 1; // account restriction type (in bytes) + modifications count (in bytes)
-				test.binary.test.addAll(codec, bufferSize, () => ({
+
+			const generateTransaction = restrictionFlags => {
+				const data = {
 					buffer: Buffer.concat([
-						Buffer.of(restrictionType), // account restriction type
-						Buffer.of(0x00) // modifications count
+						Buffer.of(0x00, 0x00), // account restriction type 2b
+						Buffer.of(0x00), // restrictionAdditions count 1b
+						Buffer.of(0x00), // restrictionDeletions count 1b
+						Buffer.of(0x00, 0x00, 0x00, 0x00) // account restriction transaction body reserved 1 4b
 					]),
 					object: {
-						restrictionType,
-						modifications: []
+						restrictionFlags,
+						accountRestrictionTransactionBody_Reserved1: 0,
+						restrictionAdditions: [],
+						restrictionDeletions: []
 					}
-				}));
-			};
-			const addModificationTests = (restrictionType, codec, modBuffers, modValues) => {
-				// bufferSize = account restriction type (in bytes) + mods count (in bytes) + (each mod size in bytes) * num mods
-				const bufferSize = 1 + 1 + ((1 + modBuffers[0][1].byteLength) * modBuffers.length);
-
-				const concatModificationBuffers = buffers =>
-					Buffer.concat(buffers.map(componentBuffers => Buffer.concat(componentBuffers)));
-
-				const splitModificationValues = values => {
-					const mods = [];
-					for (let i = 0; i < values.length; ++i)
-						mods.push({ modificationAction: values[i][0], value: values[i][1] });
-					return mods;
 				};
+				data.buffer.writeUInt32LE(restrictionFlags);
 
-				test.binary.test.addAll(codec, bufferSize, () => ({
-					buffer: Buffer.concat([
-						Buffer.of(restrictionType), // account restriction type
-						Buffer.of(modBuffers.length), // modifications count
-						concatModificationBuffers(modBuffers) // modification types and values buffers
-					]),
-					object: {
-						restrictionType,
-						modifications: splitModificationValues(modValues)
-					}
-				}));
+				return data;
+			};
+
+			const addNoModificationTests = (restrictionFlags, codec) => {
+				test.binary.test.addAll(codec, 8, () => generateTransaction(restrictionFlags));
+			};
+
+			const addModificationTests = (restrictionType, codec, additionsBuffer, additionsValues, deletionsBuffer, deletionsValues) => {
+				const data = generateTransaction(restrictionType);
+
+				data.buffer = Buffer.concat([data.buffer, additionsBuffer, deletionsBuffer]);
+				data.buffer.writeUInt8(additionsBuffer.length, 2); // restrictionAdditionsCount, additions at 2 bytes offset
+				data.buffer.writeUInt8(deletionsBuffer.length, 3); // restrictionDeletionsCount, deletions at 3 bytes offset
+
+				data.object.restrictionAdditions = additionsValues;
+				data.object.restrictionDeletions = deletionsValues;
+
+				const bufferSize = 8 + additionsBuffer.length + deletionsBuffer.length;
+
+				test.binary.test.addAll(codec, bufferSize, () => (data));
 			};
 
 			describe('supports account address restriction with no modifications', () => {
