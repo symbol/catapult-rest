@@ -384,17 +384,17 @@ describe('restrictions plugin', () => {
 					buffer: Buffer.concat([
 						Buffer.of(0xA4, 0x78, 0xB2, 0x05, 0x04, 0x40, 0x38, 0x36), // mosaicId
 						Buffer.of(0xFF, 0x12, 0x77, 0x31, 0x82, 0x33, 0x32, 0x29), // restrictionKey
-						Buffer.from(targetAddress), // targetAddress 25b
 						Buffer.of(0xD3, 0xA1, 0x3E, 0x35, 0x02, 0x22, 0xC5, 0xC4), // previousRestrictionValue
-						Buffer.of(0xCC, 0x33, 0xC2, 0x2A, 0x23, 0x32, 0x67, 0xAC) // newRestrictionValue
+						Buffer.of(0xCC, 0x33, 0xC2, 0x2A, 0x23, 0x32, 0x67, 0xAC), // newRestrictionValue
+						Buffer.from(targetAddress) // targetAddress 25b
 					]),
 
 					object: {
 						mosaicId: [0x05B278A4, 0x36384004],
 						restrictionKey: [0x317712FF, 0x29323382],
-						targetAddress,
 						previousRestrictionValue: [0x353EA1D3, 0xC4C52202],
-						newRestrictionValue: [0x2AC233CC, 0xAC673223]
+						newRestrictionValue: [0x2AC233CC, 0xAC673223],
+						targetAddress
 					}
 				}));
 			});
@@ -406,8 +406,8 @@ describe('restrictions plugin', () => {
 						Buffer.of(0x45, 0x32, 0x27, 0xAA, 0x23, 0xC2, 0x2B, 0xEE), // referenceMosaicId
 						Buffer.of(0xC4, 0x56, 0x12, 0xB5, 0xF3, 0x3A, 0xA3, 0x01), // restrictionKey
 						Buffer.of(0xDD, 0x2E, 0x3C, 0x56, 0x77, 0x7F, 0xF7, 0x7F), // previousRestrictionValue
-						Buffer.of(0x01), // previousRestrictionType
 						Buffer.of(0x34, 0x03, 0x0F, 0x0C, 0x0C, 0x00, 0x11, 0xB2), // newRestrictionValue
+						Buffer.of(0x01), // previousRestrictionType
 						Buffer.of(0x02) // newRestrictionType
 					]),
 
@@ -416,8 +416,8 @@ describe('restrictions plugin', () => {
 						referenceMosaicId: [0xAA273245, 0xEE2BC223],
 						restrictionKey: [0xB51256C4, 0x01A33AF3],
 						previousRestrictionValue: [0x563C2EDD, 0x7FF77F77],
-						previousRestrictionType: 0x01,
 						newRestrictionValue: [0x0C0F0334, 0xB211000C],
+						previousRestrictionType: 0x01,
 						newRestrictionType: 0x02
 					}
 				}));
