@@ -41,5 +41,5 @@ describe('verifiable entity codec', () => {
 		};
 	};
 
-	test.binary.test.addAll(verifiableEntityCodec, 100, generateVerifiableEntity);
+	test.binary.test.addAll(verifiableEntityCodec, 108, generateVerifiableEntity);
 });
