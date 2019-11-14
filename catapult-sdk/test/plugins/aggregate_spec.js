@@ -128,8 +128,8 @@ describe('aggregate plugin', () => {
 			return {
 				buffer: Buffer.concat([
 					transactionsHash, // transactionsHash 32 bytes
-					Buffer.of(0x00, 0x00, 0x00, 0x00), // payload size
-					Buffer.of(0x00, 0x00, 0x00, 0x00) // aggregate transaction header reserved 1
+					Buffer.of(0x00, 0x00, 0x00, 0x00), // payload size 4b
+					Buffer.of(0x00, 0x00, 0x00, 0x00) // aggregate transaction header reserved 1 4b
 				]),
 
 				// notice that payloadSize, like size, should not be in returned object
@@ -149,14 +149,15 @@ describe('aggregate plugin', () => {
 				buffer: Buffer.concat([
 					test.buffer.fromSize(constants.sizes.embedded + extraSize),
 					SignerPublicKey_Buffer,
-					Buffer.of(0x2A, 0x81, type & 0xFF, (type >> 8) & 0xFF), // version, type
+					Buffer.of(0x2A), // version 2b
+					Buffer.of(type & 0xFF, (type >> 8) & 0xFF), // type 2b
 					Buffer.of(0x46, 0x8B, 0x15, 0x2D), // alpha
 					Buffer.of(extraSize, 0x30, 0xE8, 0x50), // beta
 					Buffer.alloc(extraSize)
 				]),
 				object: {
 					signerPublicKey: SignerPublicKey_Buffer,
-					version: 0x812A,
+					version: 0x2A,
 					type,
 
 					alpha: 0x2D158B46,

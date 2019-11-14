@@ -75,14 +75,21 @@ describe('model codec builder', () => {
 		return {
 			buffer: Buffer.concat([
 				test.buffer.fromSize(size),
+				Buffer.of(0x00, 0x00, 0x00, 0x00), // verifiable entity header reserved 1 4b
 				Signature_Buffer,
 				Signer_Buffer,
-				Buffer.of(0x2A, 0x81, type & 0xFF, (type >> 8) & 0xFF) // version, type
+				Buffer.of(0x00, 0x00, 0x00, 0x00), // entity body reserved 1 4b
+				Buffer.of(0x2A), // version 1b
+				Buffer.of(0x81), // network 1b
+				Buffer.of(type & 0xFF, (type >> 8) & 0xFF) // type 2b
 			]),
 			object: {
+				verifiableEntityHeader_Reserved1: 0,
 				signature: Signature_Buffer,
 				signerPublicKey: Signer_Buffer,
-				version: 0x812A,
+				entityBody_Reserved1: 0,
+				version: 0x2A,
+				network: 0x81,
 				type
 			}
 		};
