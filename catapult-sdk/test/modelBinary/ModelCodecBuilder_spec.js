@@ -26,7 +26,7 @@ const { expect } = require('chai');
 const constants = {
 	knownTxType: 0x4123,
 	sizes: {
-		blockHeader: 192,
+		blockHeader: 304,
 		transactionHeader: 120,
 		transaction: 120 + 8 + 1
 	}
@@ -95,8 +95,9 @@ describe('model codec builder', () => {
 		const stateHashBuffer = Buffer.from(test.random.bytes(test.constants.sizes.hash256));
 		const beneficiaryPublicKey = test.random.bytes(test.constants.sizes.signerPublicKey); // 32
 		const feeMultiplierBuffer = Buffer.of(0x0A, 0x00, 0x00, 0x00);
+		const reservedPadding = Buffer.of(0x00, 0x00, 0x00, 0x00);
 
-		const data = generateVerifiableEntity(constants.sizes.blockHeader + 32 + 32 + 32 + 4 + 4, 0x8000);
+		const data = generateVerifiableEntity(constants.sizes.blockHeader, 0x8000);
 		data.buffer = Buffer.concat([
 			data.buffer,
 			Buffer.of(0x97, 0x87, 0x45, 0x0E, 0xE1, 0x6C, 0xB6, 0x62), // height
@@ -108,7 +109,7 @@ describe('model codec builder', () => {
 			stateHashBuffer, // 32b
 			Buffer.from(beneficiaryPublicKey), // key 32b
 			feeMultiplierBuffer, // 4b
-			Buffer.of(0x00, 0x00, 0x00, 0x00) // block header reserved 1 4b
+			reservedPadding // 4b
 		]);
 
 		Object.assign(data.object, {
@@ -158,7 +159,7 @@ describe('model codec builder', () => {
 	};
 
 	describe('block', () => {
-		test.binary.test.addAll(getCodec(), constants.sizes.blockHeader + 32 + 32 + 32 + 4 + 4, generateBlockHeader);
+		test.binary.test.addAll(getCodec(), constants.sizes.blockHeader, generateBlockHeader);
 	});
 
 	describe('block with transactions', () => {

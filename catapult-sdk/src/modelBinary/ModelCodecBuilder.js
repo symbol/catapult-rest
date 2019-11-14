@@ -26,7 +26,7 @@ const SerializedSizeCalculator = require('../serializer/SerializedSizeCalculator
 
 const constants = {
 	sizes: {
-		blockHeader: 192,
+		blockHeader: 304,
 		transactionHeader: 120
 	}
 };
