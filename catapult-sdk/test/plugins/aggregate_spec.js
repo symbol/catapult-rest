@@ -32,7 +32,7 @@ const constants = {
 	sizes: {
 		aggregate: 120 + 32 + 4 + 4, // transaction header + transactionshash + payload size + aggregateTransactionHeader_Reserved1
 		transaction: 120,
-		embedded: 40 + 8,
+		embedded: 48 + 8,
 		cosignature: 96,
 		transactionsHash: 32
 	}

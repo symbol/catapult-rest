@@ -38,5 +38,5 @@ describe('embedded entity codec', () => {
 		};
 	};
 
-	test.binary.test.addAll(embeddedEntityCodec, 36, generateEmbeddedEntity);
+	test.binary.test.addAll(embeddedEntityCodec, 44, generateEmbeddedEntity);
 });
