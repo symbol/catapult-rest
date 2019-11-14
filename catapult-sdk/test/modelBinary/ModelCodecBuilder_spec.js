@@ -27,8 +27,8 @@ const constants = {
 	knownTxType: 0x4123,
 	sizes: {
 		blockHeader: 304,
-		transactionHeader: 120,
-		transaction: 120 + 8 + 1
+		transactionHeader: 128,
+		transaction: 128 + 8 + 1
 	}
 };
 

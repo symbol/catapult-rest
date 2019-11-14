@@ -27,7 +27,7 @@ const SerializedSizeCalculator = require('../serializer/SerializedSizeCalculator
 
 const constants = { sizes: {} };
 Object.assign(constants.sizes, sizes, {
-	aggregate: 120 + 32 + 4 + 4, // size passed into deserialize includes full transaction size (even previously processed parts)
+	aggregate: 128 + 32 + 4 + 4, // size passed into deserialize includes full transaction size (even previously processed parts)
 	embedded: 48,
 	cosignature: sizes.signerPublicKey + sizes.signature
 });
