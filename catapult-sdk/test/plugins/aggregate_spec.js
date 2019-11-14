@@ -148,18 +148,23 @@ describe('aggregate plugin', () => {
 			return {
 				buffer: Buffer.concat([
 					test.buffer.fromSize(constants.sizes.embedded + extraSize),
+					Buffer.of(0x00, 0x00, 0x00, 0x00), // embedded transaction header reserved 1 4b
 					SignerPublicKey_Buffer,
-					Buffer.of(0x2A), // version 2b
+					Buffer.of(0x00, 0x00, 0x00, 0x00), // entity body reserved 1
+					Buffer.of(0x2A), // version 1b
+					Buffer.of(0x55), // network 1b
 					Buffer.of(type & 0xFF, (type >> 8) & 0xFF), // type 2b
 					Buffer.of(0x46, 0x8B, 0x15, 0x2D), // alpha
 					Buffer.of(extraSize, 0x30, 0xE8, 0x50), // beta
 					Buffer.alloc(extraSize)
 				]),
 				object: {
+					embeddedTransactionHeader_Reserved1: 0,
 					signerPublicKey: SignerPublicKey_Buffer,
+					entityBody_Reserved1: 0,
 					version: 0x2A,
+					network: 0x55,
 					type,
-
 					alpha: 0x2D158B46,
 					beta: 0x50E83000 | extraSize
 				}
