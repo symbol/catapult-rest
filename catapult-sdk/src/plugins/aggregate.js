@@ -118,7 +118,6 @@ const aggregatePlugin = {
 				if (size < payloadSize + constants.sizes.aggregate)
 					throw Error('aggregate must contain complete payload');
 
-				// Reserved 1
 				transaction.aggregateTransactionHeader_Reserved1 = parser.uint32();
 
 				// 1. deserialize transactions
