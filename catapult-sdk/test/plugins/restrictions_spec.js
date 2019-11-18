@@ -28,7 +28,7 @@ const { expect } = require('chai');
 describe('restrictions plugin', () => {
 	describe('account restriction types enumeration', () => {
 		it('contains valid values', () => {
-			const accountRestrictionTypeBlockOffset = 128;
+			const accountRestrictionTypeBlockOffset = 0x8000;
 
 			// Assert:
 			expect(AccountRestrictionType.addressAllow).to.equal(1);
@@ -120,19 +120,19 @@ describe('restrictions plugin', () => {
 			const accountRestrictionSchema = modelSchema['accountRestriction.restrictions'].restrictions.schemaName;
 
 			// Assert:
-			expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.addressAllow }))
+			expect(accountRestrictionSchema({ restrictionFlags: AccountRestrictionType.addressAllow }))
 				.to.equal('accountRestriction.addressAccountRestriction');
-			expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.addressBlock }))
+			expect(accountRestrictionSchema({ restrictionFlags: AccountRestrictionType.addressBlock }))
 				.to.equal('accountRestriction.addressAccountRestriction');
-			expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.mosaicAllow }))
+			expect(accountRestrictionSchema({ restrictionFlags: AccountRestrictionType.mosaicAllow }))
 				.to.equal('accountRestriction.mosaicAccountRestriction');
-			expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.mosaicBlock }))
+			expect(accountRestrictionSchema({ restrictionFlags: AccountRestrictionType.mosaicBlock }))
 				.to.equal('accountRestriction.mosaicAccountRestriction');
-			expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.operationAllow }))
+			expect(accountRestrictionSchema({ restrictionFlags: AccountRestrictionType.operationAllow }))
 				.to.equal('accountRestriction.operationAccountRestriction');
-			expect(accountRestrictionSchema({ restrictionType: AccountRestrictionType.operationBlock }))
+			expect(accountRestrictionSchema({ restrictionFlags: AccountRestrictionType.operationBlock }))
 				.to.equal('accountRestriction.operationAccountRestriction');
-			expect(accountRestrictionSchema({ restrictionType: 99 }))
+			expect(accountRestrictionSchema({ restrictionFlags: 99 }))
 				.to.equal('accountRestriction.fallback');
 		});
 

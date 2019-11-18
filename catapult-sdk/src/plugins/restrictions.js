@@ -25,7 +25,7 @@ const sizes = require('../modelBinary/sizes');
 
 const constants = { sizes };
 
-const accountRestrictionTypeBlockOffset = 128;
+const accountRestrictionTypeBlockOffset = 0x8000;
 const AccountRestrictionTypeFlags = Object.freeze({
 	address: 1,
 	mosaic: 2,
@@ -136,7 +136,7 @@ const restrictionsPlugin = {
 				type: ModelType.array,
 				schemaName: entity => {
 					for (let i = 0; i < accountRestrictionTypeDescriptors.length; i++) {
-						if ((entity.restrictionType & 0x3F) === accountRestrictionTypeDescriptors[i].flag)
+						if ((entity.restrictionFlags & 0x3FFF) === accountRestrictionTypeDescriptors[i].flag)
 							return `accountRestriction.${accountRestrictionTypeDescriptors[i].schemaPrefix}AccountRestriction`;
 					}
 					return 'accountRestriction.fallback';
