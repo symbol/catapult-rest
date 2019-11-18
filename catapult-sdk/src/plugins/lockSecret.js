@@ -63,7 +63,8 @@ const lockSecretPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.secret = parser.buffer(constants.sizes.hash256);
-				transaction.mosaic = parser.uint64();
+				transaction.mosaicId = parser.uint64();
+				transaction.amount = parser.uint64();
 				transaction.duration = parser.uint64();
 				transaction.hashAlgorithm = parser.uint8();
 				transaction.recipientAddress = parser.buffer(constants.sizes.addressDecoded);
@@ -72,7 +73,8 @@ const lockSecretPlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.secret);
-				serializer.writeUint64(transaction.mosaic);
+				serializer.writeUint64(transaction.mosaicId);
+				serializer.writeUint64(transaction.amount);
 				serializer.writeUint64(transaction.duration);
 				serializer.writeUint8(transaction.hashAlgorithm);
 				serializer.writeBuffer(transaction.recipientAddress);
