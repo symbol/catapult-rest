@@ -67,16 +67,12 @@ const multisigPlugin = {
 				transaction.multisigAccountModificationTransactionBody_Reserved1 = parser.uint32();
 
 				transaction.publicKeyAdditions = [];
-				while (transaction.publicKeyAdditions.length < publicKeyAdditionsCount) {
-					const cosignatoryPublicKey = parser.buffer(constants.sizes.signerPublicKey);
-					transaction.publicKeyAdditions.push(cosignatoryPublicKey);
-				}
+				for (let i = 0; i < publicKeyAdditionsCount; ++i)
+					transaction.publicKeyAdditions.push(parser.buffer(constants.sizes.signerPublicKey));
 
 				transaction.publicKeyDeletions = [];
-				while (transaction.publicKeyDeletions.length < publicKeyDeletionsCount) {
-					const cosignatoryPublicKey = parser.buffer(constants.sizes.signerPublicKey);
-					transaction.publicKeyDeletions.push(cosignatoryPublicKey);
-				}
+				for (let i = 0; i < publicKeyDeletionsCount; ++i)
+					transaction.publicKeyDeletions.push(parser.buffer(constants.sizes.signerPublicKey));
 
 				return transaction;
 			},

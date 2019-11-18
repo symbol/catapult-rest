@@ -55,11 +55,12 @@ const accountRestrictionsCreateBaseCodec = valueCodec => ({
 		serializer.writeUint8(transaction.restrictionAdditions.length);
 		serializer.writeUint8(transaction.restrictionDeletions.length);
 		serializer.writeUint32(transaction.accountRestrictionTransactionBody_Reserved1);
-
-		for (let i = 0; i < transaction.restrictionAdditions.length; ++i)
-			valueCodec.serializeValue(serializer, transaction.restrictionAdditions[i]);
-		for (let i = 0; i < transaction.restrictionDeletions.length; ++i)
-			valueCodec.serializeValue(serializer, transaction.restrictionDeletions[i]);
+		transaction.restrictionAdditions.forEach(key => {
+			valueCodec.serializeValue(serializer, key);
+		});
+		transaction.restrictionDeletions.forEach(key => {
+			valueCodec.serializeValue(serializer, key);
+		});
 	}
 });
 
