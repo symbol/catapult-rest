@@ -99,7 +99,7 @@ describe('lock secret plugin', () => {
 
 				object: {
 					secret: secretBuffer,
-					mosaic: [0x78563412, 0xEFCDAB90],
+					mosaicId: [0x78563412, 0xEFCDAB90],
 					amount: [0x6E8ED0CA, 0x492F21FF],
 					duration: [0xBBAA0099, 0xFFEEDDCC],
 					hashAlgorithm: 0xFF,
