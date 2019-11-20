@@ -82,6 +82,12 @@ const requireCodecs = txCodecs => {
 		throw Error('aggregate transaction is not embeddable');
 };
 
+// after every inner transaction in an aggregate there's padding up to 8 bytes
+const innerAggregateTxPaddingSize = innerTransactionSize => {
+	const alignment = 8;
+	return 0 === innerTransactionSize % alignment ? 0 : alignment - (innerTransactionSize % alignment);
+};
+
 /**
  * Creates an aggregate plugin.
  * @type {module:plugins/CatapultPlugin}
@@ -132,6 +138,10 @@ const aggregatePlugin = {
 						transaction.transactions.push({ transaction: subTransaction.entity });
 						processedSize += subTransaction.size;
 
+						const paddingSize = innerAggregateTxPaddingSize(subTransaction.size);
+						parser.buffer(paddingSize);
+						processedSize += paddingSize;
+
 						if (subTransaction.size < constants.sizes.embedded)
 							throw Error('sub transaction must contain complete transaction header');
 					}
@@ -181,7 +191,10 @@ const aggregatePlugin = {
 				// 2. serialize transactions
 				let i = 0;
 				transactions.forEach(subTransaction => {
-					txCodec.serialize(subTransaction, serializer, subTransactionSizes[i++]);
+					const subTransactionSize = subTransactionSizes[i++];
+					txCodec.serialize(subTransaction, serializer, subTransactionSize);
+					const paddingSize = innerAggregateTxPaddingSize(subTransactionSize);
+					serializer.writeBuffer(Buffer.alloc(paddingSize));
 				});
 
 				// 3. serialize cosignatures
