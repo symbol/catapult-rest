@@ -139,9 +139,10 @@ const aggregatePlugin = {
 						processedSize += subTransaction.size;
 
 						const paddingSize = innerAggregateTxPaddingSize(subTransaction.size);
-						parser.buffer(paddingSize);
-						processedSize += paddingSize;
-
+						if (0 < paddingSize) {
+							parser.buffer(paddingSize);
+							processedSize += paddingSize;
+						}
 						if (subTransaction.size < constants.sizes.embedded)
 							throw Error('sub transaction must contain complete transaction header');
 					}
@@ -194,7 +195,8 @@ const aggregatePlugin = {
 					const subTransactionSize = subTransactionSizes[i++];
 					txCodec.serialize(subTransaction, serializer, subTransactionSize);
 					const paddingSize = innerAggregateTxPaddingSize(subTransactionSize);
-					serializer.writeBuffer(Buffer.alloc(paddingSize));
+					if (0 < paddingSize)
+						serializer.writeBuffer(Buffer.alloc(paddingSize));
 				});
 
 				// 3. serialize cosignatures
