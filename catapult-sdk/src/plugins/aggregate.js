@@ -95,7 +95,7 @@ const innerAggregateTxPaddingSize = innerTransactionSize => {
 const aggregatePlugin = {
 	registerSchema: builder => {
 		const aggregateSchema = {
-			transactionHash: ModelType.binary,
+			transactionsHash: ModelType.binary,
 			transactions: { type: ModelType.array, schemaName: 'transactionWithMetadata' },
 			cosignatures: { type: ModelType.array, schemaName: 'aggregate.cosignature' }
 		};
