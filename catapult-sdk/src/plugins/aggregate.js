@@ -128,6 +128,7 @@ const aggregatePlugin = {
 				transaction.aggregateTransactionHeader_Reserved1 = parser.uint32();
 
 				// 1. deserialize transactions
+				let totalPaddingSize = 0;
 				if (0 < payloadSize) {
 					transaction.transactions = [];
 
@@ -142,6 +143,7 @@ const aggregatePlugin = {
 						if (0 < paddingSize) {
 							parser.buffer(paddingSize);
 							processedSize += paddingSize;
+							totalPaddingSize += paddingSize;
 						}
 						if (subTransaction.size < constants.sizes.embedded)
 							throw Error('sub transaction must contain complete transaction header');
@@ -149,7 +151,8 @@ const aggregatePlugin = {
 				}
 
 				// 2. deserialize cosignatures
-				const numCosignatures = (size - payloadSize - constants.sizes.aggregate) / constants.sizes.cosignature;
+				const numCosignatures = (size - payloadSize - constants.sizes.aggregate - totalPaddingSize) / constants.sizes.cosignature;
+
 				if (numCosignatures !== (numCosignatures | 0))
 					throw Error('aggregate cannot have partial cosignatures');
 
