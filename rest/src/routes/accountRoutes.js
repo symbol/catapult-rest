@@ -56,6 +56,7 @@ module.exports = {
 
 		const transactionStates = [
 			{ dbPostfix: 'Confirmed', routePostfix: '' },
+			{ dbPostfix: 'Incoming', routePostfix: '/incoming' },
 			{ dbPostfix: 'Unconfirmed', routePostfix: '/unconfirmed' }
 		];
 
@@ -74,19 +75,6 @@ module.exports = {
 			});
 		});
 
-		server.get('/account/:accountId/transactions/incoming', (req, res, next) => {
-			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
-
-			const accountAddress = (AccountType.publicKey === type)
-				? address.publicKeyToAddress(accountId, networkInfo.networks[services.config.network.name].id)
-				: accountId;
-
-			return db.accountTransactionsIncoming(accountAddress, pagingOptions.id, pagingOptions.pageSize, ordering)
-				.then(transactionSender.sendArray('accountId', res, next));
-		});
-
 		const accountIdToPublicKey = (type, accountId) => {
 			if (AccountType.publicKey === type)
 				return Promise.resolve(accountId);
@@ -101,7 +89,10 @@ module.exports = {
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
 				db.accountTransactionsOutgoing(publicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
-					.then(transactionSender.sendArray('accountId', res, next)));
+					.then(transactionSender.sendArray('accountId', res, next)))
+				.catch(() => {
+					transactionSender.sendArray('accountId', res, next)([]);
+				});
 		});
 
 		// endregion
