@@ -153,25 +153,6 @@ describe('account routes', () => {
 					});
 				});
 
-			const emptyTest = route =>
-				it('returns empty if no transactions', () => {
-					// Arrange:
-					const req = { params: { accountId: AccountType.publicKey === accountIdType ? testPublicKey : testAddress } };
-
-					// Act:
-					return mockServer.callRoute(route, req).then(() => {
-						// Assert:
-						expect(dbTransactionsFake.calledOnce).to.equal(true);
-						expect(dbTransactionsFake.firstCall.args[0]).to.deep.equal(address.stringToAddress(testAddress));
-
-						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
-							payload: [],
-							type: 'transactionWithMetadata'
-						});
-						expect(mockServer.next.calledOnce).to.equal(true);
-					});
-				});
-
 			const paginationParamsTest = route =>
 				it('parses and fordwards pagination params correctly', () => {
 					// Arrange:
@@ -224,7 +205,6 @@ describe('account routes', () => {
 			const getStandardTests = route => {
 				basicQueryTest(route);
 				paginationParamsTest(route);
-				emptyTest(route);
 				invalidPageIdTest(route);
 				invalidPageSizeTest(route);
 				invalidAccountTest(route);
@@ -279,7 +259,6 @@ describe('account routes', () => {
 					});
 				}
 
-				emptyTest(route);
 				paginationParamsTest(route);
 				invalidPageIdTest(route);
 				invalidPageSizeTest(route);
