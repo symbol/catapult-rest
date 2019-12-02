@@ -183,7 +183,8 @@ const aggregatePlugin = {
 				transactions.forEach(subTransaction => {
 					const subTransactionSize = txCodec.size(subTransaction);
 					subTransactionSizes.push(subTransactionSize);
-					payloadSize += subTransactionSize;
+					const paddingSize = innerAggregateTxPaddingSize(subTransactionSize);
+					payloadSize += subTransactionSize + paddingSize;
 				});
 
 				serializer.writeUint32(payloadSize);
