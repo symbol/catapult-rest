@@ -25,6 +25,7 @@ const errors = require('../server/errors');
 const stateTreesCodec = require('../sockets/stateTreesCodec');
 const catapult = require('catapult-sdk');
 
+const { constants } = catapult;
 const packetHeader = catapult.packet.header;
 const { StatePathPacketTypes } = catapult.packet;
 const { BinaryParser } = catapult.parser;
@@ -104,7 +105,8 @@ module.exports = {
 			const { timeout } = services.config.apiNode;
 
 
-			const packetBuffer = packetHeader.createBuffer(state, packetHeader.size);
+			const headerBuffer = packetHeader.createBuffer(state, packetHeader.size + constants.sizes.hash256);
+			const packetBuffer = Buffer.concat([headerBuffer, hash]);
 			return connections.singleUse()
 				.then(connection => connection.pushPull(packetBuffer, timeout))
 				.then(packet => {
