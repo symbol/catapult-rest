@@ -97,14 +97,14 @@ module.exports = {
 			const { state } = req.params;
 			const hash = routeUtils.parseArgument(req.params, 'hash', 'hash256');
 
-			// TODO Validate state with `StatePathPacketTypes`
-			const packetType = undefined;
+			if (!StatePathPacketTypes.includes(state))
+				throw errors.createInvalidArgumentError('invalid `state` provided');
 
 			const { connections } = services;
 			const { timeout } = services.config.apiNode;
 
 
-			const packetBuffer = packetHeader.createBuffer(packetType, packetHeader.size);
+			const packetBuffer = packetHeader.createBuffer(state, packetHeader.size);
 			return connections.singleUse()
 				.then(connection => connection.pushPull(packetBuffer, timeout))
 				.then(packet => {

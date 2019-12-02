@@ -25,6 +25,7 @@ const catapult = require('catapult-sdk');
 const { expect } = require('chai');
 const sinon = require('sinon');
 
+const { PacketType, StatePathPacketTypes } = catapult.packet;
 const { convert } = catapult.utils;
 
 describe('block routes', () => {
@@ -160,7 +161,7 @@ describe('block routes', () => {
 	});
 
 	describe('block state tree', () => {
-		it('returns the requested tree with valid params', () => {
+		describe('returns the requested tree with valid params', () => {
 			// Arrange:
 			const stateTree = [
 				'9922093F19F7160BDCBCA8AA48499DA8DF532D4102745670B85AA4BDF63B8D59',
@@ -173,37 +174,49 @@ describe('block routes', () => {
 			].map((treeNode => Buffer.from(convert.hexToUint8(treeNode))));
 
 			const packet = {
-				type: 867,
+				type: PacketType.accountStatePath,
 				size: 168,
 				payload: Buffer.concat(stateTree)
 			};
 			const services = serviceCreator(packet);
 
+			StatePathPacketTypes.forEach(packetType => {
+				// Act:
+				it(`for ${packetType} state`, () =>
+					test.route.prepareExecuteRoute(
+						blockRoutes.register,
+						'/state/:state/hash/:hash/merkle',
+						'get',
+						{ state: packetType, hash: '2D3418274BBC250616223C162534B460216AED82C4FA9A87B53083B7BA7A9391' },
+						{}, services, routeContext => routeContext.routeInvoker().then(() => {
+							// Assert:
+							expect(routeContext.numNextCalls).to.equal(1);
+							expect(routeContext.responses.length).to.equal(1);
+							expect(routeContext.redirects.length).to.equal(0);
+							expect(routeContext.responses[0]).to.deep.equal({
+								formatter: 'ws',
+								payload: {
+									tree: stateTree
+								},
+								type: 'stateTree'
+							});
+						})
+					));
+			});
+		});
+
+		it('returns error for invalid state', () =>
 			// Act:
-			return test.route.prepareExecuteRoute(
+			test.route.prepareExecuteRoute(
 				blockRoutes.register,
 				'/state/:state/hash/:hash/merkle',
 				'get',
-				{ state: 835, hash: '2D3418274BBC250616223C162534B460216AED82C4FA9A87B53083B7BA7A9391' },
-				{}, services, routeContext =>
-					routeContext.routeInvoker().then(() => {
-						// Assert:
-						expect(routeContext.numNextCalls).to.equal(1);
-						expect(routeContext.responses.length).to.equal(1);
-						expect(routeContext.redirects.length).to.equal(0);
-						expect(routeContext.responses[0]).to.deep.equal({
-							formatter: 'ws',
-							payload: {
-								tree: stateTree
-							},
-							type: 'stateTree'
-						});
+				{ state: 15000, hash: '2D3418274BBC250616223C162534B460216AED82C4FA9A87B53083B7BA7A9391' },
+				{}, {}, routeContext =>
+					test.assert.invokerThrowsError(routeContext.routeInvoker, {
+						statusCode: 409,
+						message: 'invalid `state` provided'
 					})
-			);
-		});
-
-		it('returns the requested tree with valid params', () => {
-
-		});
+			));
 	});
 });

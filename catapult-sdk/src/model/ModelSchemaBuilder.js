@@ -164,8 +164,7 @@ class ModelSchemaBuilder {
 			serverInfo: {
 			},
 			stateTree: {
-				tree: undefined
-
+				tree: { type: ModelType.array, schemaName: ModelType.binary }
 			},
 			storageInfo: {
 			}
