@@ -327,7 +327,7 @@ class CatapultDb {
 			.then(this.sanitizer.deleteIds);
 	}
 
-	// region transaction retrieval for account
+	// region account transactions
 
 	/**
 	 * Retrieves confirmed transactions for which an account is the sender or receiver.
