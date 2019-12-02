@@ -20,15 +20,22 @@
 
 /** @module sockets/stateTreesCodec */
 
+const catapult = require('catapult-sdk');
+
+const { sizes } = catapult.constants;
+
 const stateTreesCodec = {
 	/**
-	 * Parses node communication timestamps.
+	 * Parses state trees.
 	 * @param {object} parser Parser.
-	 * @returns {object} Parsed node info.
+	 * @returns {object} Parsed state tree.
 	 */
-	deserialize: parser => ({
-		tree: parser.uint64()
-	})
+	deserialize: parser => {
+		const tree = [];
+		while (parser.numUnprocessedBytes())
+			tree.push(parser.buffer(sizes.hash256));
+		return { tree };
+	}
 };
 
 module.exports = stateTreesCodec;
