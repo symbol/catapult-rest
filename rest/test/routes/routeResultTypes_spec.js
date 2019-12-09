@@ -23,7 +23,7 @@ const { expect } = require('chai');
 
 describe('routeResultTypes', () => {
 	it('has correct links to schema', () => {
-		expect(Object.keys(routeResultTypes).length).to.equal(12);
+		expect(Object.keys(routeResultTypes).length).to.equal(13);
 		expect(routeResultTypes).to.deep.equal({
 			account: 'accountWithMetadata',
 			block: 'blockHeaderWithMetadata',
@@ -32,6 +32,7 @@ describe('routeResultTypes', () => {
 			chainStatisticCurrent: 'chainStatisticCurrent',
 			merkleProofInfo: 'merkleProofInfo',
 			receipts: 'receipts',
+			stateTree: 'stateTree',
 			transactionStatus: 'transactionStatus',
 			nodeInfo: 'nodeInfo',
 			nodeTime: 'nodeTime',

@@ -104,7 +104,6 @@ module.exports = {
 			const { connections } = services;
 			const { timeout } = services.config.apiNode;
 
-
 			const headerBuffer = packetHeader.createBuffer(state, packetHeader.size + constants.sizes.hash256);
 			const packetBuffer = Buffer.concat([headerBuffer, hash]);
 			return connections.singleUse()
