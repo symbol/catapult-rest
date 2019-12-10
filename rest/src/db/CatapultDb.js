@@ -65,6 +65,12 @@ const createSanitizer = () => ({
 	}
 });
 
+const createMetaAddressesConditions = accountAddress => ({ 'meta.addresses': Buffer.from(accountAddress) });
+
+const createMetaAddressesAndTypeConditions = (accountAddress, transactionType) => (
+	{ $and: [createMetaAddressesConditions(accountAddress), { 'transaction.type': transactionType }] }
+);
+
 const mapToPromise = dbObject => Promise.resolve(null === dbObject ? undefined : dbObject);
 
 const buildBlocksFromOptions = (height, numBlocks, chainHeight) => {
@@ -341,8 +347,9 @@ class CatapultDb {
 	 */
 	accountTransactionsConfirmed(accountAddress, transactionType, id, pageSize, ordering) {
 		const conditions = undefined !== transactionType
-			? { $and: [{ 'meta.addresses': Buffer.from(accountAddress) }, { 'transaction.type': transactionType }] }
-			: { 'meta.addresses': Buffer.from(accountAddress) };
+			? createMetaAddressesAndTypeConditions(accountAddress, transactionType)
+			: createMetaAddressesConditions(accountAddress);
+
 		return this.queryTransactions(conditions, id, pageSize, { sortOrder: ordering });
 	}
 
@@ -394,8 +401,9 @@ class CatapultDb {
 	 */
 	accountTransactionsUnconfirmed(accountAddress, transactionType, id, pageSize, ordering) {
 		const conditions = undefined !== transactionType
-			? { $and: [{ 'meta.addresses': Buffer.from(accountAddress) }, { 'transaction.type': transactionType }] }
-			: { 'meta.addresses': Buffer.from(accountAddress) };
+			? createMetaAddressesAndTypeConditions(accountAddress, transactionType)
+			: createMetaAddressesConditions(accountAddress);
+
 		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'unconfirmedTransactions', sortOrder: ordering });
 	}
 
@@ -411,8 +419,9 @@ class CatapultDb {
 	 */
 	accountTransactionsPartial(accountAddress, transactionType, id, pageSize, ordering) {
 		const conditions = undefined !== transactionType
-			? { $and: [{ 'meta.addresses': Buffer.from(accountAddress) }, { 'transaction.type': transactionType }] }
-			: { 'meta.addresses': Buffer.from(accountAddress) };
+			? createMetaAddressesAndTypeConditions(accountAddress, transactionType)
+			: createMetaAddressesConditions(accountAddress);
+
 		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'partialTransactions', sortOrder: ordering });
 	}
 
