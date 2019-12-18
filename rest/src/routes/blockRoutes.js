@@ -70,9 +70,12 @@ module.exports = {
 		});
 
 		server.get('/blocks/:height/limit/:limit', (req, res, next) => {
-			const height = parseHeight(req.params);
+			const height = parseHeight(req.params) || 1;
 			const limit = routeUtils.parseArgument(req.params, 'limit', 'uint');
 			const sanitizedLimit = getSanitizedLimit(services.config.pageSize, limit);
+
+			if (sanitizedLimit !== limit)
+				return res.redirect(`/blocks/${height}/limit/${sanitizedLimit}`, next); // redirect calls next
 
 			return db.blocksFrom(height, sanitizedLimit).then(blocks => {
 				res.send({ payload: blocks, type: routeResultTypes.block });
