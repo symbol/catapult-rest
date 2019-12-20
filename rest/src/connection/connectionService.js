@@ -77,12 +77,16 @@ module.exports.createConnectionService = (config, connectionFactory, authPromise
 					delete authenticatingConnectionPromises[node];
 				}
 
+				// return and additionally, return the connection for possible queued connections on `authenticatingConnectionPromises`
 				resolve(serverConnection);
-			}, reject)
-			.catch(err => {
+				return serverConnection;
+			}).catch(err => {
 				if (isPersistent)
 					delete authenticatingConnectionPromises[node];
+
+				// reject and additionally, return the connection for possible queued connections on `authenticatingConnectionPromises`
 				reject(err);
+				throw err;
 			});
 
 		if (isPersistent)
