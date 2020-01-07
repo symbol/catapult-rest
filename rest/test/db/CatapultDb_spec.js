@@ -800,19 +800,86 @@ describe('catapult db', () => {
 		});
 
 		describe('incoming', () => {
+			describe('correctly retrieves incoming transactions inside aggregate transactions', () => {
+				// Set specific transactions to test incoming transactions and incoming transactions inside aggregates.
+				const transactionIdOne = '000000000000000000111111';
+				const transactionIdTwo = '000000000000000000222222';
+				const incomingDbEntities = [
+					{
+						id: transactionIdOne,
+						meta: {
+							height: 1,
+							addresses: [new Binary(testAddress)]
+						},
+						transaction: {
+							recipientAddress: new Binary(testAddress),
+							signerPublicKey: new Binary(testPublicKey)
+						}
+					},
+					{
+						id: transactionIdTwo,
+						meta: { height: 1 },
+						transaction: {}
+					},
+					{
+						id: '000000000000000000333333',
+						meta: {
+							height: 1,
+							aggregateId: transactionIdTwo
+						},
+						transaction: {
+							recipientAddress: new Binary(testAddress)
+						}
+					},
+					{
+						id: '000000000000000000444444',
+						meta: {
+							height: 1,
+							aggregateId: transactionIdTwo
+						},
+						transaction: {
+							recipientAddress: new Binary(testAddress)
+						}
+					}
+				];
+
+				it('returns correct transactions', () => {
+					// Arrange:
+					const db = new CatapultDb({ networkId: Mijin_Test_Network });
+
+					// Act + Assert:
+					return db.connect(testDbOptions.url, 'test')
+						.then(() => test.db.populateDatabase(db, { transactions: incomingDbEntities }))
+						.then(() => deleteIds({ transactions: incomingDbEntities }))
+						.then(() => db.accountTransactionsIncoming(testAddress))
+						.then(result => {
+							expect(result.length).to.equal(2);
+							expect(
+								result.map(transaction => transaction.id).sort()
+							).to.deep.equal(
+								[transactionIdOne, transactionIdTwo]
+							);
+							return result;
+						})
+						.then(() => db.close());
+				});
+			});
+
 			describe('calls queryTransactions with correct conditions and pagination params', () => {
+				const baseCondition = { 'transaction.recipientAddress': Buffer.from(testAddress) };
+
 				it('without transaction type filter', () =>
 					runDbWithQueryTransactionsSpy(
 						{ transactions: transactionDbEntities },
 						db => db.accountTransactionsIncoming(testAddress, undefined, testObjectId, 25, 1),
-						[{ 'transaction.recipientAddress': Buffer.from(testAddress) }, testObjectId, 25, { sortOrder: 1 }]
+						[baseCondition, testObjectId, 25, { sortOrder: 1 }]
 					));
 				it('with transaction type filter', () =>
 					runDbWithQueryTransactionsSpy(
 						{ transactions: transactionDbEntities },
 						db => db.accountTransactionsIncoming(testAddress, 0x4154, testObjectId, 25, 1),
 						[
-							{ $and: [{ 'transaction.recipientAddress': Buffer.from(testAddress) }, { 'transaction.type': 0x4154 }] },
+							{ $and: [baseCondition, { 'transaction.type': 0x4154 }] },
 							testObjectId,
 							25,
 							{ sortOrder: 1 }

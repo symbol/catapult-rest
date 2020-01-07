@@ -364,6 +364,8 @@ class CatapultDb {
 	 */
 	accountTransactionsIncoming(accountAddress, transactionType, id, pageSize, ordering) {
 		const bufferAddress = Buffer.from(accountAddress);
+
+		// Search for inner transactions by recipient
 		const conditions = undefined !== transactionType
 			? { $and: [{ 'transaction.recipientAddress': bufferAddress }, { 'transaction.type': transactionType }] }
 			: { 'transaction.recipientAddress': bufferAddress };
