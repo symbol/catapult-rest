@@ -365,12 +365,40 @@ class CatapultDb {
 	accountTransactionsIncoming(accountAddress, transactionType, id, pageSize, ordering) {
 		const bufferAddress = Buffer.from(accountAddress);
 
-		// Search for inner transactions by recipient
-		const conditions = undefined !== transactionType
-			? { $and: [{ 'transaction.recipientAddress': bufferAddress }, { 'transaction.type': transactionType }] }
-			: { 'transaction.recipientAddress': bufferAddress };
+		const getInnerTransactionConditions = () => {
+			const conditions = {
+				$and: [
+					{ 'meta.aggregateId': { $exists: true } },
+					{ 'transaction.recipientAddress': bufferAddress }
+				]
+			};
 
-		return this.queryTransactions(conditions, id, pageSize, { sortOrder: ordering });
+			if (undefined !== transactionType)
+				conditions.$and.push({ 'transaction.type': transactionType });
+
+			return conditions;
+		};
+
+		// Search for inner transactions by recipient address
+		return this.database.collection('transactions')
+			.find(getInnerTransactionConditions())
+			.project({ 'meta.aggregateId': 1 })
+			.toArray()
+			.then(transactions => transactions.map(transaction => transaction.meta.aggregateId))
+			.then(transactionIds => {
+				const baseCondition = {
+					$or: [
+						{ 'transaction.recipientAddress': bufferAddress },
+						{ id: { $in: transactionIds } }
+					]
+				};
+
+				const conditions = undefined !== transactionType
+					? { $and: [baseCondition, { 'transaction.type': transactionType }] }
+					: baseCondition;
+
+				return this.queryTransactions(conditions, id, pageSize, { sortOrder: ordering });
+			});
 	}
 
 	/**
