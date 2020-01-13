@@ -394,7 +394,7 @@ class CatapultDb {
 				};
 
 				const conditions = undefined !== transactionType
-					? { $and: [baseCondition, { 'transaction.type': transactionType }] }
+					? { $and: [{ 'transaction.type': transactionType }, baseCondition] }
 					: baseCondition;
 
 				return this.queryTransactions(conditions, id, pageSize, { sortOrder: ordering });
