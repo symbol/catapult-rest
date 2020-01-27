@@ -54,5 +54,18 @@ module.exports = {
 				res.send({ payload: storageInfo, type: routeResultTypes.storageInfo });
 				next();
 			}));
+
+		server.get('/diagnostic/status', (req, res, next) => {
+			res.send({
+				payload: {
+					statusInfo: {
+						ApiStatus: 'status not implemented',
+						DbStatus: 'status not implemented'
+					}
+				},
+				type: routeResultTypes.statusInfo
+			});
+			return next();
+		});
 	}
 };

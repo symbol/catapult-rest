@@ -94,7 +94,8 @@ describe('model schema builder', () => {
 				'nodeTime',
 				'serverInfo',
 				'stateTree',
-				'storageInfo'
+				'storageInfo',
+				'statusInfo'
 			]);
 		});
 

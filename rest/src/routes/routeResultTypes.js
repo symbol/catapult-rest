@@ -36,5 +36,6 @@ module.exports = {
 
 	// diagnostic
 	serverInfo: 'serverInfo',
-	storageInfo: 'storageInfo'
+	storageInfo: 'storageInfo',
+	statusInfo: 'statusInfo'
 };

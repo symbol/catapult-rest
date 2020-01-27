@@ -56,6 +56,7 @@ describe('model formatter builder', () => {
 				'serverInfo',
 				'stateTree',
 				'storageInfo',
+				'statusInfo',
 				'transactionStatus'
 			]);
 		});

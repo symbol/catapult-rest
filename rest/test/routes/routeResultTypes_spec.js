@@ -37,7 +37,8 @@ describe('routeResultTypes', () => {
 			nodeInfo: 'nodeInfo',
 			nodeTime: 'nodeTime',
 			serverInfo: 'serverInfo',
-			storageInfo: 'storageInfo'
+			storageInfo: 'storageInfo',
+			statusInfo: 'statusInfo'
 		});
 	});
 });
