@@ -90,7 +90,7 @@ module.exports = {
 							db: dbStatus
 						}
 					},
-					type: routeResultTypes.statusInfo
+					type: routeResultTypes.nodeHealth
 				});
 
 				return next();

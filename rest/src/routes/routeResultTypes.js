@@ -33,9 +33,9 @@ module.exports = {
 	transactionStatus: 'transactionStatus',
 	nodeInfo: 'nodeInfo',
 	nodeTime: 'nodeTime',
+	nodeHealth: 'nodeHealth',
 
 	// diagnostic
 	serverInfo: 'serverInfo',
-	storageInfo: 'storageInfo',
-	statusInfo: 'statusInfo'
+	storageInfo: 'storageInfo'
 };

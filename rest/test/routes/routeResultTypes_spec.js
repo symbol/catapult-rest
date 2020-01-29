@@ -36,9 +36,9 @@ describe('routeResultTypes', () => {
 			transactionStatus: 'transactionStatus',
 			nodeInfo: 'nodeInfo',
 			nodeTime: 'nodeTime',
+			nodeHealth: 'nodeHealth',
 			serverInfo: 'serverInfo',
-			storageInfo: 'storageInfo',
-			statusInfo: 'statusInfo'
+			storageInfo: 'storageInfo'
 		});
 	});
 });

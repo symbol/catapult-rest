@@ -95,7 +95,7 @@ describe('model schema builder', () => {
 				'serverInfo',
 				'stateTree',
 				'storageInfo',
-				'statusInfo'
+				'nodeHealth'
 			]);
 		});
 

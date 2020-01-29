@@ -155,7 +155,7 @@ describe('node routes', () => {
 							db: 'OK'
 						}
 					},
-					type: 'statusInfo'
+					type: 'nodeHealth'
 				});
 				expect(mockServer.next.calledOnce).to.equal(true);
 			});

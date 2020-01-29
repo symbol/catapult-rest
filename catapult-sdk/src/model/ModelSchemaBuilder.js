@@ -168,7 +168,7 @@ class ModelSchemaBuilder {
 			},
 			storageInfo: {
 			},
-			statusInfo: {
+			nodeHealth: {
 			}
 
 			// endregion
