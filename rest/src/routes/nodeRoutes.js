@@ -25,7 +25,6 @@ const catapult = require('catapult-sdk');
 
 const packetHeader = catapult.packet.header;
 const { PacketType } = catapult.packet;
-
 const { BinaryParser } = catapult.parser;
 
 const buildResponse = (packet, codec, resultType) => {
@@ -57,6 +56,45 @@ module.exports = {
 					res.send(buildResponse(packet, nodeTimeCodec, routeResultTypes.nodeTime));
 					next();
 				});
+		});
+
+		server.get('/node/health', (req, res, next) => {
+			const tryParseNodeInfoPacket = packet => {
+				try {
+					const binaryParser = new BinaryParser();
+					binaryParser.push(packet.payload);
+					return nodeInfoCodec.deserialize(binaryParser);
+				} catch (error) {
+					return undefined;
+				}
+			};
+
+			const okMessage = 'OK';
+			const downMessage = 'down';
+
+			// Check database status
+			const dbStatus = true === db.database.serverConfig.isConnected() ? okMessage : downMessage;
+
+			// Check apiNode status
+			const packetBuffer = packetHeader.createBuffer(PacketType.nodeDiscoveryPullPing, packetHeader.size);
+			const apiNodeStatus = services.connections.singleUse()
+				.then(connection => connection.pushPull(packetBuffer, services.config.apiNode.timeout))
+				.then(packet => (undefined !== tryParseNodeInfoPacket(packet) ? okMessage : downMessage))
+				.catch(e => e.message);
+
+			return apiNodeStatus.then(status => {
+				res.send({
+					payload: {
+						statusInfo: {
+							apiNode: status,
+							db: dbStatus
+						}
+					},
+					type: routeResultTypes.statusInfo
+				});
+
+				return next();
+			});
 		});
 	}
 };
