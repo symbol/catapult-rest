@@ -59,42 +59,53 @@ module.exports = {
 		});
 
 		server.get('/node/health', (req, res, next) => {
-			const tryParseNodeInfoPacket = packet => {
-				try {
-					const binaryParser = new BinaryParser();
-					binaryParser.push(packet.payload);
-					return nodeInfoCodec.deserialize(binaryParser);
-				} catch (error) {
-					return undefined;
-				}
+			const parseNodeInfoPacket = packet => {
+				const binaryParser = new BinaryParser();
+				binaryParser.push(packet.payload);
+				return nodeInfoCodec.deserialize(binaryParser);
 			};
 
-			const okMessage = 'OK';
-			const downMessage = 'down';
+			const ServiceStatus = Object.freeze({
+				up: 'up',
+				down: 'down'
+			});
 
 			// Check database status
-			const dbStatus = true === db.database.serverConfig.isConnected() ? okMessage : downMessage;
+			const dbStatusPromise = new Promise((resolve, reject) => (db.database.serverConfig.isConnected() ? resolve() : reject()));
 
 			// Check apiNode status
 			const packetBuffer = packetHeader.createBuffer(PacketType.nodeDiscoveryPullPing, packetHeader.size);
-			const apiNodeStatus = services.connections.singleUse()
+			const apiNodeStatusPromise = services.connections.singleUse()
 				.then(connection => connection.pushPull(packetBuffer, services.config.apiNode.timeout))
-				.then(packet => (undefined !== tryParseNodeInfoPacket(packet) ? okMessage : downMessage))
-				.catch(e => e.message);
+				.then(packet => parseNodeInfoPacket(packet));
 
-			return apiNodeStatus.then(status => {
-				res.send({
-					payload: {
-						statusInfo: {
-							apiNode: status,
-							db: dbStatus
-						}
-					},
-					type: routeResultTypes.nodeHealth
+			const allSettled = promises => {
+				const wrappedPromises = promises.map(p => Promise.resolve(p)
+					.then(
+						val => ({ status: 'fulfilled', value: val }),
+						err => ({ status: 'rejected', reason: err })
+					));
+				return Promise.all(wrappedPromises);
+			};
+
+			// Promise.allSettled() is officially supported from Node.js 12.9.0
+			return allSettled([dbStatusPromise, apiNodeStatusPromise])
+				.then(results => {
+					const statusCode = results.some(result => 'fulfilled' !== result.status) ? 503 : 200;
+					const checkResult = result => ('fulfilled' === result.status ? ServiceStatus.up : ServiceStatus.down);
+
+					res.status(statusCode);
+					res.send({
+						payload: {
+							status: {
+								apiNode: checkResult(results[1]),
+								db: checkResult(results[0])
+							}
+						},
+						type: routeResultTypes.nodeHealth
+					});
+					next();
 				});
-
-				return next();
-			});
 		});
 	}
 };

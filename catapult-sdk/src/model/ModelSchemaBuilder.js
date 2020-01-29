@@ -149,6 +149,8 @@ class ModelSchemaBuilder {
 				scoreLow: ModelType.uint64,
 				scoreHigh: ModelType.uint64
 			},
+			nodeHealth: {
+			},
 			nodeInfo: {
 				friendlyName: ModelType.string,
 				host: ModelType.string,
@@ -167,8 +169,6 @@ class ModelSchemaBuilder {
 				tree: { type: ModelType.array, schemaName: ModelType.binary }
 			},
 			storageInfo: {
-			},
-			nodeHealth: {
 			}
 
 			// endregion

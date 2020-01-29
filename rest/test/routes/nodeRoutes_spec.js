@@ -150,9 +150,9 @@ describe('node routes', () => {
 				// Assert
 				expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 					payload: {
-						statusInfo: {
-							apiNode: 'OK',
-							db: 'OK'
+						status: {
+							apiNode: 'up',
+							db: 'up'
 						}
 					},
 					type: 'nodeHealth'

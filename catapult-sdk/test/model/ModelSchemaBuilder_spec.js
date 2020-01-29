@@ -89,13 +89,13 @@ describe('model schema builder', () => {
 
 				'chainStatistic',
 				'chainStatisticCurrent',
+				'nodeHealth',
 				'nodeInfo',
 				'communicationTimestamps',
 				'nodeTime',
 				'serverInfo',
 				'stateTree',
-				'storageInfo',
-				'nodeHealth'
+				'storageInfo'
 			]);
 		});
 
