@@ -25,19 +25,66 @@ const errors = require('../server/errors');
 const catapult = require('catapult-sdk');
 
 const { address, networkInfo } = catapult.model;
+const { parsers } = routeUtils;
+
+const endpoints = {
+	account: {
+		route: '/account',
+		method: 'post',
+		params: {},
+		args: {},
+		bodyParams: {
+			publicKeys: parsers.array(parsers.publicKey),
+			addresses: parsers.array(parsers.accountId)
+		}
+	},
+	accountById: {
+		route: '/account/:accountId',
+		method: 'get',
+		params: {
+			accountId: parsers.accountId
+		},
+		args: {},
+		bodyParams: {}
+	},
+	transctionsByAccountIdAndStatus: {
+		route: '/account/:accountId/:status',
+		method: 'get',
+		params: {
+			accountId: parsers.accountId,
+			status: parsers.string, // does not exist
+			ordering: input => ('id' === input ? 1 : -1)
+		},
+		args: {
+			type: parsers.uint
+		},
+		bodyParams: {}
+	},
+	transactionsOutgoingByAccountId: {
+		route: '/account/:accountId/transactions/outgoing',
+		method: 'get',
+		params: {
+			accountId: parsers.accountId,
+			ordering: input => ('id' === input ? 1 : -1)
+		},
+		args: {
+			type: parsers.uint
+		},
+		bodyParams: {}
+	}
+};
+
+const buildEndpoint = (server, endpoint, endpointLogic) =>
+	server[endpoint.method](endpoint.route, (req, res, next) => {
+		const params = routeUtils.parseParams(req.params, endpoint.params);
+		return endpointLogic(req, res, next, params);
+	});
 
 module.exports = {
 	register: (server, db, services) => {
 		const transactionSender = routeUtils.createSender(routeResultTypes.transaction);
 
-		server.get('/account/:accountId', (req, res, next) => {
-			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-			const sender = routeUtils.createSender(routeResultTypes.account);
-			return db.accountsByIds([{ [type]: accountId }])
-				.then(sender.sendOne(req.params.accountId, res, next));
-		});
-
-		server.post('/account', (req, res, next) => {
+		buildEndpoint(server, endpoints.account, (req, res, next, params, args, bodyParams) => {
 			if (req.params.publicKeys && req.params.addresses)
 				throw errors.createInvalidArgumentError('publicKeys and addresses cannot both be provided');
 
@@ -45,40 +92,43 @@ module.exports = {
 				? { keyName: 'publicKeys', parserName: 'publicKey', type: AccountType.publicKey }
 				: { keyName: 'addresses', parserName: 'address', type: AccountType.address };
 
-			const accountIds = routeUtils.parseArgumentAsArray(req.params, idOptions.keyName, idOptions.parserName);
+			const accountIds = routeUtils.parseParams(req.params, {
+				[idOptions.keyName]: parsers.array(parsers[idOptions.parserName])
+			})[idOptions.keyName];
 			const sender = routeUtils.createSender(routeResultTypes.account);
 
 			return db.accountsByIds(accountIds.map(accountId => ({ [idOptions.type]: accountId })))
 				.then(sender.sendArray(idOptions.keyName, res, next));
 		});
 
-		// region account transactions
+		buildEndpoint(server, endpoints.accountById, (req, res, next, params, args, bodyParams) => {
+			const [type, accountId] = params.accountId;
+			const sender = routeUtils.createSender(routeResultTypes.account);
+			return db.accountsByIds([{ [type]: accountId }])
+				.then(sender.sendOne(req.params.accountId, res, next));
+		});
 
-		const transactionStates = [
-			{ dbPostfix: 'Confirmed', routePostfix: '' },
-			{ dbPostfix: 'Incoming', routePostfix: '/incoming' },
-			{ dbPostfix: 'Unconfirmed', routePostfix: '/unconfirmed' }
-		];
+		buildEndpoint(server, endpoints.transctionsByAccountIdAndStatus, (req, res, next, params, args, bodyParams) => {
+			const dbPostfixByStatus = {
+				transactions: 'Confirmed',
+				'transactions/incoming': 'Incoming',
+				'transactions/unconfirmed': 'Unconfirmed'
+			};
 
-		transactionStates.concat(services.config.transactionStates).forEach(state => {
-			server.get(`/account/:accountId/transactions${state.routePostfix}`, (req, res, next) => {
-				const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-				const transactionType = req.params.type ? routeUtils.parseArgument(req.params, 'type', 'uint') : undefined;
-				const pagingOptions = routeUtils.parsePagingArguments(req.params);
-				const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
+			const [type, accountId] = params.accountId;
+			const transactionType = req.params.type ? routeUtils.parseArgument(req.params, 'type', 'uint') : undefined;
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
+			const accountAddress = (AccountType.publicKey === type)
+				? address.publicKeyToAddress(accountId, networkInfo.networks[services.config.network.name].id)
+				: accountId;
 
-				const accountAddress = (AccountType.publicKey === type)
-					? address.publicKeyToAddress(accountId, networkInfo.networks[services.config.network.name].id)
-					: accountId;
-
-				return db[`accountTransactions${state.dbPostfix}`](
-					accountAddress,
-					transactionType,
-					pagingOptions.id,
-					pagingOptions.pageSize,
-					ordering
-				).then(transactionSender.sendArray('accountId', res, next));
-			});
+			return db[`accountTransactions${dbPostfixByStatus[params.status]}`](
+				accountAddress,
+				transactionType,
+				pagingOptions.id,
+				pagingOptions.pageSize,
+				params.ordering
+			).then(transactionSender.sendArray('accountId', res, next));
 		});
 
 		const accountIdToPublicKey = (type, accountId) => {
@@ -88,20 +138,16 @@ module.exports = {
 			return routeUtils.addressToPublicKey(db, accountId);
 		};
 
-		server.get('/account/:accountId/transactions/outgoing', (req, res, next) => {
-			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-			const transactionType = req.params.type ? routeUtils.parseArgument(req.params, 'type', 'uint') : undefined;
+		buildEndpoint(server, endpoints.transactionsOutgoingByAccountId, (req, res, next, params, args, bodyParams) => {
+			const [type, accountId] = params.accountId;
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.accountTransactionsOutgoing(publicKey, transactionType, pagingOptions.id, pagingOptions.pageSize, ordering)
+				db.accountTransactionsOutgoing(publicKey, params.type, pagingOptions.id, pagingOptions.pageSize, params.ordering)
 					.then(transactionSender.sendArray('accountId', res, next)))
 				.catch(() => {
 					transactionSender.sendArray('accountId', res, next)([]);
 				});
 		});
-
-		// endregion
 	}
 };

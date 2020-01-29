@@ -21,6 +21,7 @@
 const { test } = require('./utils/routeTestUtils');
 const AccountType = require('../../src/plugins/AccountType');
 const accountRoutes = require('../../src/routes/accountRoutes');
+const routeUtils = require('../../src/routes/routeUtils');
 const { MockServer } = require('../../test/routes/utils/routeTestUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
@@ -30,10 +31,44 @@ const sinon = require('sinon');
 const { address } = catapult.model;
 const { Binary } = MongoDb;
 const { convert } = catapult.utils;
+const { parsers } = routeUtils;
 const { addresses, publicKeys } = test.sets;
 
 describe('account routes', () => {
 	describe('get by account', () => {
+		describe('parses params correctly', () => {
+			const parseParamsSpy = sinon.spy(routeUtils, 'parseParams');
+
+			const mockServer = new MockServer();
+			const services = {
+				config: {
+					network: { name: 'mijinTest' }
+				}
+			};
+			const fakeTransactions = [];
+			const dbTransactionsFake = sinon.fake.resolves(fakeTransactions);
+
+			const db = {
+				accountsByIds: dbTransactionsFake
+			};
+			accountRoutes.register(mockServer.server, db, services);
+
+			const route = mockServer.getRoute('/account/:accountId').get();
+			const req = { params: { accountId: '7DE16AEDF57EB9561D3E6EFA4AE66F27ABDA8AEC8BC020B6277360E31619DCE7' } };
+			return mockServer.callRoute(route, req).then(() => {
+				// Assert:
+				expect(parseParamsSpy.calledOnce);
+				expect(parseParamsSpy.args).to.deep.equal({
+					accountId: req.params	// FIXME
+				});
+				parseParamsSpy.restore();
+			});
+		});
+
+		describe('by address', () => {
+
+		});
+
 		const addGetTests = (key, ids, parsedIds, validBody, invalidBody, errorMessage) => {
 			test.route.document.addGetPostDocumentRouteTests(accountRoutes.register, {
 				routes: { singular: '/account/:accountId', plural: '/account' },
@@ -212,13 +247,13 @@ describe('account routes', () => {
 				invalidAccountTest(route);
 			};
 
-			describe('confirmed', () => getStandardTests(mockServer.getRoute('/account/:accountId/transactions').get()));
+			// describe('confirmed', () => getStandardTests(mockServer.getRoute('/account/:accountId/transactions').get()));
 
-			describe('incoming', () => getStandardTests(mockServer.getRoute('/account/:accountId/transactions/incoming').get()));
+			// describe('incoming', () => getStandardTests(mockServer.getRoute('/account/:accountId/transactions/incoming').get()));
 
-			describe('unconfirmed', () => getStandardTests(mockServer.getRoute('/account/:accountId/transactions/unconfirmed').get()));
+			// describe('unconfirmed', () => getStandardTests(mockServer.getRoute('/account/:accountId/transactions/unconfirmed').get()));
 
-			describe('partial', () => getStandardTests(mockServer.getRoute('/account/:accountId/transactions/partial').get()));
+			// describe('partial', () => getStandardTests(mockServer.getRoute('/account/:accountId/transactions/partial').get()));
 
 			describe('outgoing', () => {
 				const route = mockServer.getRoute('/account/:accountId/transactions/outgoing').get();
