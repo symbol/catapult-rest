@@ -66,7 +66,8 @@ describe('all routes', () => {
 
 			'/diagnostic/blocks/:height/limit/:limit',
 			'/diagnostic/server',
-			'/diagnostic/storage'
+			'/diagnostic/storage',
+			'/diagnostic/status'
 		]);
 	});
 

@@ -25,9 +25,6 @@ const diagnosticRoutes = require('../../src/routes/diagnosticRoutes');
 const { expect } = require('chai');
 
 describe('diagnostic routes', () => {
-	const executeRoute = (routeName, db, assertResponse) =>
-		test.route.executeSingle(diagnosticRoutes.register, routeName, 'get', {}, db, undefined, assertResponse);
-
 	describe('blocks', () => {
 		const builder = test.route.document.prepareGetDocumentsRouteTests(diagnosticRoutes.register, {
 			route: '/diagnostic/blocks/:height/limit/:limit',
@@ -71,6 +68,9 @@ describe('diagnostic routes', () => {
 	});
 
 	describe('storage', () => {
+		const executeRoute = (routeName, db, assertResponse) =>
+			test.route.executeSingle(diagnosticRoutes.register, routeName, 'get', {}, db, undefined, assertResponse);
+
 		const createMockStorageInfoDb = (numBlocks, numTransactions, numAccounts) => ({
 			storageInfo: () => Promise.resolve({ numBlocks, numTransactions, numAccounts })
 		});
@@ -86,6 +86,68 @@ describe('diagnostic routes', () => {
 					payload: { numBlocks: 2, numTransactions: 64, numAccounts: 9 },
 					type: 'storageInfo'
 				});
+			});
+		});
+	});
+
+	describe('status', () => {
+		it('can check status', () => {
+			// Arrange:
+			const db = {
+				database: {
+					serverConfig: {
+						isConnected: () => true
+					}
+				}
+			};
+			const publicKeyBuffer = Buffer.from([
+				0xE3, 0x27, 0xC0, 0xF1, 0xC9, 0x97, 0x5C, 0x3A, 0xA5, 0x1B, 0x2A, 0x41, 0x76, 0x81, 0x58, 0xC1,
+				0x07, 0x7D, 0x16, 0xB4, 0x60, 0x99, 0x9A, 0xAB, 0xE7, 0xAD, 0xB5, 0x26, 0x2B, 0xE2, 0x9A, 0x68
+			]);
+			const packet = {
+				type: 601,
+				size: 57,
+				payload: Buffer.concat([
+					Buffer.from([0x31, 0x00, 0x00, 0x00]), // size
+					Buffer.from([0x17, 0x00, 0x00, 0x00]), // version
+					publicKeyBuffer,
+					Buffer.from([0x02, 0x00, 0x00, 0x00]), // roles
+					Buffer.from([0xDC, 0x1E]), // port
+					Buffer.from([0x90]), // network identifier
+					Buffer.from([0x00]), // host size
+					Buffer.from([0x00]) // friendly name size
+				])
+			};
+			const services = {
+				connections: {
+					singleUse: () => new Promise(resolve => {
+						resolve({
+							pushPull: () => new Promise(innerResolve => innerResolve(packet))
+						});
+					})
+				},
+				config: {
+					apiNode: { timeout: 1000 }
+				}
+			};
+
+			const mockServer = new MockServer();
+			diagnosticRoutes.register(mockServer.server, db, services);
+			const route = mockServer.getRoute('/diagnostic/status').get();
+
+			// Act
+			return mockServer.callRoute(route, {}).then(() => {
+				// Assert
+				expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+					payload: {
+						statusInfo: {
+							apiNode: 'OK',
+							db: 'OK'
+						}
+					},
+					type: 'statusInfo'
+				});
+				expect(mockServer.next.calledOnce).to.equal(true);
 			});
 		});
 	});
