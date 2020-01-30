@@ -20,6 +20,7 @@
 
 const { MockServer, test } = require('./utils/routeTestUtils');
 const nodeRoutes = require('../../src/routes/nodeRoutes');
+const errors = require('../../src/server/errors');
 const { expect } = require('chai');
 
 describe('node routes', () => {
@@ -197,21 +198,67 @@ describe('node routes', () => {
 				});
 			});
 
-			it('returns up or down for each service', () => {
+			it('returns down when apiNode service fails partially', () => {
 				// Arrange:
-				const services = serviceCreator(packet);
+				const badPacket = {
+					type: 601,
+					size: 57,
+					payload: Buffer.concat([
+						Buffer.from([0x31, 0x00, 0x00, 0x00]), // size
+						Buffer.from([0x17, 0x00, 0x00, 0x00]) // version
+						// missing fields make it a packet that can not be parsed correctly
+					])
+				};
+				const services = serviceCreator(badPacket);
 				const mockServer = new MockServer();
-				nodeRoutes.register(mockServer.server, createMockDb(false), services);
+				nodeRoutes.register(mockServer.server, createMockDb(true), services);
 				const route = mockServer.getRoute('/node/health').get();
 
 				// Act
 				return mockServer.callRoute(route, {}).then(() => {
 					// Assert
+					expect(mockServer.status.firstCall.args[0]).to.equal(503);
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: {
 							status: {
-								apiNode: 'up',
-								db: 'down'
+								apiNode: 'down',
+								db: 'up'
+							}
+						},
+						type: 'nodeHealth'
+					});
+					expect(mockServer.next.calledOnce).to.equal(true);
+				});
+			});
+
+			it('returns down when apiNode service fails completely', () => {
+				// Arrange:
+				const failingService = {
+					connections: {
+						singleUse: () => new Promise(resolve => {
+							resolve({
+								pushPull: () => Promise.reject(errors.createServiceUnavailableError('connection failed'))
+							});
+						})
+					},
+					config: {
+						apiNode: { timeout: 1000 }
+					}
+				};
+
+				const mockServer = new MockServer();
+				nodeRoutes.register(mockServer.server, createMockDb(true), failingService);
+				const route = mockServer.getRoute('/node/health').get();
+
+				// Act
+				return mockServer.callRoute(route, {}).then(() => {
+					// Assert
+					expect(mockServer.status.firstCall.args[0]).to.equal(503);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+						payload: {
+							status: {
+								apiNode: 'down',
+								db: 'up'
 							}
 						},
 						type: 'nodeHealth'
