@@ -25,5 +25,25 @@ module.exports = {
 			res.send(services.config.network);
 			next();
 		});
+
+		server.get('/network/fees', (req, res, next) => {
+			const average = array => array.reduce((p, c) => p + c, 0) / array.length;
+			const median = array => {
+				array.sort((a, b) => a - b);
+				const mid = array.length / 2;
+				return mid % 1 ? array[mid - 0.5] : (array[mid - 1] + array[mid]) / 2;
+			};
+
+			const maxRollBackBlocks = Math.abs(services.config.network.maxRollBackBlocks) || 1;
+			return db.latestBlocksFeeMultiplier(maxRollBackBlocks).then(feeMultipliers => {
+				res.send({
+					averageFeeMultiplier: average(feeMultipliers),
+					medianFeeMultiplier: median(feeMultipliers),
+					highestFeeMultiplier: Math.max(...feeMultipliers),
+					lowestFeeMultiplier: Math.min(...feeMultipliers)
+				});
+				next();
+			});
+		});
 	}
 };

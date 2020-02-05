@@ -1,7 +1,8 @@
 {
   "network": {
     "name": "mijinTest",
-    "description": "catapult development network"
+    "description": "catapult development network",
+    "maxRollBackBlocks": 300
   },
 
   "port": 3000,
