@@ -34,7 +34,7 @@ module.exports = {
 				return mid % 1 ? array[mid - 0.5] : (array[mid - 1] + array[mid]) / 2;
 			};
 
-			const maxRollBackBlocks = Math.abs(services.config.network.maxRollBackBlocks) || 1;
+			const maxRollBackBlocks = services.config.network.maxRollBackBlocks || 1;
 			return db.latestBlocksFeeMultiplier(maxRollBackBlocks).then(feeMultipliers => {
 				res.send({
 					averageFeeMultiplier: average(feeMultipliers),
