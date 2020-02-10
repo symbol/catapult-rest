@@ -33,13 +33,13 @@ module.exports = {
 				const mid = array.length / 2;
 				return mid % 1 ? array[mid - 0.5] : (array[mid - 1] + array[mid]) / 2;
 			};
-			const round = (num, decimals) => Number(num.toFixed(decimals));
+			const round = num => Number(num.toFixed(2));
 
 			const numBlocksTransactionFeeStats = services.config.numBlocksTransactionFeeStats || 1;
 			return db.latestBlocksFeeMultiplier(numBlocksTransactionFeeStats).then(feeMultipliers => {
 				res.send({
-					averageFeeMultiplier: round(average(feeMultipliers), 2),
-					medianFeeMultiplier: round(median(feeMultipliers), 2),
+					averageFeeMultiplier: round(average(feeMultipliers)),
+					medianFeeMultiplier: round(median(feeMultipliers)),
 					highestFeeMultiplier: Math.max(...feeMultipliers),
 					lowestFeeMultiplier: Math.min(...feeMultipliers)
 				});

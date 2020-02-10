@@ -221,7 +221,7 @@ class CatapultDb {
 	}
 
 	/**
-	 * Retrieves the fee multiplier for the last(higher on the chain) numBlocks blocks
+	 * Retrieves the fee multiplier for the last (higher on the chain) numBlocks blocks
 	 * @param {int} numBlocks Number of blocks to retrieve.
 	 * @returns {Promise} Promise that resolves to feeMultiplier array
 	 */
