@@ -35,8 +35,8 @@ module.exports = {
 			};
 			const round = (num, decimals) => Number(num.toFixed(decimals));
 
-			const maxRollBackBlocks = services.config.network.maxRollBackBlocks || 1;
-			return db.latestBlocksFeeMultiplier(maxRollBackBlocks).then(feeMultipliers => {
+			const numBlocksTransactionFeeStats = services.config.numBlocksTransactionFeeStats || 1;
+			return db.latestBlocksFeeMultiplier(numBlocksTransactionFeeStats).then(feeMultipliers => {
 				res.send({
 					averageFeeMultiplier: round(average(feeMultipliers), 2),
 					medianFeeMultiplier: round(median(feeMultipliers), 2),

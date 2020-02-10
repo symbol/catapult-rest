@@ -50,9 +50,7 @@ describe('network routes', () => {
 			const runNetworkFeesTest = (testName, feeMultipliers, average, median, max, min) => {
 				const services = {
 					config: {
-						network: {
-							maxRollBackBlocks: feeMultipliers.length
-						}
+						numBlocksTransactionFeeStats: feeMultipliers.length
 					}
 				};
 

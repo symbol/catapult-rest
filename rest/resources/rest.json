@@ -1,8 +1,7 @@
 {
   "network": {
     "name": "mijinTest",
-    "description": "catapult development network",
-    "maxRollBackBlocks": 300
+    "description": "catapult development network"
   },
 
   "port": 3000,
@@ -74,5 +73,7 @@
       "maxsize": 20971520,
       "maxFiles": 100
     }
-  }
+  },
+
+  "numBlocksTransactionFeeStats": 300
 }
