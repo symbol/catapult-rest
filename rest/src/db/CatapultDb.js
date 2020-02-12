@@ -237,6 +237,21 @@ class CatapultDb {
 			.then(blocks => Promise.resolve(blocks.map(block => block.block.feeMultiplier)));
 	}
 
+	/**
+	 * Retrieves blocks harvested by account based on signer public key.
+	 * @param {Uint8Array} accountPublicKey Public key of the account harvesting blocks.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @param {object} ordering Page ordering.
+	 * @returns {Promise} Promise that resolves to harvested blocks.
+	 */
+	accountHarvestedBlocks(accountPublicKey, id, pageSize, ordering) {
+		const bufferPublicKey = Buffer.from(accountPublicKey);
+		const conditions = { 'block.signerPublicKey': bufferPublicKey };
+
+		return this.queryPagedDocuments('blocks', conditions, id, pageSize, { sortOrder: ordering });
+	}
+
 	queryDependentDocuments(collectionName, aggregateIds) {
 		if (0 === aggregateIds.length)
 			return Promise.resolve([]);
