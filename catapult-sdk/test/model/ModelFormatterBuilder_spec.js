@@ -46,6 +46,7 @@ describe('model formatter builder', () => {
 			expect(subFormatterTypes).to.deep.equal([
 				'accountWithMetadata',
 				'blockHeaderWithMetadata',
+				'blockHeaderWithMetadataArray',
 				'transactionWithMetadata',
 
 				'chainStatistic',

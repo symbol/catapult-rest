@@ -66,7 +66,7 @@ class ModelSchemaBuilder {
 				blocks: { type: ModelType.array, schemaName: 'blockHeaderWithMetadataArrayElement' }
 			},
 			blockHeaderWithMetadataArrayElement: {
-				id: ModelType.uint64HexIdentifier,
+				id: ModelType.objectId,
 				meta: { type: ModelType.object, schemaName: 'blockHeaderMetadata' },
 				block: { type: ModelType.object, schemaName: 'blockHeader' }
 			},

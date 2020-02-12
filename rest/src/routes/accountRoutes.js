@@ -49,16 +49,14 @@ module.exports = {
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
 
-			return accountIdToPublicKey(type, accountId).then(accountPublicKey => {
+			return accountIdToPublicKey(type, accountId).then(accountPublicKey =>
 				db.accountHarvestedBlocks(accountPublicKey, pagingOptions.id, pagingOptions.pageSize, ordering).then(blocks => {
 					res.send({
 						payload: { blocks },
-						type: ''
-						// type: 'routeResultTypes.blocks'
+						type: routeResultTypes.blocks
 					});
 					next();
-				});
-			});
+				}));
 		});
 
 		server.post('/account', (req, res, next) => {

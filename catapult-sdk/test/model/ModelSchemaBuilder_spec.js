@@ -264,7 +264,6 @@ describe('model schema builder', () => {
 
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
-				'blockHeaderWithMetadataArrayElement.id',
 				'mosaic.id'
 			]);
 		});
@@ -275,6 +274,7 @@ describe('model schema builder', () => {
 
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
+				'blockHeaderWithMetadataArrayElement.id',
 				'transactionMetadata.aggregateId',
 				'transactionMetadata.id'
 			]);
