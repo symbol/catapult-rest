@@ -248,8 +248,12 @@ class CatapultDb {
 	accountHarvestedBlocks(accountPublicKey, id, pageSize, ordering) {
 		const bufferPublicKey = Buffer.from(accountPublicKey);
 		const conditions = { 'block.signerPublicKey': bufferPublicKey };
+		const options = {
+			sortOrder: ordering,
+			projection: { 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 }
+		};
 
-		return this.queryPagedDocuments('blocks', conditions, id, pageSize, { sortOrder: ordering });
+		return this.queryPagedDocuments('blocks', conditions, id, pageSize, options);
 	}
 
 	queryDependentDocuments(collectionName, aggregateIds) {
