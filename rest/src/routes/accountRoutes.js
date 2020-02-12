@@ -81,10 +81,12 @@ module.exports = {
 			{ dbPostfix: 'Unconfirmed', routePostfix: '/unconfirmed' }
 		];
 
+		const parseUintArrayString = arrayString => arrayString.split(',').map(value => routeUtils.parseArgument(value, 'type', 'uint'));
+
 		transactionStates.concat(services.config.transactionStates).forEach(state => {
 			server.get(`/account/:accountId/transactions${state.routePostfix}`, (req, res, next) => {
 				const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-				const transactionType = req.params.type ? routeUtils.parseArgument(req.params, 'type', 'uint') : undefined;
+				const transactionTypes = req.params.type ? parseUintArrayString(req.params.type) : undefined;
 				const pagingOptions = routeUtils.parsePagingArguments(req.params);
 				const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
 
@@ -94,7 +96,7 @@ module.exports = {
 
 				return db[`accountTransactions${state.dbPostfix}`](
 					accountAddress,
-					transactionType,
+					transactionTypes,
 					pagingOptions.id,
 					pagingOptions.pageSize,
 					ordering
@@ -104,12 +106,12 @@ module.exports = {
 
 		server.get('/account/:accountId/transactions/outgoing', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-			const transactionType = req.params.type ? routeUtils.parseArgument(req.params, 'type', 'uint') : undefined;
+			const transactionTypes = req.params.type ? parseUintArrayString(req.params.type) : undefined;
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
 
 			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.accountTransactionsOutgoing(publicKey, transactionType, pagingOptions.id, pagingOptions.pageSize, ordering)
+				db.accountTransactionsOutgoing(publicKey, transactionTypes, pagingOptions.id, pagingOptions.pageSize, ordering)
 					.then(transactionSender.sendArray('accountId', res, next)))
 				.catch(() => {
 					transactionSender.sendArray('accountId', res, next)([]);
