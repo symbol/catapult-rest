@@ -72,6 +72,8 @@ describe('model schema builder', () => {
 				'blockHeader',
 				'blockHeaderMetadata',
 				'blockHeaderWithMetadata',
+				'blockHeaderWithMetadataArray',
+				'blockHeaderWithMetadataArrayElement',
 				'merkleProofInfo',
 				'merkleProofInfoPathNode',
 
@@ -147,6 +149,8 @@ describe('model schema builder', () => {
 			expect(matchingProperties).to.deep.equal([
 				'blockHeaderWithMetadata.meta',
 				'blockHeaderWithMetadata.block',
+				'blockHeaderWithMetadataArrayElement.meta',
+				'blockHeaderWithMetadataArrayElement.block',
 
 				'transactionWithMetadata.meta',
 				'transactionWithMetadata.transaction',
@@ -167,6 +171,7 @@ describe('model schema builder', () => {
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
 				'blockHeaderMetadata.stateHashSubCacheMerkleRoots',
+				'blockHeaderWithMetadataArray.blocks',
 				'merkleProofInfo.merklePath',
 				'account.activityBuckets',
 				'account.mosaics',
@@ -259,6 +264,7 @@ describe('model schema builder', () => {
 
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
+				'blockHeaderWithMetadataArrayElement.id',
 				'mosaic.id'
 			]);
 		});

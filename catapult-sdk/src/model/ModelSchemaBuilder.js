@@ -62,6 +62,14 @@ class ModelSchemaBuilder {
 				meta: { type: ModelType.object, schemaName: 'blockHeaderMetadata' },
 				block: { type: ModelType.object, schemaName: 'blockHeader' }
 			},
+			blockHeaderWithMetadataArray: {
+				blocks: { type: ModelType.array, schemaName: 'blockHeaderWithMetadataArrayElement' }
+			},
+			blockHeaderWithMetadataArrayElement: {
+				id: ModelType.uint64HexIdentifier,
+				meta: { type: ModelType.object, schemaName: 'blockHeaderMetadata' },
+				block: { type: ModelType.object, schemaName: 'blockHeader' }
+			},
 			merkleProofInfo: {
 				merklePath: { type: ModelType.array, schemaName: 'merkleProofInfoPathNode' }
 			},

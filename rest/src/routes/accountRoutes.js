@@ -54,6 +54,7 @@ module.exports = {
 					res.send({
 						payload: { blocks },
 						type: ''
+						// type: 'routeResultTypes.blocks'
 					});
 					next();
 				});

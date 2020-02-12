@@ -253,7 +253,8 @@ class CatapultDb {
 			projection: { 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 }
 		};
 
-		return this.queryPagedDocuments('blocks', conditions, id, pageSize, options);
+		return this.queryPagedDocuments('blocks', conditions, id, pageSize, options).then(blocks =>
+			blocks.map(b => ({ id: b._id, meta: b.meta, block: b.block })));
 	}
 
 	queryDependentDocuments(collectionName, aggregateIds) {
