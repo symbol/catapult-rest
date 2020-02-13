@@ -150,11 +150,19 @@ class CatapultDb {
 
 	queryPagedDocuments(collectionName, conditions, id, pageSize, options = {}) {
 		const sortOrder = options.sortOrder || -1;
-		if (id)
-			conditions.$and.push({ _id: { [0 > sortOrder ? '$lt' : '$gt']: new ObjectId(id) } });
+		let allConditions = conditions;
+
+		if (id) {
+			allConditions = {
+				$and: [
+					{ _id: { [0 > sortOrder ? '$lt' : '$gt']: new ObjectId(id) } },
+					conditions
+				]
+			};
+		}
 
 		const collection = this.database.collection(collectionName);
-		return collection.find(conditions)
+		return collection.find(allConditions)
 			.project(options.projection)
 			.sort({ _id: sortOrder })
 			.limit(boundPageSize(pageSize, this))
