@@ -48,15 +48,11 @@ module.exports = {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
+			const sender = routeUtils.createSender(routeResultTypes.blockWithId);
 
 			return accountIdToPublicKey(type, accountId).then(accountPublicKey =>
-				db.accountHarvestedBlocks(accountPublicKey, pagingOptions.id, pagingOptions.pageSize, ordering).then(blocks => {
-					res.send({
-						payload: { blocks },
-						type: routeResultTypes.blocks
-					});
-					next();
-				}));
+				db.accountHarvestedBlocks(accountPublicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
+					.then(sender.sendArray(accountId, res, next)));
 		});
 
 		server.post('/account', (req, res, next) => {

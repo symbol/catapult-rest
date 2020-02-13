@@ -36,7 +36,7 @@ class ModelFormatterBuilder {
 		this.subFormatterTypes = new Set([
 			'accountWithMetadata',
 			'blockHeaderWithMetadata',
-			'blockHeaderWithMetadataArray',
+			'blockHeaderWithMetadataAndId',
 			'transactionWithMetadata',
 
 			'chainStatistic',
