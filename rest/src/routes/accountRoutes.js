@@ -52,7 +52,10 @@ module.exports = {
 
 			return accountIdToPublicKey(type, accountId).then(accountPublicKey =>
 				db.accountHarvestedBlocks(accountPublicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
-					.then(sender.sendArray(accountId, res, next)));
+					.then(sender.sendArray('accountId', res, next)))
+				.catch(() => {
+					sender.sendArray('accountId', res, next)([]);
+				});
 		});
 
 		server.post('/account', (req, res, next) => {
