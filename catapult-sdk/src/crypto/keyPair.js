@@ -31,10 +31,11 @@ const tweetnacl = require('tweetnacl');
  */
 
 /**
- * A catapult key pair composed of a public and private key.
+ * A catapult key pair composed of a public, a private, and a secret keys.
  * @typedef {object} KeyPair
  * @property {module:crypto/keyPair~PublicKey} publicKey Public key.
  * @property {Uint8Array} privateKey Private key.
+ * @property {Uint8Array} secretKey Secret key.
  */
 
 const keyPairModule = {
@@ -48,7 +49,7 @@ const keyPairModule = {
 		if (32 !== privateKey.length)
 			throw Error(`private key has unexpected size: ${privateKey.length}`);
 
-		return { privateKey, ...tweetnacl.sign.keyPair.fromSeed(privateKey) };
+		return Object.assign({ privateKey }, tweetnacl.sign.keyPair.fromSeed(privateKey));
 	},
 
 	/**
