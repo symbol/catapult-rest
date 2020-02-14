@@ -23,7 +23,31 @@ const convert = require('../../src/utils/convert');
 const test = require('../testUtils');
 const { expect } = require('chai');
 
+
 describe('key pair', () => {
+	describe('SANDBOX', () => {
+		it('custom stuff', () => {
+			const privateKey = 'e8bf9bc0f35c12d8c8bf94dd3a8b5b4034f1063948e3cc5304e55e31aa4b95a6';
+			const keyPair = createKeyPairFromPrivateKeyString(privateKey);
+			expect('0815926E003CDD5AF0113C0E067262307A42CD1E697F53B683F7E5F9F57D72C9').to.equal(convert.uint8ToHex(keyPair.publicKey));
+			console.log('---- OK 1 ----');
+
+
+			const signPrivateKey = 'abf4cf55a2b3f742d7543d9cc17f50447b969e6e06f5ea9195d428ab12b7318d';
+			const signKeyPair = createKeyPairFromPrivateKeyString(signPrivateKey);
+			const dataString = '8ce03cd60514233b86789729102ea09e867fc6d964dea8c2018ef7d0a2e0e24bf7e348e917116690b9';
+			const data = convert.hexToUint8(dataString);
+			const signature = sign(signKeyPair, data);
+			expect('31D272F0662915CAC43AB7D721CAF65D8601F52B2E793EA1533E7BC20E04EA97B74859D9209A7B18DFECFD2C4A42D6957628F5357E3FB8B87CF6A888BAB4280E').to.equal(convert.uint8ToHex(signature));
+			console.log('---- OK 2 ----');
+
+
+			const verification = verify(signKeyPair.publicKey, data, signature);
+			expect(verification).to.equal(true);
+			console.log('---- OK 3 ----');
+		});
+	});
+
 	const Private_Key_Size = 32;
 	const Signature_Size = 64;
 
