@@ -155,8 +155,8 @@ class CatapultDb {
 		if (id) {
 			allConditions = {
 				$and: [
-					{ _id: { [0 > sortOrder ? '$lt' : '$gt']: new ObjectId(id) } },
-					conditions
+					conditions,
+					{ _id: { [0 > sortOrder ? '$lt' : '$gt']: new ObjectId(id) } }
 				]
 			};
 		}
