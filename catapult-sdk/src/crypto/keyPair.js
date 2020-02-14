@@ -165,28 +165,6 @@ catapult.crypto = (() => {
 			c.pack(t, p);
 
 			return 0 === c.crypto_verify_32(signature, 0, t, 0);
-		},
-
-		deriveSharedKey: (salt, sk, pk, hashfunc) => {
-			const c = nacl.catapult;
-			const d = prepareForScalarMult(sk, hashfunc);
-
-			// sharedKey = pack(p = d (derived from sk) * q (derived from pk))
-			const q = [c.gf(), c.gf(), c.gf(), c.gf()];
-			const p = [c.gf(), c.gf(), c.gf(), c.gf()];
-			const sharedKey = new Uint8Array(Key_Size);
-			c.unpackneg(q, pk);
-			c.scalarmult(p, q, d);
-			c.pack(sharedKey, p);
-
-			// salt the shared key
-			for (let i = 0; i < Key_Size; ++i)
-				sharedKey[i] ^= salt[i];
-
-			// return the hash of the result
-			const sharedKeyHash = new Uint8Array(Key_Size);
-			hashfunc(sharedKeyHash, sharedKey, Key_Size);
-			return sharedKeyHash;
 		}
 	};
 })();
@@ -235,22 +213,7 @@ const keyPairModule = {
 	 * @param {Uint8Array} signature Signature to verify.
 	 * @returns {boolean} true if the signature is verifiable, false otherwise.
 	 */
-	verify: (publicKey, data, signature) => catapult.crypto.verify(publicKey, data, signature, catapult.hash.createHasher()),
-
-	/**
-	 * Creates a shared key given a key pair and an arbitrary public key.
-	 * Shared key can be used for encrypted message passing between the two.
-	 * @param {module:crypto/keyPair~KeyPair} keyPair Key pair for which to create the shared key.
-	 * @param {module:crypto/keyPair~PublicKey} publicKey Public key for which to create the shared key.
-	 * @param {Uint8Array} salt A salt that should be applied to the shared key.
-	 * @returns {Uint8Array} Shared key.
-	 */
-	deriveSharedKey: (keyPair, publicKey, salt) => {
-		if (Key_Size !== salt.length)
-			throw Error(`salt has unexpected size: ${salt.length}`);
-
-		return catapult.crypto.deriveSharedKey(salt, keyPair.privateKey, publicKey, catapult.hash.func);
-	}
+	verify: (publicKey, data, signature) => catapult.crypto.verify(publicKey, data, signature, catapult.hash.createHasher())
 };
 
 // endregion

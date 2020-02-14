@@ -18,9 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const {
-	createKeyPairFromPrivateKeyString, sign, verify, deriveSharedKey
-} = require('../../src/crypto/keyPair');
+const { createKeyPairFromPrivateKeyString, sign, verify } = require('../../src/crypto/keyPair');
 const convert = require('../../src/utils/convert');
 const test = require('../testUtils');
 const { expect } = require('chai');
@@ -354,63 +352,6 @@ describe('key pair', () => {
 		it('can verify test vectors as binary', () => {
 			// Assert:
 			assertCanVerifyTestVectors(data => convert.hexToUint8(data));
-		});
-	});
-
-	describe('derive shared key', () => {
-		const Salt_Size = 32;
-
-		it('fails if salt is wrong size', () => {
-			// Arrange: create a salt that is too long
-			const keyPair = test.random.keyPair();
-			const publicKey = test.random.publicKey();
-			const salt = test.random.bytes(Salt_Size + 1);
-
-			// Act:
-			expect(() => { deriveSharedKey(keyPair, publicKey, salt); })
-				.to.throw('salt has unexpected size');
-		});
-
-		it('derives same shared key for both partners', () => {
-			// Arrange:
-			const keyPair1 = test.random.keyPair();
-			const keyPair2 = test.random.keyPair();
-			const salt = test.random.bytes(Salt_Size);
-
-			// Act:
-			const sharedKey1 = deriveSharedKey(keyPair1, keyPair2.publicKey, salt);
-			const sharedKey2 = deriveSharedKey(keyPair2, keyPair1.publicKey, salt);
-
-			// Assert:
-			expect(sharedKey1).to.deep.equal(sharedKey2);
-		});
-
-		it('derives different shared keys for different partners', () => {
-			// Arrange:
-			const keyPair = test.random.keyPair();
-			const publicKey1 = test.random.publicKey();
-			const publicKey2 = test.random.publicKey();
-			const salt = test.random.bytes(Salt_Size);
-
-			// Act:
-			const sharedKey1 = deriveSharedKey(keyPair, publicKey1, salt);
-			const sharedKey2 = deriveSharedKey(keyPair, publicKey2, salt);
-
-			// Assert:
-			expect(sharedKey1).to.not.deep.equal(sharedKey2);
-		});
-
-		it('can derive deterministic shared key from well known inputs', () => {
-			// Arrange:
-			const privateKey = convert.hexToUint8('8F545C2816788AB41D352F236D80DBBCBC34705B5F902EFF1F1D88327C7C1300');
-			const publicKey = convert.hexToUint8('BF684FB1A85A8C8091EE0442EDDB22E51683802AFA0C0E7C6FE3F3E3E87A8D72');
-			const salt = convert.hexToUint8('422C39DF16AAE42A74A5597D6EE2D59CFB4EEB6B3F26D98425B9163A03DAA3B5');
-
-			// Act:
-			const sharedKey = deriveSharedKey({ privateKey }, publicKey, salt);
-
-			// Assert:
-			expect(convert.uint8ToHex(sharedKey)).to.equal('FF9623D28FBC13B6F0E0659117FC7BE294DB3385C046055A6BAC39EDF198D50D');
 		});
 	});
 });
