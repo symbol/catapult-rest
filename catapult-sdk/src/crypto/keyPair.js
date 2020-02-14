@@ -19,17 +19,9 @@
  */
 
 /** @module crypto/keyPair */
-const sha3Hasher = require('./sha3Hasher');
 const convert = require('../utils/convert');
 const tweetnacl = require('tweetnacl');
 
-
-// custom catapult hash functions
-const catapult = {};
-catapult.hash = {
-	func: sha3Hasher.func,
-	createHasher: sha3Hasher.createHasher
-};
 
 // region exported functions
 
