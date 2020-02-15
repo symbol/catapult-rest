@@ -229,6 +229,26 @@ class CatapultDb {
 	}
 
 	/**
+	 * Retrieves blocks based on database field name and value.
+	 * @param {string} fieldName Block field name.
+	 * @param {object} value Value to search for.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @param {object} ordering Page ordering.
+	 * @returns {Promise} Promise that resolves to blocks.
+	 */
+	getBlocksBy(fieldName, value, id, pageSize, ordering) {
+		const conditions = { [`block.${fieldName}`]: value };
+		const options = {
+			sortOrder: ordering,
+			projection: { 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 }
+		};
+
+		return this.queryPagedDocuments('blocks', conditions, id, pageSize, options).then(blocks =>
+			blocks.map(b => ({ id: b._id, meta: b.meta, block: b.block })));
+	}
+
+	/**
 	 * Retrieves the fee multiplier for the last (higher on the chain) numBlocks blocks
 	 * @param {int} numBlocks Number of blocks to retrieve.
 	 * @returns {Promise} Promise that resolves to feeMultiplier array
@@ -243,27 +263,6 @@ class CatapultDb {
 			.project({ 'block.feeMultiplier': 1 })
 			.toArray()
 			.then(blocks => Promise.resolve(blocks.map(block => block.block.feeMultiplier)));
-	}
-
-	/**
-	 * Retrieves blocks by account public key based on fieldName.
-	 * @param {string} fieldName Block field name.
-	 * @param {Uint8Array} accountPublicKey Public key of the account.
-	 * @param {string} id Paging id.
-	 * @param {int} pageSize Page size.
-	 * @param {object} ordering Page ordering.
-	 * @returns {Promise} Promise that resolves to blocks.
-	 */
-	accountBlocksBy(fieldName, accountPublicKey, id, pageSize, ordering) {
-		const bufferPublicKey = Buffer.from(accountPublicKey);
-		const conditions = { [`block.${fieldName}`]: bufferPublicKey };
-		const options = {
-			sortOrder: ordering,
-			projection: { 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 }
-		};
-
-		return this.queryPagedDocuments('blocks', conditions, id, pageSize, options).then(blocks =>
-			blocks.map(b => ({ id: b._id, meta: b.meta, block: b.block })));
 	}
 
 	queryDependentDocuments(collectionName, aggregateIds) {

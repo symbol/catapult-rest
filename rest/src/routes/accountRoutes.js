@@ -44,10 +44,10 @@ module.exports = {
 				.then(sender.sendOne(req.params.accountId, res, next));
 		});
 
-		// Get account blocks by harvested and beneficiary
+		// Get account blocks harvested and beneficiary by public key
 		const accountBlocks = [
-			{ dbParam: 'signerPublicKey', routePostfix: '/harvest' },
-			{ dbParam: 'beneficiaryPublicKey', routePostfix: '/beneficiary' }
+			{ dbField: 'signerPublicKey', routePostfix: '/harvest' },
+			{ dbField: 'beneficiaryPublicKey', routePostfix: '/beneficiary' }
 		];
 
 		accountBlocks.forEach(blockType => {
@@ -58,7 +58,7 @@ module.exports = {
 				const sender = routeUtils.createSender(routeResultTypes.blockWithId);
 
 				return accountIdToPublicKey(type, accountId).then(accountPublicKey =>
-					db.accountBlocksBy(blockType.dbParam, accountPublicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
+					db.getBlocksBy(blockType.dbField, Buffer.from(accountPublicKey), pagingOptions.id, pagingOptions.pageSize, ordering)
 						.then(sender.sendArray('accountId', res, next)))
 					.catch(() => {
 						sender.sendArray('accountId', res, next)([]);
