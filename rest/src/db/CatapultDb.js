@@ -246,16 +246,17 @@ class CatapultDb {
 	}
 
 	/**
-	 * Retrieves blocks harvested by account based on signer public key.
-	 * @param {Uint8Array} accountPublicKey Public key of the account harvesting blocks.
+	 * Retrieves blocks by account public key based on fieldName.
+	 * @param {string} fieldName Block field name.
+	 * @param {Uint8Array} accountPublicKey Public key of the account.
 	 * @param {string} id Paging id.
 	 * @param {int} pageSize Page size.
 	 * @param {object} ordering Page ordering.
-	 * @returns {Promise} Promise that resolves to harvested blocks.
+	 * @returns {Promise} Promise that resolves to blocks.
 	 */
-	accountHarvestedBlocks(accountPublicKey, id, pageSize, ordering) {
+	accountBlocksBy(fieldName, accountPublicKey, id, pageSize, ordering) {
 		const bufferPublicKey = Buffer.from(accountPublicKey);
-		const conditions = { 'block.signerPublicKey': bufferPublicKey };
+		const conditions = { [`block.${fieldName}`]: bufferPublicKey };
 		const options = {
 			sortOrder: ordering,
 			projection: { 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 }

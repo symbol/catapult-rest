@@ -44,18 +44,26 @@ module.exports = {
 				.then(sender.sendOne(req.params.accountId, res, next));
 		});
 
-		server.get('/account/:accountId/harvest', (req, res, next) => {
-			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
-			const sender = routeUtils.createSender(routeResultTypes.blockWithId);
+		// Get account blocks by harvested and beneficiary
+		const accountBlocks = [
+			{ dbParam: 'signerPublicKey', routePostfix: '/harvest' },
+			{ dbParam: 'beneficiaryPublicKey', routePostfix: '/beneficiary' }
+		];
 
-			return accountIdToPublicKey(type, accountId).then(accountPublicKey =>
-				db.accountHarvestedBlocks(accountPublicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
-					.then(sender.sendArray('accountId', res, next)))
-				.catch(() => {
-					sender.sendArray('accountId', res, next)([]);
-				});
+		accountBlocks.forEach(blockType => {
+			server.get(`/account/:accountId${blockType.routePostfix}`, (req, res, next) => {
+				const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+				const pagingOptions = routeUtils.parsePagingArguments(req.params);
+				const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
+				const sender = routeUtils.createSender(routeResultTypes.blockWithId);
+
+				return accountIdToPublicKey(type, accountId).then(accountPublicKey =>
+					db.accountBlocksBy(blockType.dbParam, accountPublicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
+						.then(sender.sendArray('accountId', res, next)))
+					.catch(() => {
+						sender.sendArray('accountId', res, next)([]);
+					});
+			});
 		});
 
 		server.post('/account', (req, res, next) => {
