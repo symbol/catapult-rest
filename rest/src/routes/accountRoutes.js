@@ -81,7 +81,8 @@ module.exports = {
 			{ dbPostfix: 'Unconfirmed', routePostfix: '/unconfirmed' }
 		];
 
-		const parseUintArrayString = arrayString => arrayString.split(',').map(value => routeUtils.parseArgument(value, 'type', 'uint'));
+		const parseUintArrayString = arrayString =>
+			routeUtils.parseArgumentAsArray({ param: arrayString.split(',') }, 'param', 'uint');
 
 		transactionStates.concat(services.config.transactionStates).forEach(state => {
 			server.get(`/account/:accountId/transactions${state.routePostfix}`, (req, res, next) => {
