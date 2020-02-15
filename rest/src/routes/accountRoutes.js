@@ -46,8 +46,8 @@ module.exports = {
 
 		// Get account blocks harvested and beneficiary by public key
 		const accountBlocks = [
-			{ dbField: 'signerPublicKey', routePostfix: '/harvest' },
-			{ dbField: 'beneficiaryPublicKey', routePostfix: '/beneficiary' }
+			{ dbField: 'block.signerPublicKey', routePostfix: '/harvest' },
+			{ dbField: 'block.beneficiaryPublicKey', routePostfix: '/beneficiary' }
 		];
 
 		accountBlocks.forEach(blockType => {

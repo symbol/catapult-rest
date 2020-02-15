@@ -238,7 +238,7 @@ class CatapultDb {
 	 * @returns {Promise} Promise that resolves to blocks.
 	 */
 	getBlocksBy(fieldName, value, id, pageSize, ordering) {
-		const conditions = { [`block.${fieldName}`]: value };
+		const conditions = { [fieldName]: value };
 		const options = {
 			sortOrder: ordering,
 			projection: { 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 }
