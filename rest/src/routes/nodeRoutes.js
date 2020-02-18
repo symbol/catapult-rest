@@ -22,6 +22,7 @@ const routeResultTypes = require('./routeResultTypes');
 const { version: sdkVersion } = require('../../../catapult-sdk/package.json');
 const { version: restVersion } = require('../../package.json');
 const nodeInfoCodec = require('../sockets/nodeInfoCodec');
+const nodePeersCodec = require('../sockets/nodePeersCodec');
 const nodeTimeCodec = require('../sockets/nodeTimeCodec');
 const catapult = require('catapult-sdk');
 
@@ -96,6 +97,16 @@ module.exports = {
 				.then(connection => connection.pushPull(packetBuffer, timeout))
 				.then(packet => {
 					res.send(buildResponse(packet, nodeInfoCodec, routeResultTypes.nodeInfo));
+					next();
+				});
+		});
+
+		server.get('/node/peers', (req, res, next) => {
+			const packetBuffer = packetHeader.createBuffer(PacketType.nodeDiscoveryPullPeers, packetHeader.size);
+			return connections.singleUse()
+				.then(connection => connection.pushPull(packetBuffer, timeout))
+				.then(packet => {
+					res.send(buildResponse(packet, nodePeersCodec, routeResultTypes.nodeInfo));
 					next();
 				});
 		});
