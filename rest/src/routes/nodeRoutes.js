@@ -40,26 +40,6 @@ module.exports = {
 		const { connections } = services;
 		const { timeout } = services.config.apiNode;
 
-		server.get('/node/info', (req, res, next) => {
-			const packetBuffer = packetHeader.createBuffer(PacketType.nodeDiscoveryPullPing, packetHeader.size);
-			return connections.singleUse()
-				.then(connection => connection.pushPull(packetBuffer, timeout))
-				.then(packet => {
-					res.send(buildResponse(packet, nodeInfoCodec, routeResultTypes.nodeInfo));
-					next();
-				});
-		});
-
-		server.get('/node/time', (req, res, next) => {
-			const packetBuffer = packetHeader.createBuffer(PacketType.timeSyncNodeTime, packetHeader.size);
-			return connections.singleUse()
-				.then(connection => connection.pushPull(packetBuffer, timeout))
-				.then(packet => {
-					res.send(buildResponse(packet, nodeTimeCodec, routeResultTypes.nodeTime));
-					next();
-				});
-		});
-
 		server.get('/node/health', (req, res, next) => {
 			const parseNodeInfoPacket = packet => {
 				const binaryParser = new BinaryParser();
@@ -110,6 +90,16 @@ module.exports = {
 				});
 		});
 
+		server.get('/node/info', (req, res, next) => {
+			const packetBuffer = packetHeader.createBuffer(PacketType.nodeDiscoveryPullPing, packetHeader.size);
+			return connections.singleUse()
+				.then(connection => connection.pushPull(packetBuffer, timeout))
+				.then(packet => {
+					res.send(buildResponse(packet, nodeInfoCodec, routeResultTypes.nodeInfo));
+					next();
+				});
+		});
+
 		server.get('/node/server', (req, res, next) => {
 			res.send({
 				payload: {
@@ -128,5 +118,15 @@ module.exports = {
 				res.send({ payload: storageInfo, type: routeResultTypes.storageInfo });
 				next();
 			}));
+
+		server.get('/node/time', (req, res, next) => {
+			const packetBuffer = packetHeader.createBuffer(PacketType.timeSyncNodeTime, packetHeader.size);
+			return connections.singleUse()
+				.then(connection => connection.pushPull(packetBuffer, timeout))
+				.then(packet => {
+					res.send(buildResponse(packet, nodeTimeCodec, routeResultTypes.nodeTime));
+					next();
+				});
+		});
 	}
 };
