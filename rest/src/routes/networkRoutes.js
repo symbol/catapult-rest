@@ -36,9 +36,7 @@ module.exports = {
 		const readAndParseNetworkPropertiesFile = () => {
 			const readFile = util.promisify(fs.readFile);
 			return readFile(services.config.network.propertiesFilePath, 'utf8')
-				.then(fileData => ini.parse(fileData))
-				.then(parsedData => Promise.resolve(parsedData))
-				.catch(() => Promise.reject(Error('there was an error reading the network properties file')));
+				.then(fileData => ini.parse(fileData));
 		};
 
 		server.get('/network', (req, res, next) => {
