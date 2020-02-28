@@ -33,28 +33,31 @@ module.exports = {
 		};
 		const round = num => Number(num.toFixed(2));
 
+		const readAndParseNetworkPropertiesFile = () => {
+			const readFile = util.promisify(fs.readFile);
+			return readFile(services.config.network.propertiesFilePath, 'utf8')
+				.then(fileData => ini.parse(fileData))
+				.then(parsedData => Promise.resolve(parsedData))
+				.catch(() => Promise.reject(Error('there was an error reading the network properties file')));
+		};
+
 		server.get('/network', (req, res, next) => {
 			res.send({ name: services.config.network.name, description: services.config.network.description });
 			next();
 		});
 
-		server.get('/network/properties', (req, res, next) => {
-			const readFile = util.promisify(fs.readFile);
-			return readFile(services.config.network.propertiesFilePath, 'utf8')
-				.then(fileData => ini.parse(fileData))
-				.then(propertiesObject => {
-					res.send({
-						network: propertiesObject.network,
-						chain: propertiesObject.chain,
-						plugins: propertiesObject['plugin:catapult'].plugins
-					});
-					next();
-				})
-				.catch(() => {
-					res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
-					next();
+		server.get('/network/properties', (req, res, next) => readAndParseNetworkPropertiesFile()
+			.then(propertiesObject => {
+				res.send({
+					network: propertiesObject.network,
+					chain: propertiesObject.chain,
+					plugins: propertiesObject['plugin:catapult'].plugins
 				});
-		});
+				next();
+			}).catch(() => {
+				res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
+				next();
+			}));
 
 		server.get('/network/fees/transaction', (req, res, next) => {
 			const numBlocksTransactionFeeStats = services.config.numBlocksTransactionFeeStats || 1;
@@ -70,45 +73,40 @@ module.exports = {
 		});
 
 		server.get('/network/effectiveRentalFees', (req, res, next) => {
-			const parseIntProperty = (value, radix = 10) => parseInt(value.replace(/[^0-9]/g, ''), radix);
+			const parseIntProperty = (value, radix = 10) => parseInt((value || '').replace(/[^0-9]/g, ''), radix);
 
-			const readFile = util.promisify(fs.readFile);
-			return readFile(services.config.network.propertiesFilePath, 'utf8')
-				.then(fileData => ini.parse(fileData))
-				.then(propertiesObject => {
-					const maxDifficultyBlocks = parseIntProperty(propertiesObject.chain.maxDifficultyBlocks);
-					const defaultDynamicFeeMultiplier = parseIntProperty(propertiesObject.chain.defaultDynamicFeeMultiplier);
-					const rootNamespaceRentalFeePerBlock = parseIntProperty(
-						propertiesObject['plugin:catapult'].plugins.namespace.rootNamespaceRentalFeePerBlock
-					);
-					const childNamespaceRentalFee = parseIntProperty(
-						propertiesObject['plugin:catapult'].plugins.namespace.childNamespaceRentalFee
-					);
-					const mosaicRentalFee = parseIntProperty(
-						propertiesObject['plugin:catapult'].plugins.mosaic.mosaicRentalFee
-					);
+			return readAndParseNetworkPropertiesFile().then(propertiesObject => {
+				const maxDifficultyBlocks = parseIntProperty(
+					propertiesObject.chain.maxDifficultyBlocks
+				);
+				const defaultDynamicFeeMultiplier = parseIntProperty(
+					propertiesObject.chain.defaultDynamicFeeMultiplier
+				);
+				const rootNamespaceRentalFeePerBlock = parseIntProperty(
+					propertiesObject['plugin:catapult'].plugins.namespace.rootNamespaceRentalFeePerBlock
+				);
+				const childNamespaceRentalFee = parseIntProperty(
+					propertiesObject['plugin:catapult'].plugins.namespace.childNamespaceRentalFee
+				);
+				const mosaicRentalFee = parseIntProperty(
+					propertiesObject['plugin:catapult'].plugins.mosaic.mosaicRentalFee
+				);
 
-					return db.latestBlocksFeeMultiplier(maxDifficultyBlocks || 1).then(feeMultipliers => {
-						const defaultedFeeMultipliers = feeMultipliers.map(f => (0 === f ? defaultDynamicFeeMultiplier : f));
+				return db.latestBlocksFeeMultiplier(maxDifficultyBlocks || 1).then(feeMultipliers => {
+					const defaultedFeeMultipliers = feeMultipliers.map(f => (0 === f ? defaultDynamicFeeMultiplier : f));
+					const medianNetworkMultiplier = median(defaultedFeeMultipliers);
 
-						const medianNetworkMultiplier = median(defaultedFeeMultipliers);
-
-						const namespaceRentalEffectiveFee = rootNamespaceRentalFeePerBlock * medianNetworkMultiplier;
-						const effectiveChildNamespaceRentalFee = childNamespaceRentalFee * medianNetworkMultiplier;
-						const effectiveMosaicRentalFee = mosaicRentalFee * medianNetworkMultiplier;
-
-						res.send({
-							effectiveRootNamespaceRentalFeePerBlock: round(namespaceRentalEffectiveFee),
-							effectiveChildNamespaceRentalFee: round(effectiveChildNamespaceRentalFee),
-							effectiveMosaicRentalFee: round(effectiveMosaicRentalFee)
-						});
-						next();
+					res.send({
+						effectiveRootNamespaceRentalFeePerBlock: round(rootNamespaceRentalFeePerBlock * medianNetworkMultiplier),
+						effectiveChildNamespaceRentalFee: round(childNamespaceRentalFee * medianNetworkMultiplier),
+						effectiveMosaicRentalFee: round(mosaicRentalFee * medianNetworkMultiplier)
 					});
-				})
-				.catch(() => {
-					res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
 					next();
 				});
+			}).catch(() => {
+				res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
+				next();
+			});
 		});
 	}
 };
