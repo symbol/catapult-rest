@@ -208,5 +208,78 @@ describe('network routes', () => {
 				runNetworkFeesTest('Correct decimals', [23.33, 29.73, 31.53, 27.53], 28.03, 28.63, 31.53, 23.33);
 			});
 		});
+
+		describe('network effective rental fees', () => {
+			it('can retrieve network properties needed for rental fees', () => {
+				const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
+					callback(null, '[chain]\n'
+						+ 'maxDifficultyBlocks = 5\n'
+						+ 'defaultDynamicFeeMultiplier = 1\'000\n'
+						+ '[plugin:catapult.plugins.namespace]\n'
+						+ 'rootNamespaceRentalFeePerBlock = 1\'000\n'
+						+ 'childNamespaceRentalFee = 100\n'
+						+ '[plugin:catapult.plugins.mosaic]\n'
+						+ 'mosaicRentalFee = 500'));
+
+				const dbLatestBlocksFeeMultiplierFake = sinon.fake.resolves([0, 1, 2, 3, 4]);
+				const db = {
+					latestBlocksFeeMultiplier: dbLatestBlocksFeeMultiplierFake
+				};
+				const services = { config: { network: { propertiesFilePath: 'wouldBeValidFilePath' } } };
+				const mockServer = new MockServer();
+
+				networkRoutes.register(mockServer.server, db, services);
+
+				const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+				return mockServer.callRoute(route).then(() => {
+					expect(mockServer.next.calledOnce).to.equal(true);
+					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+						effectiveChildNamespaceRentalFee: 300,
+						effectiveMosaicRentalFee: 1500,
+						effectiveRootNamespaceRentalFeePerBlock: 3000
+					});
+					readFileStub.restore();
+				});
+			});
+
+			it('errors if no file path specified', () => {
+				const mockServer = new MockServer();
+				networkRoutes.register(mockServer.server, {}, { config: { network: {} } });
+
+				const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+				return mockServer.callRoute(route).then(() => {
+					expect(mockServer.send.firstCall.args[0].statusCode).to.equal(409);
+					expect(mockServer.send.firstCall.args[0].message).to.equal('there was an error reading the network properties file');
+				});
+			});
+
+			it('errors when the file has an invalid format', () => {
+				const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
+					callback(null, '{ "not": "iniFormat" }'));
+
+				const services = { config: { network: {} } };
+				const mockServer = new MockServer();
+
+				networkRoutes.register(mockServer.server, {}, services);
+
+				const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+				return mockServer.callRoute(route).then(() => {
+					expect(mockServer.send.firstCall.args[0].statusCode).to.equal(409);
+					expect(mockServer.send.firstCall.args[0].message).to.equal('there was an error reading the network properties file');
+					readFileStub.restore();
+				});
+			});
+
+			it('errors if the file does not exist', () => {
+				const mockServer = new MockServer();
+				networkRoutes.register(mockServer.server, {}, { config: { network: { propertiesFilePath: 'nowaythispath€xists' } } });
+
+				const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+				return mockServer.callRoute(route).then(() => {
+					expect(mockServer.send.firstCall.args[0].statusCode).to.equal(409);
+					expect(mockServer.send.firstCall.args[0].message).to.equal('there was an error reading the network properties file');
+				});
+			});
+		});
 	});
 });
