@@ -280,6 +280,84 @@ describe('network routes', () => {
 					expect(mockServer.send.firstCall.args[0].message).to.equal('there was an error reading the network properties file');
 				});
 			});
+
+			const runNetworkEffectiveRentalFeesTest = (
+				testName,
+				maxDifficultyBlocks,
+				defaultDynamicFeeMultiplier,
+				rootNamespaceRentalFeePerBlock,
+				childNamespaceRentalFee,
+				mosaicRentalFee,
+				feeMultipliers,
+				effectiveRootNamespaceRentalFeePerBlock,
+				effectiveChildNamespaceRentalFee,
+				effectiveMosaicRentalFee
+			) => {
+				it(`${testName}: [${[feeMultipliers]}]`, () => {
+					const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
+						callback(null, '[chain]\n'
+							+ `maxDifficultyBlocks = ${maxDifficultyBlocks}\n`
+							+ `defaultDynamicFeeMultiplier = ${defaultDynamicFeeMultiplier}\n`
+							+ '[plugin:catapult.plugins.namespace]\n'
+							+ `rootNamespaceRentalFeePerBlock = ${rootNamespaceRentalFeePerBlock}\n`
+							+ `childNamespaceRentalFee = ${childNamespaceRentalFee}\n`
+							+ '[plugin:catapult.plugins.mosaic]\n'
+							+ `mosaicRentalFee = ${mosaicRentalFee}`));
+
+					const dbLatestBlocksFeeMultiplierFake = sinon.fake.resolves(feeMultipliers);
+					const db = {
+						latestBlocksFeeMultiplier: dbLatestBlocksFeeMultiplierFake
+					};
+					const services = { config: { network: { propertiesFilePath: 'wouldBeValidFilePath' } } };
+					const mockServer = new MockServer();
+
+					networkRoutes.register(mockServer.server, db, services);
+
+					const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+					return mockServer.callRoute(route).then(() => {
+						expect(mockServer.next.calledOnce).to.equal(true);
+						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+							effectiveChildNamespaceRentalFee,
+							effectiveMosaicRentalFee,
+							effectiveRootNamespaceRentalFeePerBlock
+						});
+						readFileStub.restore();
+					});
+				});
+			};
+
+			describe('network effective rental fees are computed correctly for the following values', () => {
+				runNetworkEffectiveRentalFeesTest(
+					'Simple all 1', 1,
+					0, 1, 1, 1, [1],
+					1, 1, 1
+				);
+				runNetworkEffectiveRentalFeesTest(
+					'No need for default dynamic fee multiplier', 3,
+					0, 1, 1, 1, [1, 2, 3],
+					2, 2, 2
+				);
+				runNetworkEffectiveRentalFeesTest(
+					'Default dynamic fee multiplier applied', 3,
+					5, 1, 1, 1, [5, 0, 5],
+					5, 5, 5
+				);
+				runNetworkEffectiveRentalFeesTest(
+					'Standard case', 5,
+					0, 1, 2, 3, [10, 10, 25, 50, 50],
+					25, 50, 75
+				);
+				runNetworkEffectiveRentalFeesTest(
+					'Decimals', 6,
+					0, 1, 1, 1, [10, 10, 20, 29, 50, 50],
+					24.5, 24.5, 24.5
+				);
+				runNetworkEffectiveRentalFeesTest(
+					'Decimals', 3,
+					0, 2, 3, 4, [20, 31.53, 50],
+					63.06, 94.59, 126.12
+				);
+			});
 		});
 	});
 });
