@@ -239,4 +239,36 @@ describe('uint64', () => {
 			expect(uint64.toString([3127188303, 2974383967])).to.equal('12774881867138931535');
 		});
 	});
+
+	describe('fromString', () => {
+		const failureTestCases = [
+			{ str: '', value: [4294967295, 4294967295], description: 'empty string' },
+			{ str: undefined, value: [4294967295, 4294967295], description: 'undefined string' },
+			{ str: null, value: [4294967295, 4294967295], description: 'null string' },
+			{ str: '3546.5446', value: [4294967295, 4294967295], description: 'decimals' },
+			{ str: '35,44,56\'46.5446', value: [4294967295, 4294967295], description: 'wrong characters' },
+			{ str: 's4565678', value: [4294967295, 4294967295], description: 'wrong string' }
+		];
+
+		failureTestCases.forEach(testCase => {
+			it(`cannot parse numeric strings into uint64 (${testCase.description})`, () => {
+				expect(() => uint64.fromString(testCase.str)).to.throw(`input string is not a valid numeric string '${testCase.str}'`);
+			});
+		});
+
+		const successTestCases = [
+			{ str: '0', value: [0, 0], description: 'min value' },
+			{ str: '5678', value: [5678, 0], description: 'small number' },
+			{ str: '8765873000863846', value: [3663517798, 2040963], description: 'big number' },
+			{ str: '4294967295', value: [4294967295, 0], description: 'max 32 bits' },
+			{ str: '9007199254740993', value: [1, 2097152], description: 'max safe intger + 2' },
+			{ str: '18446744073709551615', value: [4294967295, 4294967295], description: 'max value' }
+		];
+
+		successTestCases.forEach(testCase => {
+			it(`can parse numeric strings into uint64 (${testCase.description})`, () => {
+				expect(uint64.fromString(testCase.str)).to.deep.equal(testCase.value);
+			});
+		});
+	});
 });

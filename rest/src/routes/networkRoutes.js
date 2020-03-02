@@ -70,22 +70,30 @@ module.exports = {
 			});
 		});
 
-		server.get('/network/effectiveRentalFees', (req, res, next) => {
+		server.get('/network/fees/rental', (req, res, next) => {
 			const parseIntProperty = (value, radix = 10) => parseInt((value || '').replace(/[^0-9]/g, ''), radix);
 
 			return readAndParseNetworkPropertiesFile().then(propertiesObject => {
 				const maxDifficultyBlocks = parseIntProperty(
 					propertiesObject.chain.maxDifficultyBlocks
 				);
+
+				// defaultDynamicFeeMultiplier -> uint32
 				const defaultDynamicFeeMultiplier = parseIntProperty(
 					propertiesObject.chain.defaultDynamicFeeMultiplier
 				);
+
+				// rootNamespaceRentalFeePerBlock -> uint64
 				const rootNamespaceRentalFeePerBlock = parseIntProperty(
 					propertiesObject['plugin:catapult'].plugins.namespace.rootNamespaceRentalFeePerBlock
 				);
+
+				// childNamespaceRentalFee -> uint64
 				const childNamespaceRentalFee = parseIntProperty(
 					propertiesObject['plugin:catapult'].plugins.namespace.childNamespaceRentalFee
 				);
+
+				// mosaicRentalFee -> uint64
 				const mosaicRentalFee = parseIntProperty(
 					propertiesObject['plugin:catapult'].plugins.mosaic.mosaicRentalFee
 				);

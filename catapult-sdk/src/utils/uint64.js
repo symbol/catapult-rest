@@ -21,6 +21,7 @@
 /** @module utils/uint64 */
 
 const convert = require('./convert');
+const Long = require('long');
 
 const readUint32At = (bytes, i) => (bytes[i] + (bytes[i + 1] << 8) + (bytes[i + 2] << 16) + (bytes[i + 3] << 24)) >>> 0;
 
@@ -139,6 +140,19 @@ const uint64Module = {
 			}
 		}
 		return digits.reverse().join('');
+	},
+
+	/**
+	 * Converts a numeric string representing an unsigned integer into uint64.
+	 * @param {string} input A string representing the uint64.
+	 * @returns {module:utils/uint64~uint64} A uint64 value.
+	 */
+	fromString: input => {
+		if (!/^\d+$/.test(input) || ('' === input) || (undefined === input) || (null === input))
+			throw Error(`input string is not a valid numeric string '${input}'`);
+
+		const inputLong = Long.fromString(input, true, 10);
+		return ([inputLong.getLowBitsUnsigned(), inputLong.getHighBitsUnsigned()]);
 	}
 };
 

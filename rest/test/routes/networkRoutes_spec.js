@@ -230,7 +230,7 @@ describe('network routes', () => {
 
 				networkRoutes.register(mockServer.server, db, services);
 
-				const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+				const route = mockServer.getRoute('/network/fees/rental').get();
 				return mockServer.callRoute(route).then(() => {
 					expect(mockServer.next.calledOnce).to.equal(true);
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
@@ -246,7 +246,7 @@ describe('network routes', () => {
 				const mockServer = new MockServer();
 				networkRoutes.register(mockServer.server, {}, { config: { network: {} } });
 
-				const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+				const route = mockServer.getRoute('/network/fees/rental').get();
 				return mockServer.callRoute(route).then(() => {
 					expect(mockServer.send.firstCall.args[0].statusCode).to.equal(409);
 					expect(mockServer.send.firstCall.args[0].message).to.equal('there was an error reading the network properties file');
@@ -262,7 +262,7 @@ describe('network routes', () => {
 
 				networkRoutes.register(mockServer.server, {}, services);
 
-				const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+				const route = mockServer.getRoute('/network/fees/rental').get();
 				return mockServer.callRoute(route).then(() => {
 					expect(mockServer.send.firstCall.args[0].statusCode).to.equal(409);
 					expect(mockServer.send.firstCall.args[0].message).to.equal('there was an error reading the network properties file');
@@ -274,7 +274,7 @@ describe('network routes', () => {
 				const mockServer = new MockServer();
 				networkRoutes.register(mockServer.server, {}, { config: { network: { propertiesFilePath: 'nowaythispath€xists' } } });
 
-				const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+				const route = mockServer.getRoute('/network/fees/rental').get();
 				return mockServer.callRoute(route).then(() => {
 					expect(mockServer.send.firstCall.args[0].statusCode).to.equal(409);
 					expect(mockServer.send.firstCall.args[0].message).to.equal('there was an error reading the network properties file');
@@ -313,7 +313,7 @@ describe('network routes', () => {
 
 					networkRoutes.register(mockServer.server, db, services);
 
-					const route = mockServer.getRoute('/network/effectiveRentalFees').get();
+					const route = mockServer.getRoute('/network/fees/rental').get();
 					return mockServer.callRoute(route).then(() => {
 						expect(mockServer.next.calledOnce).to.equal(true);
 						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
