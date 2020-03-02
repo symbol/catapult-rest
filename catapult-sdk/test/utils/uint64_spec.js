@@ -232,11 +232,19 @@ describe('uint64', () => {
 	});
 
 	describe('toString', () => {
-		it('parses uint64 values correctly', () => {
-			expect(uint64.toString([0, 0])).to.equal('0');	// min value
-			expect(uint64.toString([4294967295, 4294967295])).to.equal('18446744073709551615');	// max value
-			expect(uint64.toString([65436453, 45])).to.equal('193338964773');
-			expect(uint64.toString([3127188303, 2974383967])).to.equal('12774881867138931535');
+		const successTestCases = [
+			{ str: '0', value: [0, 0], description: 'min value' },
+			{ str: '4294967295', value: [4294967295, 0], description: '8 significant digits' },
+			{ str: '18446744069414584320', value: [0, 4294967295], description: '(0, 8) significant digits' },
+			{ str: '193338964773', value: [65436453, 45], description: 'number' },
+			{ str: '12774881867138931535', value: [3127188303, 2974383967], description: 'big number' },
+			{ str: '18446744073709551615', value: [4294967295, 4294967295], description: 'max value' }
+		];
+
+		successTestCases.forEach(testCase => {
+			it(`can parse uint64 values to string (${testCase.description})`, () => {
+				expect(uint64.toString(testCase.value)).to.deep.equal(testCase.str);
+			});
 		});
 	});
 

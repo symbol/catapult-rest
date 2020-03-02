@@ -124,23 +124,7 @@ const uint64Module = {
 	 * @param {module:utils/uint64~uint64} uint64 A uint64 value.
 	 * @returns {string} A numeric string representation of the input.
 	 */
-	toString: uint64 => {
-		const hexUint64 = uint64Module.toHex(uint64);
-		const digits = [0];
-		for (let i = 0; i < hexUint64.length; i += 1) {
-			let carry = parseInt(hexUint64.charAt(i), 16);
-			for (let j = 0; j < digits.length; j += 1) {
-				digits[j] = (digits[j] * 16) + carry;
-				carry = digits[j] / 10 | 0;
-				digits[j] %= 10;
-			}
-			while (0 < carry) {
-				digits.push(carry % 10);
-				carry = carry / 10 | 0;
-			}
-		}
-		return digits.reverse().join('');
-	},
+	toString: uint64 => (new Long(uint64[0], uint64[1], true).toString(10)),
 
 	/**
 	 * Converts a numeric string representing an unsigned integer into uint64.
