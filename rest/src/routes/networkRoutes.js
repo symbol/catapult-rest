@@ -19,9 +19,12 @@
  */
 
 const errors = require('../server/errors');
+const catapult = require('catapult-sdk');
 const ini = require('ini');
 const fs = require('fs');
 const util = require('util');
+
+const { uint64 } = catapult.utils;
 
 module.exports = {
 	register: (server, db, services) => {
@@ -71,7 +74,7 @@ module.exports = {
 		});
 
 		server.get('/network/fees/rental', (req, res, next) => {
-			const parseIntProperty = (value, radix = 10) => parseInt((value || '').replace(/[^0-9]/g, ''), radix);
+			const sanitizeInput = value => value.replace(/[^0-9]/g, '');
 
 			return readAndParseNetworkPropertiesFile().then(propertiesObject => {
 				const maxDifficultyBlocks = parseIntProperty(
@@ -79,24 +82,24 @@ module.exports = {
 				);
 
 				// defaultDynamicFeeMultiplier -> uint32
-				const defaultDynamicFeeMultiplier = parseIntProperty(
+				const defaultDynamicFeeMultiplier = parseInt(sanitizeInput(
 					propertiesObject.chain.defaultDynamicFeeMultiplier
-				);
+				), 10);
 
 				// rootNamespaceRentalFeePerBlock -> uint64
-				const rootNamespaceRentalFeePerBlock = parseIntProperty(
+				const rootNamespaceRentalFeePerBlock = uint64.fromString(sanitizeInput(
 					propertiesObject['plugin:catapult'].plugins.namespace.rootNamespaceRentalFeePerBlock
-				);
+				));
 
 				// childNamespaceRentalFee -> uint64
-				const childNamespaceRentalFee = parseIntProperty(
+				const childNamespaceRentalFee = uint64.fromString(sanitizeInput(
 					propertiesObject['plugin:catapult'].plugins.namespace.childNamespaceRentalFee
-				);
+				));
 
 				// mosaicRentalFee -> uint64
-				const mosaicRentalFee = parseIntProperty(
+				const mosaicRentalFee = uint64.fromString(sanitizeInput(
 					propertiesObject['plugin:catapult'].plugins.mosaic.mosaicRentalFee
-				);
+				));
 
 				return db.latestBlocksFeeMultiplier(maxDifficultyBlocks || 1).then(feeMultipliers => {
 					const defaultedFeeMultipliers = feeMultipliers.map(f => (0 === f ? defaultDynamicFeeMultiplier : f));
