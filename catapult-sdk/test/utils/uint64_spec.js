@@ -279,4 +279,39 @@ describe('uint64', () => {
 			});
 		});
 	});
+
+	describe('multiply', () => {
+		const successTestCases = [
+			{
+				factorA: [0, 0],
+				factorB: [0, 0],
+				result: [0, 0],
+				description: 'min value'
+			},
+			{
+				factorA: [25, 0],
+				factorB: [4, 0],
+				result: [100, 0],
+				description: 'small value'
+			},
+			{
+				factorA: [4294967295, 0],
+				factorB: [4294967295, 0],
+				result: [1, 4294967294],
+				description: 'big value'
+			},
+			{
+				factorA: [16843009, 16843009],
+				factorB: [255, 0],
+				result: [4294967295, 4294967295],
+				description: 'max value'
+			}
+		];
+
+		successTestCases.forEach(testCase => {
+			it(`can multiply uint64 values (${testCase.description})`, () => {
+				expect(uint64.multiply(testCase.factorA, testCase.factorB)).to.deep.equal(testCase.result);
+			});
+		});
+	});
 });

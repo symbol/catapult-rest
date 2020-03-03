@@ -137,6 +137,20 @@ const uint64Module = {
 
 		const inputLong = Long.fromString(input, true, 10);
 		return ([inputLong.getLowBitsUnsigned(), inputLong.getHighBitsUnsigned()]);
+	},
+
+	/**
+	 * Multiplies two uint64 values.
+	 * @param {module:utils/uint64~uint64} multiplier A uint64 value.
+	 * @param {module:utils/uint64~uint64} multiplicand A uint64 value.
+	 * @returns {module:utils/uint64~uint64} A uint64 value.
+	 */
+	multiply: (multiplier, multiplicand) => {
+		const factorA = new Long(multiplier[0], multiplier[1], true);
+		const factorB = new Long(multiplicand[0], multiplicand[1], true);
+
+		const result = factorA.multiply(factorB);
+		return ([result.getLowBitsUnsigned(), result.getHighBitsUnsigned()]);
 	}
 };
 
