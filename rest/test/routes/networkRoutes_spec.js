@@ -234,9 +234,9 @@ describe('network routes', () => {
 				return mockServer.callRoute(route).then(() => {
 					expect(mockServer.next.calledOnce).to.equal(true);
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
-						effectiveChildNamespaceRentalFee: 300,
-						effectiveMosaicRentalFee: 1500,
-						effectiveRootNamespaceRentalFeePerBlock: 3000
+						effectiveChildNamespaceRentalFee: '300',
+						effectiveMosaicRentalFee: '1500',
+						effectiveRootNamespaceRentalFeePerBlock: '3000'
 					});
 					readFileStub.restore();
 				});
@@ -330,33 +330,37 @@ describe('network routes', () => {
 				runNetworkEffectiveRentalFeesTest(
 					'Simple all 1', 1,
 					0, 1, 1, 1, [1],
-					1, 1, 1
+					'1', '1', '1'
 				);
 				runNetworkEffectiveRentalFeesTest(
 					'No need for default dynamic fee multiplier', 3,
 					0, 1, 1, 1, [1, 2, 3],
-					2, 2, 2
+					'2', '2', '2'
 				);
 				runNetworkEffectiveRentalFeesTest(
 					'Default dynamic fee multiplier applied', 3,
 					5, 1, 1, 1, [5, 0, 5],
-					5, 5, 5
+					'5', '5', '5'
 				);
 				runNetworkEffectiveRentalFeesTest(
 					'Standard case', 5,
 					0, 1, 2, 3, [10, 10, 25, 50, 50],
-					25, 50, 75
+					'25', '50', '75'
 				);
 				runNetworkEffectiveRentalFeesTest(
 					'Decimals', 6,
 					0, 1, 1, 1, [10, 10, 20, 29, 50, 50],
-					24.5, 24.5, 24.5
+					'25', '25', '25'
 				);
 				runNetworkEffectiveRentalFeesTest(
 					'Decimals', 3,
 					0, 2, 3, 4, [20, 31.53, 50],
-					63.06, 94.59, 126.12
+					'64', '96', '128'
 				);
+
+				it('check calculations', () => {
+					expect(true).to.equal(false);
+				});
 			});
 		});
 	});

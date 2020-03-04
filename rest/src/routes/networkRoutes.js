@@ -77,9 +77,9 @@ module.exports = {
 			const sanitizeInput = value => value.replace(/[^0-9]/g, '');
 
 			return readAndParseNetworkPropertiesFile().then(propertiesObject => {
-				const maxDifficultyBlocks = parseIntProperty(
+				const maxDifficultyBlocks = parseInt(sanitizeInput(
 					propertiesObject.chain.maxDifficultyBlocks
-				);
+				), 10);
 
 				// defaultDynamicFeeMultiplier -> uint32
 				const defaultDynamicFeeMultiplier = parseInt(sanitizeInput(
@@ -103,12 +103,16 @@ module.exports = {
 
 				return db.latestBlocksFeeMultiplier(maxDifficultyBlocks || 1).then(feeMultipliers => {
 					const defaultedFeeMultipliers = feeMultipliers.map(f => (0 === f ? defaultDynamicFeeMultiplier : f));
-					const medianNetworkMultiplier = median(defaultedFeeMultipliers);
+					const medianNetworkMultiplier = median(defaultedFeeMultipliers).toFixed(0);
+					const uint64MedianNetworkMultiplier = uint64.fromUint(medianNetworkMultiplier);
 
 					res.send({
-						effectiveRootNamespaceRentalFeePerBlock: round(rootNamespaceRentalFeePerBlock * medianNetworkMultiplier),
-						effectiveChildNamespaceRentalFee: round(childNamespaceRentalFee * medianNetworkMultiplier),
-						effectiveMosaicRentalFee: round(mosaicRentalFee * medianNetworkMultiplier)
+						effectiveRootNamespaceRentalFeePerBlock:
+							uint64.toString(uint64.multiply(rootNamespaceRentalFeePerBlock, uint64MedianNetworkMultiplier)),
+						effectiveChildNamespaceRentalFee:
+							uint64.toString(uint64.multiply(childNamespaceRentalFee, uint64MedianNetworkMultiplier)),
+						effectiveMosaicRentalFee:
+							uint64.toString(uint64.multiply(mosaicRentalFee, uint64MedianNetworkMultiplier))
 					});
 					next();
 				});
