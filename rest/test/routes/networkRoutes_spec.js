@@ -210,8 +210,16 @@ describe('network routes', () => {
 		});
 
 		describe('network effective rental fees', () => {
+			let readFileStub = null;
+			afterEach(() => {
+				if (null !== readFileStub) {
+					readFileStub.restore();
+					readFileStub = null;
+				}
+			});
+
 			it('can retrieve network properties needed for rental fees', () => {
-				const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
+				readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
 					callback(null, '[chain]\n'
 						+ 'maxDifficultyBlocks = 5\n'
 						+ 'defaultDynamicFeeMultiplier = 1\'000\n'
@@ -238,7 +246,6 @@ describe('network routes', () => {
 						effectiveMosaicRentalFee: '1500',
 						effectiveRootNamespaceRentalFeePerBlock: '3000'
 					});
-					readFileStub.restore();
 				});
 			});
 
@@ -254,7 +261,7 @@ describe('network routes', () => {
 			});
 
 			it('errors when the file has an invalid format', () => {
-				const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
+				readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
 					callback(null, '{ "not": "iniFormat" }'));
 
 				const services = { config: { network: {} } };
@@ -266,7 +273,6 @@ describe('network routes', () => {
 				return mockServer.callRoute(route).then(() => {
 					expect(mockServer.send.firstCall.args[0].statusCode).to.equal(409);
 					expect(mockServer.send.firstCall.args[0].message).to.equal('there was an error reading the network properties file');
-					readFileStub.restore();
 				});
 			});
 
@@ -294,7 +300,7 @@ describe('network routes', () => {
 				effectiveMosaicRentalFee
 			) => {
 				it(`${testName}: [${[feeMultipliers]}]`, () => {
-					const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
+					readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
 						callback(null, '[chain]\n'
 							+ `maxDifficultyBlocks = ${maxDifficultyBlocks}\n`
 							+ `defaultDynamicFeeMultiplier = ${defaultDynamicFeeMultiplier}\n`
@@ -321,7 +327,6 @@ describe('network routes', () => {
 							effectiveMosaicRentalFee,
 							effectiveRootNamespaceRentalFeePerBlock
 						});
-						readFileStub.restore();
 					});
 				});
 			};
@@ -350,17 +355,18 @@ describe('network routes', () => {
 				runNetworkEffectiveRentalFeesTest(
 					'Decimals', 6,
 					0, 1, 1, 1, [10, 10, 20, 29, 50, 50],
-					'25', '25', '25'
+					'24', '24', '24'
 				);
 				runNetworkEffectiveRentalFeesTest(
-					'Decimals', 3,
-					0, 2, 3, 4, [20, 31.53, 50],
-					'64', '96', '128'
+					'Random case', 12,
+					0, 1, 55, 28, [25, 32, 77, 9, 1, 50, 11, 4, 89, 56],
+					'28', '1540', '784'
 				);
-
-				it('check calculations', () => {
-					expect(true).to.equal(false);
-				});
+				runNetworkEffectiveRentalFeesTest(
+					'Big numbers', 3,
+					0, '4294967295', '67632967295', '9007199254740993', [25, 32, 77],
+					'137438953440', '2164254953440', '288230376151711776'
+				);
 			});
 		});
 	});

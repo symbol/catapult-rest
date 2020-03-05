@@ -103,7 +103,7 @@ module.exports = {
 
 				return db.latestBlocksFeeMultiplier(maxDifficultyBlocks || 1).then(feeMultipliers => {
 					const defaultedFeeMultipliers = feeMultipliers.map(f => (0 === f ? defaultDynamicFeeMultiplier : f));
-					const medianNetworkMultiplier = median(defaultedFeeMultipliers).toFixed(0);
+					const medianNetworkMultiplier = Math.floor(median(defaultedFeeMultipliers));
 					const uint64MedianNetworkMultiplier = uint64.fromUint(medianNetworkMultiplier);
 
 					res.send({
