@@ -18,7 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const AccountType = require('../../plugins/AccountType');
+const AccountType = require('../AccountType');
 const routeUtils = require('../../routes/routeUtils');
 const errors = require('../../server/errors');
 const catapult = require('catapult-sdk');
