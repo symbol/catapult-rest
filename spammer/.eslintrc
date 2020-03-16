@@ -32,6 +32,8 @@ rules:
 
   max-classes-per-file:
   - off
+  prefer-object-spread:
+  - off
 
   max-classes-per-file:
   - off
