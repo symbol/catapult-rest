@@ -29,6 +29,9 @@ rules:
   - error
   - code: 140
 
+  max-classes-per-file:
+  - off
+
   nonblock-statement-body-position:
   - error
   - below
