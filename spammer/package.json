@@ -37,7 +37,7 @@
     "catapult-sdk": "link:../catapult-sdk",
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.0.2",
-    "coveralls": "^3.0.5",
+    "coveralls": "^3.0.9",
     "nyc": "^14.1.1",
     "restify": "^8.3.3",
     "winston": "^3.2.1"

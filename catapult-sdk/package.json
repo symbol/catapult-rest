@@ -23,7 +23,7 @@
     "babel-plugin-transform-inline-environment-variables": "^6.8.0",
     "babel-preset-env": "^1.7.0",
     "chai": "^4.2.0",
-    "coveralls": "^3.0.5",
+    "coveralls": "^3.0.9",
     "cross-env": "^5.2.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.1.0",
