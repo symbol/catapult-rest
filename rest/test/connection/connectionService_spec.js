@@ -21,22 +21,17 @@
 const { createConnectionService } = require('../../src/connection/connectionService');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
+const sinon = require('sinon');
+const tls = require('tls');
 
 const { convert } = catapult.utils;
-const { createKeyPairFromPrivateKeyString } = catapult.crypto;
 
 describe('connection service', () => {
 	const Test_Config = {
 		apiNode: {
 			host: 'test hostname',
-			port: 12345,
-			publicKey: '11223344556677889900AABBCCDDEEFF'
-		},
-		clientPrivateKey: '0000000000000000000000000000000000000000000000000000000000000000'
-	};
-	Test_Config.expected = {
-		clientKeyPair: createKeyPairFromPrivateKeyString(Test_Config.clientPrivateKey),
-		apiNodePublicKey: convert.hexToUint8(Test_Config.apiNode.publicKey)
+			port: 12345
+		}
 	};
 
 	const createTestContext = () => {
@@ -87,8 +82,6 @@ describe('connection service', () => {
 
 		// note: this is not deep equal on purpose
 		expect(context.auth.serverSocket).to.equal(context.lastSocket());
-		expect(context.auth.clientKeyPair).to.deep.equal(Test_Config.expected.clientKeyPair);
-		expect(context.auth.apiNodePublicKey).to.deep.equal(Test_Config.expected.apiNodePublicKey);
 
 		expect(context.onCalls).to.have.all.keys(['close', 'error']);
 	};
@@ -262,18 +255,25 @@ describe('connection service', () => {
 		}
 	);
 
-	describe('handles first simultaneous connections correctly when authentication is delayed', () => {
-		it('on successful authentication both parties should lease the same connection', () => {
+	describe('handles first simultaneous connections correctly when authorization is delayed', () => {
+		it('on successful authorization both parties should lease the same connection', () => {
 			// Arrange:
+			const config = {
+				apiNode: {
+					host: 'test hostname',
+					port: 12345,
+					key: '',
+					certificate: '',
+					caCertificate: ''
+				}
+			};
 			const context = createTestContext();
 			let authPromiseResolve;
 			const connectionService = createConnectionService(
-				Test_Config,
-				context.mockConnectionFactory,
-				context.createAuthPromise(() => new Promise(resolve => {
-					authPromiseResolve = resolve;
-				}))
+				config,
 			);
+
+			const readFileStub = sinon.stub(tls, 'connect').callsFake(options => {});
 
 			// Act:
 			let firstConn;
@@ -294,13 +294,13 @@ describe('connection service', () => {
 				expect(secondConn).to.equal(firstConn);
 			});
 
-			// unblocks the first promise (simulates delayed acceptance of authentication)
+			// unblocks the first promise (simulates delayed acceptance of authorization)
 			authPromiseResolve();
 
 			return leasePromises;
 		});
 
-		it('on failed authentication both parties should fail on the same pending authentication promise', done => {
+		it('on failed authorization both parties should fail on the same pending authorization promise', done => {
 			// Arrange:
 			const context = createTestContext();
 			let authPromiseReject;
@@ -323,7 +323,7 @@ describe('connection service', () => {
 				done();
 			});
 
-			// unblocks the first promise (simulates delayed authentication failure)
+			// unblocks the first promise (simulates delayed authorization failure)
 			authPromiseReject(authError);
 		});
 	});
