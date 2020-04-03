@@ -51,7 +51,7 @@ module.exports.createConnectionService = (config, logger = () => {}) => {
 			ca: config.caCertificate
 			// sigalgs: 'ed25519'
 		};
-		let secureContext = undefined;
+		let secureContext;
 		try {
 			secureContext = tls.createSecureContext(contextOptions);
 		} catch (error) {
@@ -68,39 +68,39 @@ module.exports.createConnectionService = (config, logger = () => {}) => {
 		};
 
 		const connectionPromise = new Promise((resolve, reject) => {
-				const serverSocket = tls.connect(connectionOptions);
+			const serverSocket = tls.connect(connectionOptions);
 
-				serverSocket
-					.once('secureConnect', () => {
-						if (serverSocket.authorized) {
-							// wrap the socket in a catapult connection and save it
-							const serverConnection = catapultConnection.wrap(serverSocket);
-							if (isPersistent) {
-								aliveConnections[node] = serverConnection;
-								delete authorizingConnectionPromises[node];
-							}
-							// return and additionally, resolve the connection for possible queued connections on `authorizingConnectionPromises`
-							resolve(serverConnection);
-							return serverConnection;
+			serverSocket
+				.once('secureConnect', () => {
+					if (serverSocket.authorized) {
+						// wrap the socket in a catapult connection and save it
+						const serverConnection = catapultConnection.wrap(serverSocket);
+						if (isPersistent) {
+							aliveConnections[node] = serverConnection;
+							delete authorizingConnectionPromises[node];
 						}
+						// return, and resolve the connection for possible queued connections on `authorizingConnectionPromises`
+						resolve(serverConnection);
+						return serverConnection;
+					}
 
-						logger(`failed while connecting to the node ${node.host}:${node.port}`, serverSocket.authorizationError);
-						reject(serverSocket.authorizationError);
-						throw serverSocket.authorizationError;
-					})
-					.on('error', err => {
-						// capture error, otherwise net default handler will be called
-						// default error handler issues reject(), that would go through bootstraper and toRestError().
-						// the result might contain information about api node IP and port, because it might be different host,
-						// that information shouldn't be available to rest clients.
-						logger(`error raised by ${node.host}:${node.port} connection: `, err);
-					})
-					.on('close', () => {
-						if (isPersistent)
-							delete aliveConnections[node];
+					logger(`failed while connecting to the node ${node.host}:${node.port}`, serverSocket.authorizationError);
+					reject(serverSocket.authorizationError);
+					throw serverSocket.authorizationError;
+				})
+				.on('error', err => {
+					// capture error, otherwise net default handler will be called
+					// default error handler issues reject(), that would go through bootstraper and toRestError().
+					// the result might contain information about api node IP and port, because it might be different host,
+					// that information shouldn't be available to rest clients.
+					logger(`error raised by ${node.host}:${node.port} connection: `, err);
+				})
+				.on('close', () => {
+					if (isPersistent)
+						delete aliveConnections[node];
 
-						reject(errors.createServiceUnavailableError('connection failed'));
-					});
+					reject(errors.createServiceUnavailableError('connection failed'));
+				});
 		});
 
 		if (isPersistent)

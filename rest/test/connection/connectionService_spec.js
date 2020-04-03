@@ -18,18 +18,16 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createConnectionService } = require('../../src/connection/connectionService');
 const { MockSocket } = require('./MockSocket');
-const catapult = require('catapult-sdk');
+const { createConnectionService } = require('../../src/connection/connectionService');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const tls = require('tls');
 
-const { convert } = catapult.utils;
 
 describe('connection service', () => {
 	const sockets = [];
-	let tlsConnectStub = undefined;
+	let tlsConnectStub;
 	const testConfig = {
 		apiNode: {
 			host: 'test hostname',
@@ -39,10 +37,10 @@ describe('connection service', () => {
 			caCertificate: ''
 		}
 	};
-	let connectionService = undefined;
+	let connectionService;
 
 	beforeEach(() => {
-		tlsConnectStub = sinon.stub(tls, 'connect').callsFake(options => {
+		tlsConnectStub = sinon.stub(tls, 'connect').callsFake(() => {
 			const fakeSocket = new MockSocket();
 			sockets.push(fakeSocket);
 			return fakeSocket;
@@ -72,163 +70,158 @@ describe('connection service', () => {
 	});
 
 
+	// it('authentication failure is forwarded', () => {
+	// 	// Arrange:
+	// 	const context = createTestContext();
+	// 	const connectionService = createConnectionService(Test_Config, context.mockConnectionFactory, context.createFailureAuthPromise());
 
+	// 	// Act:
+	// 	const promise = connectionService.lease();
+	// 	return promise.catch(err => {
+	// 		// Assert:
+	// 		assertData(context);
+	// 		expect(err.message).to.equal('failure auth promise');
+	// 	});
+	// });
 
+	// it('connection failure is forwarded', () => {
+	// 	// Arrange:
+	// 	const context = createTestContext();
+	// 	const promiseInterruptedByDisconnect = context.createAuthPromise(() => {
+	// 		// note: assumption is that connection() registers 'close' event and
+	// 		// that it rejects promise if close occurred
+	// 		context.onCalls.close();
+	// 		return Promise.resolve();
+	// 	});
+	// 	const connectionService = createConnectionService(Test_Config, context.mockConnectionFactory, promiseInterruptedByDisconnect);
 
+	// 	// Act:
+	// 	return connectionService.lease()
+	// 		.then(() => {
+	// 			throw new Error('promise resolved');
+	// 		})
+	// 		.catch(err => {
+	// 			// Assert:
+	// 			assertData(context);
+	// 			expect(err.statusCode).to.equal(503);
+	// 			expect(err.message).to.equal('connection failed');
+	// 		});
+	// });
 
+	// const assertAfterFirstConnectionSucceeded = (name, method, followingActions) => {
+	// 	it(`first connection succeeded, ${name}`, () => {
+	// 		// Arrange:
+	// 		const context = createTestContext();
+	// 		const connectionService = createConnectionService(
+	// 			Test_Config,
+	// 			context.mockConnectionFactory,
+	// 			context.createSuccessAuthPromise()
+	// 		);
 
-		// it('authentication failure is forwarded', () => {
-		// 	// Arrange:
-		// 	const context = createTestContext();
-		// 	const connectionService = createConnectionService(Test_Config, context.mockConnectionFactory, context.createFailureAuthPromise());
+	// 		// Act:
+	// 		return connectionService[method]().then(firstConnection => {
+	// 			assertData(context);
 
-		// 	// Act:
-		// 	const promise = connectionService.lease();
-		// 	return promise.catch(err => {
-		// 		// Assert:
-		// 		assertData(context);
-		// 		expect(err.message).to.equal('failure auth promise');
-		// 	});
-		// });
+	// 			return followingActions(context, connectionService, firstConnection);
+	// 		});
+	// 	});
+	// };
 
-		// it('connection failure is forwarded', () => {
-		// 	// Arrange:
-		// 	const context = createTestContext();
-		// 	const promiseInterruptedByDisconnect = context.createAuthPromise(() => {
-		// 		// note: assumption is that connection() registers 'close' event and
-		// 		// that it rejects promise if close occurred
-		// 		context.onCalls.close();
-		// 		return Promise.resolve();
-		// 	});
-		// 	const connectionService = createConnectionService(Test_Config, context.mockConnectionFactory, promiseInterruptedByDisconnect);
+	// assertAfterFirstConnectionSucceeded('connection is cached using lease', 'lease', (context, connectionService, firstConnection) =>
+	// 	// Act: connection succeeded, let's try to make another one, and check that they match:
+	// 	connectionService.lease().then(secondConnection => {
+	// 		// Assert: connection was created only once
+	// 		expect(context.numConnectionFactoryCalls).to.equal(1);
+	// 		expect(secondConnection).to.equal(firstConnection);
+	// 	}));
 
-		// 	// Act:
-		// 	return connectionService.lease()
-		// 		.then(() => {
-		// 			throw new Error('promise resolved');
-		// 		})
-		// 		.catch(err => {
-		// 			// Assert:
-		// 			assertData(context);
-		// 			expect(err.statusCode).to.equal(503);
-		// 			expect(err.message).to.equal('connection failed');
-		// 		});
-		// });
+	// assertAfterFirstConnectionSucceeded(
+	// 	'connection will be restored after close using lease',
+	// 	'lease',
+	// 	(context, connectionService, firstConnection) => {
+	// 		// Act: break the connection
+	// 		context.onCalls.close();
 
-		// const assertAfterFirstConnectionSucceeded = (name, method, followingActions) => {
-		// 	it(`first connection succeeded, ${name}`, () => {
-		// 		// Arrange:
-		// 		const context = createTestContext();
-		// 		const connectionService = createConnectionService(
-		// 			Test_Config,
-		// 			context.mockConnectionFactory,
-		// 			context.createSuccessAuthPromise()
-		// 		);
+	// 		return connectionService.lease().then(secondConnection => {
+	// 			// Assert:
+	// 			expect(context.numConnectionFactoryCalls).to.equal(2);
+	// 			expect(secondConnection).to.not.equal(firstConnection);
 
-		// 		// Act:
-		// 		return connectionService[method]().then(firstConnection => {
-		// 			assertData(context);
+	// 			// - the first connection sends to the first socket
+	// 			firstConnection.send();
+	// 			expect(context.mockSockets[0].numWrites).to.equal(1);
 
-		// 			return followingActions(context, connectionService, firstConnection);
-		// 		});
-		// 	});
-		// };
+	// 			// - the second connection sends to the second socket
+	// 			secondConnection.send();
+	// 			expect(context.mockSockets[1].numWrites).to.equal(1);
+	// 		});
+	// 	}
+	// );
 
-		// assertAfterFirstConnectionSucceeded('connection is cached using lease', 'lease', (context, connectionService, firstConnection) =>
-		// 	// Act: connection succeeded, let's try to make another one, and check that they match:
-		// 	connectionService.lease().then(secondConnection => {
-		// 		// Assert: connection was created only once
-		// 		expect(context.numConnectionFactoryCalls).to.equal(1);
-		// 		expect(secondConnection).to.equal(firstConnection);
-		// 	}));
+	// assertAfterFirstConnectionSucceeded(
+	// 	'error alone does not affect connection using lease',
+	// 	'lease',
+	// 	(context, connectionService, firstConnection) => {
+	// 		// Act: emit an error
+	// 		context.onCalls.error(new Error());
 
-		// assertAfterFirstConnectionSucceeded(
-		// 	'connection will be restored after close using lease',
-		// 	'lease',
-		// 	(context, connectionService, firstConnection) => {
-		// 		// Act: break the connection
-		// 		context.onCalls.close();
+	// 		return connectionService.lease().then(secondConnection => {
+	// 			// Assert: connection was created only once
+	// 			expect(context.numConnectionFactoryCalls).to.equal(1);
+	// 			expect(secondConnection).to.equal(firstConnection);
+	// 		});
+	// 	}
+	// );
 
-		// 		return connectionService.lease().then(secondConnection => {
-		// 			// Assert:
-		// 			expect(context.numConnectionFactoryCalls).to.equal(2);
-		// 			expect(secondConnection).to.not.equal(firstConnection);
+	// assertAfterFirstConnectionSucceeded(
+	// 	'connection is not cached using singleUse',
+	// 	'singleUse',
+	// 	(context, connectionService, firstConnection) =>
+	// 		// Act: connection succeeded, let's try to make another one, and check that they do not match:
+	// 		connectionService.lease().then(secondConnection => {
+	// 			// Assert: connection was created twice
+	// 			expect(context.numConnectionFactoryCalls).to.equal(2);
+	// 			expect(secondConnection).to.not.equal(firstConnection);
+	// 		})
+	// );
 
-		// 			// - the first connection sends to the first socket
-		// 			firstConnection.send();
-		// 			expect(context.mockSockets[0].numWrites).to.equal(1);
+	// assertAfterFirstConnectionSucceeded(
+	// 	'connection will be restored after close using singleUse',
+	// 	'singleUse',
+	// 	(context, connectionService, firstConnection) => {
+	// 		// Act: break the connection
+	// 		context.onCalls.close();
 
-		// 			// - the second connection sends to the second socket
-		// 			secondConnection.send();
-		// 			expect(context.mockSockets[1].numWrites).to.equal(1);
-		// 		});
-		// 	}
-		// );
+	// 		return connectionService.lease().then(secondConnection => {
+	// 			// Assert:
+	// 			expect(context.numConnectionFactoryCalls).to.equal(2);
+	// 			expect(secondConnection).to.not.equal(firstConnection);
 
-		// assertAfterFirstConnectionSucceeded(
-		// 	'error alone does not affect connection using lease',
-		// 	'lease',
-		// 	(context, connectionService, firstConnection) => {
-		// 		// Act: emit an error
-		// 		context.onCalls.error(new Error());
+	// 			// - the first connection sends to the first socket
+	// 			firstConnection.send();
+	// 			expect(context.mockSockets[0].numWrites).to.equal(1);
 
-		// 		return connectionService.lease().then(secondConnection => {
-		// 			// Assert: connection was created only once
-		// 			expect(context.numConnectionFactoryCalls).to.equal(1);
-		// 			expect(secondConnection).to.equal(firstConnection);
-		// 		});
-		// 	}
-		// );
+	// 			// - the second connection sends to the second socket
+	// 			secondConnection.send();
+	// 			expect(context.mockSockets[1].numWrites).to.equal(1);
+	// 		});
+	// 	}
+	// );
 
-		// assertAfterFirstConnectionSucceeded(
-		// 	'connection is not cached using singleUse',
-		// 	'singleUse',
-		// 	(context, connectionService, firstConnection) =>
-		// 		// Act: connection succeeded, let's try to make another one, and check that they do not match:
-		// 		connectionService.lease().then(secondConnection => {
-		// 			// Assert: connection was created twice
-		// 			expect(context.numConnectionFactoryCalls).to.equal(2);
-		// 			expect(secondConnection).to.not.equal(firstConnection);
-		// 		})
-		// );
+	// assertAfterFirstConnectionSucceeded(
+	// 	'error alone does not affect connection using singleUse',
+	// 	'singleUse',
+	// 	(context, connectionService, firstConnection) => {
+	// 		// Act: emit an error
+	// 		context.onCalls.error(new Error());
 
-		// assertAfterFirstConnectionSucceeded(
-		// 	'connection will be restored after close using singleUse',
-		// 	'singleUse',
-		// 	(context, connectionService, firstConnection) => {
-		// 		// Act: break the connection
-		// 		context.onCalls.close();
-
-		// 		return connectionService.lease().then(secondConnection => {
-		// 			// Assert:
-		// 			expect(context.numConnectionFactoryCalls).to.equal(2);
-		// 			expect(secondConnection).to.not.equal(firstConnection);
-
-		// 			// - the first connection sends to the first socket
-		// 			firstConnection.send();
-		// 			expect(context.mockSockets[0].numWrites).to.equal(1);
-
-		// 			// - the second connection sends to the second socket
-		// 			secondConnection.send();
-		// 			expect(context.mockSockets[1].numWrites).to.equal(1);
-		// 		});
-		// 	}
-		// );
-
-		// assertAfterFirstConnectionSucceeded(
-		// 	'error alone does not affect connection using singleUse',
-		// 	'singleUse',
-		// 	(context, connectionService, firstConnection) => {
-		// 		// Act: emit an error
-		// 		context.onCalls.error(new Error());
-
-		// 		return connectionService.lease().then(secondConnection => {
-		// 			// Assert: connection was created twice
-		// 			expect(context.numConnectionFactoryCalls).to.equal(2);
-		// 			expect(secondConnection).to.not.equal(firstConnection);
-		// 		});
-		// 	}
-		// );
+	// 		return connectionService.lease().then(secondConnection => {
+	// 			// Assert: connection was created twice
+	// 			expect(context.numConnectionFactoryCalls).to.equal(2);
+	// 			expect(secondConnection).to.not.equal(firstConnection);
+	// 		});
+	// 	}
+	// );
 
 	describe('handles first simultaneous connections correctly when authorization is delayed', () => {
 		it('on successful authorization both parties should lease the same connection', () => {

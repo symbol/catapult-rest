@@ -1,25 +1,27 @@
 
 class MockSocket {
-	authorized = false;
-	numWrites = 0;
-	onceEventHandlers = {};
-	onEventHandlers = {};
+	constructor() {
+		this.authorized = false;
+		this.numWrites = 0;
+		this.onceEventHandlers = {};
+		this.onEventHandlers = {};
+	}
 
-	once = (event, handler) => {
+	once(event, handler) {
 		this.onceEventHandlers[event] = handler;
 		return this;
 	}
 
-	on = (event, handler) => {
+	on(event, handler) {
 		this.onEventHandlers[event] = handler;
 		return this;
 	}
 
-	write = (event, handler) => {
+	write() {
 		this.numWrites++;
 	}
-	
-	fireEvent = (event) => {
+
+	fireEvent(event) {
 		const onceEvent = this.onceEventHandlers[event];
 		if (onceEvent) {
 			delete this.onceEventHandlers[event];
