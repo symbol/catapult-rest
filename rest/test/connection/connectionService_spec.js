@@ -41,81 +41,41 @@ describe('connection service', () => {
 	};
 	let connectionService = undefined;
 
+	beforeEach(() => {
+		tlsConnectStub = sinon.stub(tls, 'connect').callsFake(options => {
+			const fakeSocket = new MockSocket();
+			sockets.push(fakeSocket);
+			return fakeSocket;
+		});
+		connectionService = createConnectionService(testConfig);
+	});
 
-	const Test_Config = {
-		apiNode: {
-			host: 'test hostname',
-			port: 12345
-		}
-	};
+	afterEach(() => {
+		tlsConnectStub.restore();
+		tlsConnectStub = undefined;
+		sockets.splice(0, sockets.length);
+		connectionService = undefined;
+	});
 
-	const createTestContext = () => {
-		const routeContext = {
-			onCalls: {},
-			mockSockets: [], // stores all mock sockets created by factory
-			lastSocket: () => routeContext.mockSockets[routeContext.mockSockets.length - 1],
-			numConnectionFactoryCalls: 0,
-			mockConnectionFactory: (port, host) => {
-				++routeContext.numConnectionFactoryCalls;
-				routeContext.host = host;
-				routeContext.port = port;
+	it('authentication success is forwarded', () => {
+		// Act:
+		const leasePromise = connectionService.lease().then(connection => {
+			connection.send();
 
-				const mockSocket = {
-					numWrites: 0,
-					on: (eventName, eventHandler) => {
-						routeContext.onCalls[eventName] = eventHandler;
-						return mockSocket;
-					},
-					once: () => {
-					},
-					write: () => {
-						++mockSocket.numWrites;
-					}
-				};
+			// Assert:
+			expect(sockets[0].numWrites).to.equal(1);
+		});
+		sockets[0].authorized = true;
+		sockets[0].fireEvent('secureConnect');
 
-				routeContext.mockSockets.push(mockSocket);
-				return routeContext.lastSocket();
-			},
-			auth: {},
-			createAuthPromise: promiseFactory =>
-				(serverSocket, clientKeyPair, apiNodePublicKey) => {
-					routeContext.auth.serverSocket = serverSocket;
-					routeContext.auth.clientKeyPair = clientKeyPair;
-					routeContext.auth.apiNodePublicKey = apiNodePublicKey;
-					return promiseFactory();
-				},
-			createSuccessAuthPromise: () => routeContext.createAuthPromise(() => Promise.resolve()),
-			createFailureAuthPromise: () => routeContext.createAuthPromise(() => Promise.reject(Error('failure auth promise')))
-		};
-		return routeContext;
-	};
+		return leasePromise;
+	});
 
-	const assertData = context => {
-		expect(context.host).to.equal(Test_Config.apiNode.host);
-		expect(context.port).to.equal(Test_Config.apiNode.port);
-		expect(context.numConnectionFactoryCalls).to.equal(1);
 
-		// note: this is not deep equal on purpose
-		expect(context.auth.serverSocket).to.equal(context.lastSocket());
 
-		expect(context.onCalls).to.have.all.keys(['close', 'error']);
-	};
 
-		// it('authentication success is forwarded', () => {
-		// 	// Arrange:
-		// 	const context = createTestContext();
-		// 	const connectionService = createConnectionService(Test_Config, context.mockConnectionFactory, context.createSuccessAuthPromise());
 
-		// 	// Act:
-		// 	return connectionService.lease().then(connection => {
-		// 		// Assert:
-		// 		assertData(context);
 
-		// 		// - the connection sends to the last socket
-		// 		connection.send();
-		// 		expect(context.lastSocket().numWrites).to.equal(1);
-		// 	});
-		// });
 
 		// it('authentication failure is forwarded', () => {
 		// 	// Arrange:
@@ -269,21 +229,6 @@ describe('connection service', () => {
 		// 		});
 		// 	}
 		// );
-	beforeEach(() => {
-		tlsConnectStub = sinon.stub(tls, 'connect').callsFake(options => {
-			const fakeSocket = new MockSocket();
-			sockets.push(fakeSocket);
-			return fakeSocket;
-		});
-		connectionService = createConnectionService(testConfig);
-	});
-
-	afterEach(() => {
-		tlsConnectStub.restore();
-		tlsConnectStub = undefined;
-		sockets.splice(0, sockets.length);
-		connectionService = undefined;
-	});
 
 	describe('handles first simultaneous connections correctly when authorization is delayed', () => {
 		it('on successful authorization both parties should lease the same connection', () => {

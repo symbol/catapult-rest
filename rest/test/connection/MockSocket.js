@@ -1,6 +1,7 @@
 
 class MockSocket {
-	authorized = false
+	authorized = false;
+	numWrites = 0;
 	onceEventHandlers = {};
 	onEventHandlers = {};
 
@@ -12,6 +13,10 @@ class MockSocket {
 	on = (event, handler) => {
 		this.onEventHandlers[event] = handler;
 		return this;
+	}
+
+	write = (event, handler) => {
+		this.numWrites++;
 	}
 	
 	fireEvent = (event) => {
