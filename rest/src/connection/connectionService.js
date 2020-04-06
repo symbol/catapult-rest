@@ -46,6 +46,7 @@ module.exports.createConnectionService = (config, logger = () => {}) => {
 		logger(`connecting to ${node.host}:${node.port}`);
 
 		const contextOptions = {
+			minVersion: 'TLSv1.3',
 			key: config.key,
 			cert: config.certificate,
 			ca: config.caCertificate
