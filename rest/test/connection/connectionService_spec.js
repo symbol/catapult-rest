@@ -73,7 +73,7 @@ describe('connection service', () => {
 	it('connection close is forwarded', () => {
 		// Act:
 		const leasePromise = connectionService.lease().catch(error => {
-			// Assert: 
+			// Assert:
 			expect(error.message).to.equal('connection failed');
 		});
 		sockets[0].authorized = true;
@@ -85,12 +85,12 @@ describe('connection service', () => {
 	describe('connection lease', () => {
 		it('connection is cached/reused', () => {
 			// Act:
-			const leasePromise = connectionService.lease().then(connection1 => {
-				return connectionService.lease().then(connection2 => {
+			const leasePromise = connectionService.lease().then(connection1 =>
+				connectionService.lease().then(connection2 => {
 					// Assert:
 					expect(connection2).to.equal(connection1);
-				});
-			});
+				}));
+
 			sockets[0].authorized = true;
 			sockets[0].fireEvent('secureConnect');
 
@@ -113,7 +113,7 @@ describe('connection service', () => {
 				sockets[1].authorized = true;
 				sockets[1].fireEvent('secureConnect');
 
-				return leasePromise2
+				return leasePromise2;
 			});
 			sockets[0].authorized = true;
 			sockets[0].fireEvent('secureConnect');
