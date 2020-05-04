@@ -54,11 +54,11 @@ const sizes = {
 	/**
 	 * @property {numeric} Size of VRF proof properties.
 	 */
-	 vrfProof: {
-	 	gamma: 32,
-	 	verificationHash: 16,
-	 	scalar: 32
-	 }
+	vrfProof: {
+		gamma: 32,
+		verificationHash: 16,
+		scalar: 32
+	}
 };
 
 module.exports = sizes;
