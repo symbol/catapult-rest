@@ -33,6 +33,12 @@ const { Long, Binary } = MongoDb;
 const Mijin_Test_Network = testDbOptions.networkId;
 const Default_Height = 34567;
 
+const DefaultPagingOptions = {
+	pageSizeMin: 10,
+	pageSizeMax: 100,
+	pageSizeDefault: 20
+};
+
 describe('catapult db', () => {
 	const deleteIds = dbEntities => {
 		test.collection.names.forEach(collectionName => {
@@ -45,7 +51,7 @@ describe('catapult db', () => {
 
 	const runDbTest = (dbEntities, issueDbCommand, assertDbCommandResult) => {
 		// Arrange:
-		const db = new CatapultDb({ networkId: Mijin_Test_Network });
+		const db = new CatapultDb(Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions));
 
 		// Act + Assert:
 		return db.connect(testDbOptions.url, 'test')
@@ -58,7 +64,7 @@ describe('catapult db', () => {
 
 	const runDbTestWithQueryTransactionsSpy = (dbEntities, issueDbCommand, expectedParams) => {
 		// Arrange:
-		const db = new CatapultDb({ networkId: Mijin_Test_Network });
+		const db = new CatapultDb(Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions));
 		const queryTransactionsSpy = sinon.spy(db, 'queryTransactions');
 
 		// Act + Assert:
@@ -454,7 +460,7 @@ describe('catapult db', () => {
 
 		it('calls queryPagedDocuments with correct params', () => {
 			// Arrange:
-			const db = new CatapultDb({ networkId: Mijin_Test_Network });
+			const db = new CatapultDb(Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions));
 			const queryPagedDocumentsSpy = sinon.spy(db, 'queryPagedDocuments');
 
 			const blockDbEntities = [createBlock(1, 0x0100)];
@@ -1020,7 +1026,7 @@ describe('catapult db', () => {
 		const numToObjectId = num => `000000000000000000000000${num.toString()}`.slice(-24);
 
 		const runIncomingTransactionsDbTest = (dbEntities, accountAddress, expectedIds, types) => {
-			const db = new CatapultDb({ networkId: Mijin_Test_Network });
+			const db = new CatapultDb(Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions));
 			const expectedObjectIds = expectedIds.map(numToObjectId);
 
 			return db.connect(testDbOptions.url, 'test')
@@ -1165,7 +1171,7 @@ describe('catapult db', () => {
 			describe('correctly processes pagination params', () => {
 				it('calls queryTransactions with correct pagination params', () => {
 					// Arrange:
-					const db = new CatapultDb({ networkId: Mijin_Test_Network });
+					const db = new CatapultDb(Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions));
 					const queryTransactionsSpy = sinon.spy(db, 'queryTransactions');
 
 					// Act + Assert:
@@ -1512,13 +1518,782 @@ describe('catapult db', () => {
 		it('query respects page size', () => runPageSizeTests(50, 25, 25));
 
 		it('query ensures minimum page size', () => {
-			const minPageSize = new CatapultDb({ networkId: Mijin_Test_Network }).pageSizeMin;
+			const config = Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions);
+			const minPageSize = new CatapultDb(config).pagingOptions.pageSizeMin;
 			return runPageSizeTests(minPageSize + 5, minPageSize - 1, minPageSize);
 		});
 
 		it('query ensures maximum page size', () => {
-			const maxPageSize = new CatapultDb({ networkId: Mijin_Test_Network }).pageSizeMax;
+			const config = Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions);
+			const maxPageSize = new CatapultDb(config).pagingOptions.pageSizeMax;
 			return runPageSizeTests(maxPageSize + 5, maxPageSize + 1, maxPageSize);
+		});
+	});
+
+	describe('queryPagedDocuments 2', () => {
+		const account1 = {
+			publicKey: test.random.publicKey(),
+			address: keyToAddress(test.random.publicKey())
+		};
+		const account2 = {
+			publicKey: test.random.publicKey(),
+			address: keyToAddress(test.random.publicKey())
+		};
+		const { createObjectId } = test.db;
+		const sortConditions = { $sort: { _id: 1 } };
+		const options = { pageSize: 10, pageNumber: 1 };
+
+		describe('can return empty result', () => {
+			it('empty db', () => {
+				// Arrange
+				const conditions = [];
+
+				// Act + Assert:
+				return runDbTest(
+					{},
+					db => db.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options),
+					page => {
+						expect(page.data).to.deep.equal([]);
+						expect(page.pagination).to.deep.equal({
+							totalEntries: 0, pageNumber: 1, pageSize: options.pageSize, totalPages: 0
+						});
+					}
+				);
+			});
+
+			it('conditions produces empty result', () => {
+				// Arrange
+				const dbAccounts = () => [
+					{ _id: createObjectId(10), account: { addressHeight: 10 } },
+					{ _id: createObjectId(30), account: { addressHeight: 30 } }
+				];
+				const conditions = [{ 'account.addressHeight': 20 }];
+
+				// Act + Assert:
+				return runDbTest(
+					{ accounts: dbAccounts() },
+					db => db.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options),
+					page => {
+						expect(page.data).to.deep.equal([]);
+						expect(page.pagination).to.deep.equal({
+							totalEntries: 0, pageNumber: 1, pageSize: options.pageSize, totalPages: 0
+						});
+					}
+				);
+			});
+		});
+
+		describe('respects query conditions', () => {
+			// Arrange:
+			const accounts = () => ([
+				{ _id: createObjectId(10), account: { address: account1.address, addressHeight: 10 } },
+				{ _id: createObjectId(20), account: { address: account2.address, addressHeight: 20 } },
+				{ _id: createObjectId(30), account: { address: account2.address, addressHeight: 30 } }
+			]);
+
+			it('no conditions', () => {
+				const conditions = [];
+
+				// Act + Assert:
+				return runDbTest(
+					{ accounts: accounts() },
+					db => db.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options),
+					page => {
+						expect(page.data.length).to.equal(3);
+						expect(page.data[0].id).to.deep.equal(createObjectId(10));
+						expect(page.data[1].id).to.deep.equal(createObjectId(20));
+						expect(page.data[2].id).to.deep.equal(createObjectId(30));
+					}
+				);
+			});
+
+			it('one condition', () => {
+				const conditions = [{ 'account.addressHeight': 20 }];
+
+				// Act + Assert:
+				return runDbTest(
+					{ accounts: accounts() },
+					db => db.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options),
+					page => {
+						expect(page.data.length).to.equal(1);
+						expect(page.data[0].id).to.deep.equal(createObjectId(20));
+					}
+				);
+			});
+
+			it('multiple conditions', () => {
+				const conditions = [
+					{ 'account.address': account2.address },
+					{ 'account.addressHeight': { $gt: 20 } }
+				];
+
+				// Act + Assert:
+				return runDbTest(
+					{ accounts: accounts() },
+					db => db.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options),
+					page => {
+						expect(page.data.length).to.equal(1);
+						expect(page.data[0].id).to.deep.equal(createObjectId(30));
+					}
+				);
+			});
+		});
+
+		describe('renames _id to id', () => {
+			// Arrange:
+			const blocks = () => ([
+				{
+					_id: createObjectId(10),
+					meta: {
+						hash: 0x0100,
+						numTransactions: 10
+					},
+					block: {
+						version: 1,
+						type: 2
+					}
+				}
+			]);
+
+			it('id is in the query result and _id is not', () =>
+				// Act + Assert:
+				runDbTest(
+					{ blocks: blocks() },
+					db => db.queryPagedDocuments_2([], [], sortConditions, 'blocks', options),
+					page => {
+						expect(page.data[0]._id).to.equal(undefined);
+						expect(page.data[0].id).to.deep.equal(createObjectId(10));
+					}
+				));
+
+			it('id is used when is removed instead of _id', () =>
+				// Act + Assert:
+				runDbTest(
+					{ blocks: blocks() },
+					db => db.queryPagedDocuments_2([], ['id'], sortConditions, 'blocks', options),
+					page => {
+						expect(page.data[0]._id).to.equal(undefined);
+						expect(page.data[0].id).to.equal(undefined);
+					}
+				));
+		});
+
+		describe('removed fields', () => {
+			// Arrange:
+			const blocks = () => ([
+				{
+					_id: createObjectId(10),
+					meta: {
+						hash: 0x0100,
+						numTransactions: 10
+					},
+					block: {
+						version: 1,
+						type: 2
+					}
+				}
+			]);
+
+			it('does not remove fields if no supplied fields to remove', () => {
+				const removedFields = [];
+
+				// Act + Assert:
+				return runDbTest(
+					{ blocks: blocks() },
+					db => db.queryPagedDocuments_2([], removedFields, sortConditions, 'blocks', options),
+					page => {
+						expect(page.data.length).to.equal(1);
+						expect(page.data[0]).to.deep.equal({
+							id: createObjectId(10),
+							meta: { hash: 0x0100, numTransactions: 10 },
+							block: { version: 1, type: 2 }
+						});
+					}
+				);
+			});
+
+			it('removes supplied fields', () => {
+				const removedFields = ['meta.hash', 'block.version'];
+
+				// Act + Assert:
+				return runDbTest(
+					{ blocks: blocks() },
+					db => db.queryPagedDocuments_2([], removedFields, sortConditions, 'blocks', options),
+					page => {
+						expect(page.data.length).to.equal(1);
+						expect(page.data[0]).to.deep.equal({
+							id: createObjectId(10),
+							meta: { numTransactions: 10 },
+							block: { type: 2 }
+						});
+					}
+				);
+			});
+		});
+
+		describe('respects sort conditions', () => {
+			// Arrange:
+			const blocks = () => ([
+				{ _id: createObjectId(10), meta: { numTransactions: 1 }, block: { version: 3, type: 2 } },
+				{ _id: createObjectId(20), meta: { numTransactions: 2 }, block: { version: 2, type: 1 } },
+				{ _id: createObjectId(30), meta: { numTransactions: 3 }, block: { version: 1, type: 3 } }
+			]);
+
+			it('direction ascending', () =>
+				// Act + Assert:
+				runDbTest(
+					{ blocks: blocks() },
+					db => db.queryPagedDocuments_2([], [], { $sort: { _id: 1 } }, 'blocks', options),
+					page => {
+						expect(page.data.length).to.equal(3);
+						expect(page.data[0].id).to.deep.equal(createObjectId(10));
+						expect(page.data[1].id).to.deep.equal(createObjectId(20));
+						expect(page.data[2].id).to.deep.equal(createObjectId(30));
+					}
+				));
+
+			it('direction descending', () =>
+				// Act + Assert:
+				runDbTest(
+					{ blocks: blocks() },
+					db => db.queryPagedDocuments_2([], [], { $sort: { _id: -1 } }, 'blocks', options),
+					page => {
+						expect(page.data.length).to.equal(3);
+						expect(page.data[0].id).to.deep.equal(createObjectId(30));
+						expect(page.data[1].id).to.deep.equal(createObjectId(20));
+						expect(page.data[2].id).to.deep.equal(createObjectId(10));
+					}
+				));
+
+			it('sort field', () =>
+				// Act + Assert:
+				runDbTest(
+					{ blocks: blocks() },
+					db => db.queryPagedDocuments_2([], [], { $sort: { 'block.type': 1 } }, 'blocks', options),
+					page => {
+						expect(page.data.length).to.equal(3);
+						expect(page.data[0].id).to.deep.equal(createObjectId(20));
+						expect(page.data[1].id).to.deep.equal(createObjectId(10));
+						expect(page.data[2].id).to.deep.equal(createObjectId(30));
+					}
+				));
+		});
+
+		describe('uses provided collection', () => {
+			// Arrange:
+			const accounts = () => ([{ _id: createObjectId(10), account: { address: account1.address, addressHeight: 10 } }]);
+			const blocks = () => ([{ _id: createObjectId(20), meta: { numTransactions: 1 }, block: { version: 3, type: 2 } }]);
+			const transactions = () => ([{ _id: createObjectId(30), meta: { height: 1 }, transaction: { type: 3 } }]);
+
+			it('respects collection', () =>
+				// Act + Assert:
+				runDbTest(
+					{ accounts: accounts(), blocks: blocks(), transactions: transactions() },
+					db => db.queryPagedDocuments_2([], [], sortConditions, 'blocks', options),
+					page => {
+						expect(page.data.length).to.equal(1);
+						expect(page.data[0].id).to.deep.equal(createObjectId(20));
+					}
+				));
+		});
+
+		describe('options', () => {
+			const blocks = numBlocks => {
+				const resultBlocks = [];
+				for (let i = 0; numBlocks > i; i++)
+					resultBlocks.push({ _id: createObjectId(i), meta: { hash: 0x0100 }, block: { type: 1 } });
+
+				return resultBlocks;
+			};
+
+			describe('respects page size', () => {
+				it('page size: 25', () => {
+					const pageSize = 25;
+
+					// Act + Assert:
+					return runDbTest(
+						{ blocks: blocks(25 + 10) },
+						db => db.queryPagedDocuments_2([], [], { $sort: { id: 1 } }, 'blocks', { pageSize, pageNumber: 1 }),
+						page => {
+							expect(page.data.length).to.equal(25);
+							expect(page.pagination).to.deep.equal({
+								totalEntries: 25 + 10, pageNumber: 1, pageSize: 25, totalPages: 2
+							});
+						}
+					);
+				});
+
+				it('less results than a page size', () => {
+					const pageSize = 25;
+
+					// Act + Assert:
+					return runDbTest(
+						{ blocks: blocks(10) },
+						db => db.queryPagedDocuments_2([], [], { $sort: { id: 1 } }, 'blocks', { pageSize, pageNumber: 1 }),
+						page => {
+							expect(page.data.length).to.equal(10);
+							expect(page.pagination).to.deep.equal({
+								totalEntries: 10, pageNumber: 1, pageSize: 25, totalPages: 1
+							});
+						}
+					);
+				});
+			});
+
+			describe('respects page number', () => {
+				const runPageNumberTest = (pageNumber, expectedNumberOfElements) => {
+					it(`page number: ${pageNumber}`, () =>
+						// Act + Assert:
+						runDbTest(
+							{ blocks: blocks(12) },
+							db => db.queryPagedDocuments_2([], [], { $sort: { id: 1 } }, 'blocks', { pageSize: 10, pageNumber }),
+							page => {
+								expect(page.data.length).to.equal(expectedNumberOfElements);
+								expect(page.pagination).to.deep.equal({
+									totalEntries: 12, pageNumber, pageSize: 10, totalPages: 2
+								});
+							}
+						));
+				};
+
+				runPageNumberTest(1, 10);
+				runPageNumberTest(2, 2);
+				runPageNumberTest(3, 0);
+			});
+		});
+
+		describe('does not promote MongoDb.Long to regular `number` for small enough numbers', () => {
+			// Arrange:
+			const blocks = () => ([{ _id: createObjectId(10), block: { height: Long.fromNumber(10) } }]);
+
+			it('returns long', () =>
+				// Act + Assert:
+				runDbTest(
+					{ blocks: blocks() },
+					db => db.queryPagedDocuments_2([], [], sortConditions, 'blocks', options),
+					page => {
+						expect(page.data[0].block.height instanceof Long).to.be.equal(true);
+					}
+				));
+		});
+	});
+
+	describe('transactions', () => {
+		const account1 = { publicKey: test.random.publicKey() };
+		account1.address = keyToAddress(account1.publicKey);
+		const account2 = { publicKey: test.random.publicKey() };
+		account2.address = keyToAddress(account2.publicKey);
+		const account3 = { publicKey: test.random.publicKey() };
+		account3.address = keyToAddress(account3.publicKey);
+
+		const paginationOptions = {
+			pageSize: 10,
+			pageNumber: 1,
+			sortField: '_id',
+			sortDirection: -1
+		};
+
+		const { createObjectId } = test.db;
+
+		const createTransaction = (objectId, addresses, height, signerPublicKey, recipientAddress, type) => ({
+			_id: createObjectId(objectId),
+			meta: {
+				height,
+				addresses: addresses.map(a => new Binary(a))
+			},
+			transaction: {
+				signerPublicKey,
+				recipientAddress,
+				type
+			}
+		});
+
+		const createInnerTransaction = (objectId, aggregateId, signerPublicKey, recipientAddress, type) => ({
+			_id: createObjectId(objectId),
+			meta: { aggregateId: createObjectId(aggregateId) },
+			transaction: {
+				signerPublicKey,
+				recipientAddress,
+				type
+			}
+		});
+
+		const runTestAndVerifyIds = (dbTransactions, filters, options, expectedIds) => {
+			const expectedObjectIds = expectedIds.map(id => createObjectId(id));
+
+			return runDbTest(
+				{ transactions: dbTransactions },
+				db => db.transactions(filters, options),
+				transactionsPage => {
+					const returnedIds = transactionsPage.data.map(t => t.id);
+					expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
+					expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
+				}
+			);
+		};
+
+		it('returns expected structure', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 123, account1.publicKey, account2.address, EntityType.transfer)
+			];
+
+			// Act + Assert:
+			return runDbTest(
+				{ transactions: dbTransactions },
+				db => db.transactions({}, paginationOptions),
+				page => {
+					const expected_keys = ['meta', 'transaction', 'id'];
+					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
+				}
+			);
+		});
+
+		it('does not expose private meta.addresses field', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 1, 0, 0, 0)
+			];
+
+			// Act + Assert:
+			return runDbTest(
+				{ transactions: dbTransactions },
+				db => db.transactions({}, paginationOptions),
+				transactionsPage => {
+					expect(transactionsPage.data[0].meta.addresses).to.equal(undefined);
+				}
+			);
+		});
+
+		it('if address is provided signerPublicKey and recipientAddress are omitted', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 1),
+				createTransaction(20, [account1.address], 1, account1.publicKey),
+				createTransaction(30, [account1.address], 1, account2.publicKey),
+				createTransaction(40, [account1.address], 1, account1.publicKey, account1.address),
+				createTransaction(50, [account1.address], 1, account2.publicKey, account2.address),
+				createTransaction(60, [account2.address], 1)
+			];
+
+			const filters = {
+				address: account1.address,
+				signerPublicKey: account1.publicKey,
+				recipientAddress: account1.address
+			};
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 20, 30, 40, 50]);
+		});
+
+		it('ignores inner aggregate transactions in the results', () => {
+			// Arrange:
+			const dbTransactions = [
+				// Aggregate
+				createTransaction(10, [], 1, 0, 0, EntityType.aggregateComplete),
+				createInnerTransaction(100, 30, 0, 0, EntityType.mosaicDefinition),
+				createInnerTransaction(200, 30, 0, 0, EntityType.mosaicSupplyChange),
+
+				createTransaction(20, [], 1, 0, 0, EntityType.aggregateBonded),
+				createInnerTransaction(300, 30, 0, 0, EntityType.transfer),
+				createInnerTransaction(400, 30, 0, 0, EntityType.mosaicDefinition),
+
+				createTransaction(30, [], 1, 0, 0, EntityType.aggregateComplete),
+				createInnerTransaction(500, 30, 0, 0, EntityType.registerNamespace)
+			];
+
+			const filters = {
+				transactionTypes: [EntityType.transfer, EntityType.mosaicDefinition, EntityType.aggregateComplete]
+			};
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 30]);
+		});
+
+		it('returns correct transactions when no filters are provided', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 1),
+				createTransaction(20, [account1.address], 1, account1.publicKey),
+				createTransaction(30, [account1.address], 1, account1.publicKey, account1.address),
+				createTransaction(40, [account1.address], 1, account1.publicKey, account1.address, EntityType.transfer)
+			];
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, {}, paginationOptions, [10, 20, 30, 40]);
+		});
+
+		it('all the provided filters are taken into account', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 1),
+				createTransaction(20, [account1.address], 1),
+				createTransaction(30, [account1.address], 1, account1.publicKey),
+				createTransaction(40, [account1.address], 1, account1.publicKey, account1.address),
+				createTransaction(50, [account1.address], 1, account1.publicKey, account1.address, EntityType.transfer)
+			];
+
+			const filters = {
+				height: 1,
+				signerPublicKey: account1.publicKey,
+				recipientAddress: account1.address,
+				transactionTypes: [EntityType.transfer]
+			};
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [50]);
+		});
+
+		describe('respects offset', () => {
+			// Arrange:
+			const dbTransactions = () => [
+				createTransaction(10, [], 20),
+				createTransaction(20, [], 30),
+				createTransaction(30, [], 10)
+			];
+			const options = {
+				pageSize: 10,
+				pageNumber: 1,
+				sortField: '_id',
+				sortDirection: 1,
+				offset: createObjectId(20).toString()
+			};
+
+			it('gt', () => {
+				options.sortDirection = 1;
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions(), {}, options, [30]);
+			});
+
+			it('lt', () => {
+				options.sortDirection = -1;
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions(), {}, options, [10]);
+			});
+		});
+
+		describe('respects sort conditions', () => {
+			// Arrange:
+			const dbTransactions = () => [
+				createTransaction(10, [], 20),
+				createTransaction(20, [], 30),
+				createTransaction(30, [], 10)
+			];
+
+			it('direction ascending', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: 1
+				};
+
+				// Act + Assert:
+				return runDbTest(
+					{ transactions: dbTransactions() },
+					db => db.transactions([], options),
+					transactionsPage => {
+						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
+					}
+				);
+			});
+
+			it('direction descending', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: -1
+				};
+
+				// Act + Assert:
+				return runDbTest(
+					{ transactions: dbTransactions() },
+					db => db.transactions([], options),
+					transactionsPage => {
+						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
+						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
+					}
+				);
+			});
+
+			it('sort field', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: 'meta.height',
+					sortDirection: 1
+				};
+
+				// Act + Assert:
+				return runDbTest(
+					{ transactions: dbTransactions() },
+					db => db.transactions([], options),
+					transactionsPage => {
+						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
+						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(20));
+					}
+				);
+			});
+		});
+
+		describe('correctly applies each filter:', () => {
+			it('height', () => {
+				// Arrange:
+				const dbTransactions = [
+					createTransaction(10, [], 5),
+					createTransaction(20, [], 10),
+					createTransaction(30, [], 15)
+				];
+
+				const filters = { height: 10 };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [20]);
+			});
+
+			it('address', () => {
+				// Arrange:
+				const dbTransactions = [
+					createTransaction(10, [account1.address], 1),
+					createTransaction(20, [account2.address], 1),
+					createTransaction(30, [account3.address], 1),
+					createTransaction(40, [account2.address, account1.address], 1),
+					createTransaction(50, [account3.address, account1.address], 1)
+				];
+
+				const filters = { address: account1.address };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 40, 50]);
+			});
+
+			it('signerPublicKey', () => {
+				// Arrange:
+				const dbTransactions = [
+					// Non aggregate
+					createTransaction(10, [], 1, account1.publicKey),
+					createTransaction(20, [], 1, account2.publicKey),
+
+					// Aggregate
+					createTransaction(30, [], 1, account1.publicKey),
+					createInnerTransaction(100, 30, account2.publicKey),
+					createInnerTransaction(200, 30, account2.publicKey),
+
+					createTransaction(40, [], 1, account2.publicKey),
+					createInnerTransaction(300, 40, account1.publicKey),
+					createInnerTransaction(400, 40, account2.publicKey),
+
+					createTransaction(50, [], 1, account2.publicKey),
+					createInnerTransaction(500, 50, account2.publicKey)
+				];
+
+				const filters = { signerPublicKey: account1.publicKey };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 30]);
+			});
+
+			it('recipientAddress', () => {
+				// Arrange:
+				const dbTransactions = [
+					// Non aggregate
+					createTransaction(10, [], 1, 0, account1.address),
+					createTransaction(20, [], 1, 0, account2.address),
+
+					// Aggregate
+					createTransaction(30, [], 1, 0, account1.address),
+					createInnerTransaction(100, 30, 0, account2.address),
+					createInnerTransaction(200, 30, 0, account2.address),
+
+					createTransaction(40, [], 1, 0, account2.address),
+					createInnerTransaction(300, 40, 0, account1.address),
+					createInnerTransaction(400, 40, 0, account2.address),
+
+					createTransaction(50, [], 1, 0, account2.address),
+					createInnerTransaction(500, 50, 0, account2.address)
+				];
+
+				const filters = { recipientAddress: account1.address };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 30]);
+			});
+
+			it('transactionTypes', () => {
+				// Arrange:
+				const dbTransactions = [
+					// Non aggregate
+					createTransaction(10, [], 1, 0, 0, EntityType.transfer),
+					createTransaction(20, [], 1, 0, 0, EntityType.accountLink),
+
+					// Aggregate
+					createTransaction(30, [], 1, 0, 0, EntityType.aggregateBonded),
+					createInnerTransaction(100, 30, 0, 0, EntityType.mosaicDefinition),
+					createInnerTransaction(200, 30, 0, 0, EntityType.mosaicSupplyChange),
+
+					createTransaction(40, [], 1, 0, 0, EntityType.aggregateComplete),
+					createInnerTransaction(300, 40, 0, 0, EntityType.transfer),
+					createInnerTransaction(400, 40, 0, 0, EntityType.transfer),
+
+					createTransaction(50, [], 1, 0, 0, EntityType.aggregateBonded),
+					createInnerTransaction(500, 50, 0, 0, EntityType.registerNamespace),
+					createInnerTransaction(600, 50, 0, 0, EntityType.aliasAddress)
+				];
+
+				const filters = {
+					transactionTypes: [EntityType.mosaicDefinition, EntityType.aggregateComplete, EntityType.transfer]
+				};
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 40]);
+			});
+
+			describe('state', () => {
+				// Arrange:
+				const dbTransactions = () => ({
+					transactions: [createTransaction(10, [], 1)],
+					partialTransactions: [createTransaction(20, [], 1)],
+					unconfirmedTransactions: [createTransaction(30, [], 1)]
+				});
+
+				const runStateTest = (state, expectedIds) => {
+					it(`state: ${state}`, () => {
+						const expectedObjectIds = expectedIds.map(id => createObjectId(id));
+
+						return runDbTest(
+							dbTransactions(),
+							db => db.transactions({ state }, paginationOptions),
+							transactionsPage => {
+								const returnedIds = transactionsPage.data.map(t => t.id);
+								expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
+								expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
+							}
+						);
+					});
+				};
+
+				runStateTest('confirmed', [10]);
+				runStateTest('partial', [20]);
+				runStateTest('unconfirmed', [30]);
+
+				it('defaults to confirmed', () =>
+					// Act + Assert:
+					runDbTest(
+						dbTransactions(),
+						db => db.transactions({}, paginationOptions),
+						transactionsPage => {
+							expect(transactionsPage.data.length).to.equal(1);
+							expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
+						}
+					));
+			});
 		});
 	});
 

@@ -25,7 +25,7 @@ const { convertToLong } = require('./dbUtils');
 const catapult = require('catapult-sdk');
 const MongoDb = require('mongodb');
 
-const { address, EntityType } = catapult.model;
+const { EntityType } = catapult.model;
 const { ObjectId } = MongoDb;
 
 const isAggregateType = document => EntityType.aggregateComplete === document.transaction.type
@@ -85,7 +85,8 @@ const buildBlocksFromOptions = (height, numBlocks, chainHeight) => {
 	return { startHeight, endHeight, numBlocks: endHeight.subtract(startHeight).toNumber() };
 };
 
-const boundPageSize = (pageSize, bounds) => Math.max(bounds.pageSizeMin, Math.min(bounds.pageSizeMax, pageSize));
+const getBoundedPageSize = (pageSize, pagingOptions) =>
+	Math.max(pagingOptions.pageSizeMin, Math.min(pagingOptions.pageSizeMax, pageSize || pagingOptions.pageSizeDefault));
 
 class CatapultDb {
 	// region construction / connect / disconnect
@@ -95,8 +96,11 @@ class CatapultDb {
 		if (!this.networkId)
 			throw Error('network id is required');
 
-		this.pageSizeMin = options.pageSizeMin || 10;
-		this.pageSizeMax = options.pageSizeMax || 100;
+		this.pagingOptions = {
+			pageSizeMin: options.pageSizeMin,
+			pageSizeMax: options.pageSizeMax,
+			pageSizeDefault: options.pageSizeDefault
+		};
 		this.sanitizer = createSanitizer();
 	}
 
@@ -165,7 +169,7 @@ class CatapultDb {
 		return collection.find(allConditions)
 			.project(options.projection)
 			.sort({ _id: sortOrder })
-			.limit(boundPageSize(pageSize, this))
+			.limit(getBoundedPageSize(pageSize, this.pagingOptions))
 			.toArray();
 	}
 
@@ -305,6 +309,144 @@ class CatapultDb {
 					return transactions;
 				});
 			});
+	}
+
+	/**
+	 * Makes a paginated query with the provided arguments.
+	 * @param {array<object>} queryConditions The conditions that determine the query results, may be empty.
+	 * @param {array<string>} removedFields Field names to be hidden from the query results, may be empty.
+	 * @param {object} sortConditions Condition that describes the order of the results, must be set.
+	 * @param {string} collectionName Name of the collection to be queried.
+	 * @param {object} options Pagination options, must contain `pageSize` and `pageNumber` (starting at 1).
+	 * @returns {Promise.<object>} Page result, contains the attributes `data` with the actual results, and `paging` with pagination
+	 * metadata - which is comprised of: `totalEntries`, `pageNumber`, and `pageSize`.
+	 */
+	queryPagedDocuments_2(queryConditions, removedFields, sortConditions, collectionName, options) {
+		const conditions = [];
+		if (queryConditions.length)
+			conditions.push(1 === queryConditions.length ? { $match: queryConditions[0] } : { $match: { $and: queryConditions } });
+
+		conditions.push(sortConditions);
+
+		const { pageSize } = options;
+		const pageIndex = options.pageNumber - 1;
+
+		const facet = [
+			{ $skip: pageSize * pageIndex },
+			{ $limit: pageSize }
+		];
+
+		// rename _id to id
+		facet.push({ $set: { id: '$_id' } });
+		removedFields.push('_id');
+
+		if (0 < Object.keys(removedFields).length)
+			facet.push({ $unset: removedFields });
+
+		conditions.push({
+			$facet: {
+				data: facet,
+				pagination: [
+					{ $count: 'totalEntries' },
+					{
+						$set: {
+							pageNumber: options.pageNumber,
+							pageSize
+						}
+					}
+				]
+			}
+		});
+
+		return this.database.collection(collectionName)
+			.aggregate(conditions, { promoteLongs: false })
+			.toArray()
+			.then(result => {
+				const formattedResult = result[0];
+
+				// when query is empty, mongodb does not fill the pagination info
+				if (!formattedResult.pagination.length)
+					formattedResult.pagination = { totalEntries: 0, pageNumber: options.pageNumber, pageSize };
+				else
+					formattedResult.pagination = formattedResult.pagination[0];
+
+				formattedResult.pagination.totalPages = Math.ceil(
+					formattedResult.pagination.totalEntries / formattedResult.pagination.pageSize
+				);
+
+				return formattedResult;
+			});
+	}
+
+	/**
+	 * Retrieves filtered and paginated transactions.
+	 * @param {object} filters Filters to be applied: `address` for an involved address in the query, `signerPublicKey`, `recipientAddress`,
+	 * `state`, `height`, `transactionTypes` array of uint. If `address` is provided, other account related filters are omitted.
+	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	 * `pageSize`.
+	 * and `pageNumber`.
+	 * @returns {Promise.<object>} Transactions page.
+	 */
+	transactions(filters, options) {
+		const getCollectionName = (transactionStatus = 'confirmed') => {
+			const collectionNames = {
+				confirmed: 'transactions',
+				unconfirmed: 'unconfirmedTransactions',
+				partial: 'partialTransactions'
+			};
+			return collectionNames[transactionStatus];
+		};
+		const collectionName = getCollectionName(filters.state);
+
+		const buildAccountConditions = () => {
+			if (filters.address)
+				return { 'meta.addresses': Buffer.from(filters.address) };
+
+			const accountConditions = [];
+			if (filters.signerPublicKey) {
+				const signerPublicKeyCondition = { 'transaction.signerPublicKey': Buffer.from(filters.signerPublicKey) };
+				accountConditions.push(signerPublicKeyCondition);
+			}
+
+			if (filters.recipientAddress) {
+				const recipientAddressCondition = { 'transaction.recipientAddress': Buffer.from(filters.recipientAddress) };
+				accountConditions.push(recipientAddressCondition);
+			}
+
+			if (Object.keys(accountConditions).length)
+				return 1 < Object.keys(accountConditions).length ? { $and: accountConditions } : accountConditions[0];
+
+			return undefined;
+		};
+
+		const buildConditions = () => {
+			const conditions = [];
+
+			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+			// in fact, offset logic should be moved to `queryPagedDocuments`
+			if (options.offset)
+				conditions.push({ [options.sortField]: { [1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset) } });
+
+			if (filters.height)
+				conditions.push({ 'meta.height': convertToLong(filters.height) });
+
+			conditions.push({ 'meta.aggregateId': { $exists: false } });
+
+			if (undefined !== filters.transactionTypes)
+				conditions.push({ 'transaction.type': { $in: filters.transactionTypes } });
+
+			const accountConditions = buildAccountConditions();
+			if (accountConditions)
+				conditions.push(accountConditions);
+
+			return conditions;
+		};
+
+		const removedFields = ['meta.addresses'];
+		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+		const conditions = buildConditions();
+
+		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, collectionName, options);
 	}
 
 	/**
@@ -526,7 +668,8 @@ class CatapultDb {
 
 	accountsByIds(ids) {
 		// id will either have address property or publicKey property set; in the case of publicKey, convert it to address
-		const buffers = ids.map(id => Buffer.from((id.publicKey ? address.publicKeyToAddress(id.publicKey, this.networkId) : id.address)));
+		const buffers = ids.map(id => Buffer.from((id.publicKey
+			? catapult.model.address.publicKeyToAddress(id.publicKey, this.networkId) : id.address)));
 		return this.queryDocuments('accounts', { 'account.address': { $in: buffers } })
 			.then(entities => entities.map(accountWithMetadata => {
 				const { account } = accountWithMetadata;

@@ -71,7 +71,8 @@ describe('all routes', () => {
 			'/node/time',
 
 			'/transaction/:transactionId',
-			'/transaction/:hash/status'
+			'/transaction/:hash/status',
+			'/transactions'
 		]);
 	});
 
