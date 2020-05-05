@@ -25,7 +25,7 @@ const sizes = require('../modelBinary/sizes');
 
 const constants = { sizes };
 
-const accountRestrictionTypeOutgoingOffset = 0x4000;
+// const accountRestrictionTypeOutgoingOffset = 0x4000;
 const accountRestrictionTypeBlockOffset = 0x8000;
 const AccountRestrictionTypeFlags = Object.freeze({
 	address: 0x0001,
