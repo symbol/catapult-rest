@@ -2294,6 +2294,30 @@ describe('catapult db', () => {
 						}
 					));
 			});
+
+			describe('embedded', () => {
+				// Arrange:
+				const dbTransactions = () => [
+					// Non aggregate
+					createTransaction(10, [], 1),
+
+					// Aggregate
+					createTransaction(20, [], 1),
+					createInnerTransaction(100, 20)
+				];
+
+				const runEmbeddedTest = (embedded, expectedIds) =>
+					it(`embedded: ${embedded}`, () =>
+						// Act + Assert:
+						runTestAndVerifyIds(dbTransactions(), { embedded }, paginationOptions, expectedIds));
+
+				runEmbeddedTest(true, [10, 20, 100]);
+				runEmbeddedTest(false, [10, 20]);
+
+				it('defaults to false', () =>
+					// Act + Assert:
+					runTestAndVerifyIds(dbTransactions(), {}, paginationOptions, [10, 20]));
+			});
 		});
 	});
 

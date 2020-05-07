@@ -153,6 +153,12 @@ describe('route utils', () => {
 			valid: hashes512.valid.map(hash => ({ id: hash, parsed: catapult.utils.convert.hexToUint8(hash) })),
 			invalid: hashes512.invalid.map(hash => ({ id: hash, error: `invalid length of hash512 '${hash.length}` }))
 		}));
+
+		describe('boolean', () => addParserTests({
+			parser: 'boolean',
+			valid: [{ id: 'true', parsed: true }, { id: 'false', parsed: false }],
+			invalid: [{ id: 'abcd', error: 'must be boolean value \'true\' or \'false\'' }]
+		}));
 	});
 
 	describe('parse argument array', () => {

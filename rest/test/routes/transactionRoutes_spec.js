@@ -187,6 +187,7 @@ describe('transaction routes', () => {
 							recipientAddress: undefined,
 							signerPublicKey: undefined,
 							state: undefined,
+							embedded: undefined,
 							transactionTypes: undefined
 						};
 
@@ -204,6 +205,7 @@ describe('transaction routes', () => {
 					{ filter: 'address', param: testAddressString, value: testAddress },
 					{ filter: 'signerPublicKey', param: testPublickeyString, value: testPublickey },
 					{ filter: 'recipientAddress', param: testAddressString, value: testAddress },
+					{ filter: 'embedded', param: 'true', value: true },
 					{ filter: 'state', param: 'confirmed', value: 'confirmed' }
 				];
 
@@ -222,6 +224,7 @@ describe('transaction routes', () => {
 							recipientAddress: undefined,
 							signerPublicKey: undefined,
 							state: undefined,
+							embedded: undefined,
 							transactionTypes: [1, 5, 25]
 						});
 					});
@@ -302,6 +305,7 @@ describe('transaction routes', () => {
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								state,
+								embedded: undefined,
 								transactionTypes: undefined
 							});
 						}));

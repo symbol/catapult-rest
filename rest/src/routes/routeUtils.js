@@ -83,6 +83,12 @@ const namedParserMap = {
 			return convert.hexToUint8(str);
 
 		throw Error(`invalid length of hash512 '${str.length}'`);
+	},
+	boolean: str => {
+		if (('true' !== str) && ('false' !== str))
+			throw Error('must be boolean value \'true\' or \'false\'');
+
+		return 'true' === str;
 	}
 };
 
