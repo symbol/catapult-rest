@@ -80,13 +80,13 @@ const accountLinkPlugin = {
 		codecBuilder.addTransactionSupport(EntityType.votingKeyLink, {
 			deserialize: parser => {
 				const transaction = {};
-				transaction.votingKey = parser.buffer(constants.sizes.votingKey);
+				transaction.linkedPublicKey = parser.buffer(constants.sizes.votingKey);
 				transaction.linkAction = parser.uint8();
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeBuffer(transaction.votingKey);
+				serializer.writeBuffer(transaction.linkedPublicKey);
 				serializer.writeUint8(transaction.linkAction);
 			}
 		});
