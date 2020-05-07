@@ -43,6 +43,7 @@ describe('entity type enumeration', () => {
 			mosaicRestrictionAddress: 0x4251,
 			mosaicRestrictionGlobal: 0x4151,
 			accountLink: 0x414C,
+			nodeKeyLink: 0x424C,
 			accountMetadata: 0x4144,
 			mosaicMetadata: 0x4244,
 			namespaceMetadata: 0x4344

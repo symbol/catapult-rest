@@ -78,6 +78,9 @@ const EntityType = {
 	/** Account link transaction. */
 	accountLink: 0x414C,
 
+	/** Node key link transaction. */
+	nodeKeyLink: 0x424C,
+
 	/** Account metadata transaction */
 	accountMetadata: 0x4144,
 
