@@ -38,6 +38,14 @@ const accountLinkPlugin = {
 		builder.addTransactionSupport(EntityType.nodeKeyLink, {
 			linkedPublicKey: ModelType.binary
 		});
+
+		builder.addTransactionSupport(EntityType.votingKeyLink, {
+			linkedPublicKey: ModelType.binary
+		});
+
+		builder.addTransactionSupport(EntityType.vrfKeyLink, {
+			linkedPublicKey: ModelType.binary
+		});
 	},
 
 	registerCodecs: codecBuilder => {
@@ -56,6 +64,34 @@ const accountLinkPlugin = {
 		});
 
 		codecBuilder.addTransactionSupport(EntityType.nodeKeyLink, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.linkedPublicKey = parser.buffer(constants.sizes.signerPublicKey);
+				transaction.linkAction = parser.uint8();
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.linkedPublicKey);
+				serializer.writeUint8(transaction.linkAction);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.votingKeyLink, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.votingKey = parser.buffer(constants.sizes.votingKey);
+				transaction.linkAction = parser.uint8();
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.votingKey);
+				serializer.writeUint8(transaction.linkAction);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.vrfKeyLink, {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.linkedPublicKey = parser.buffer(constants.sizes.signerPublicKey);

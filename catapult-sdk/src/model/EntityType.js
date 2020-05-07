@@ -81,6 +81,12 @@ const EntityType = {
 	/** Node key link transaction. */
 	nodeKeyLink: 0x424C,
 
+	/** Voting key link transaction. */
+	votingKeyLink: 0x4143,
+
+	/** VRF key link transaction. */
+	vrfKeyLink: 0x4243,
+
 	/** Account metadata transaction */
 	accountMetadata: 0x4144,
 
