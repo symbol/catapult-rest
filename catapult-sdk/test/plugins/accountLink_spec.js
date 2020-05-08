@@ -48,12 +48,12 @@ describe('account link plugin', () => {
 			expect(modelSchema.nodeKeyLink).to.contain.all.keys(['linkedPublicKey']);
 
 			// - votingKeyLink
-			expect(Object.keys(modelSchema.nodeKeyLink).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
-			expect(modelSchema.nodeKeyLink).to.contain.all.keys(['linkedPublicKey']);
+			expect(Object.keys(modelSchema.votingKeyLink).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.votingKeyLink).to.contain.all.keys(['linkedPublicKey']);
 
 			// - vrfKeyLink
-			expect(Object.keys(modelSchema.nodeKeyLink).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
-			expect(modelSchema.nodeKeyLink).to.contain.all.keys(['linkedPublicKey']);
+			expect(Object.keys(modelSchema.vrfKeyLink).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.vrfKeyLink).to.contain.all.keys(['linkedPublicKey']);
 		});
 	});
 
