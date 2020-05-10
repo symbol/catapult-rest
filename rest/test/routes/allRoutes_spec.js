@@ -44,15 +44,9 @@ describe('all routes', () => {
 			'/account/:accountId',
 			'/account/:accountId/harvest',
 			'/account/:accountId/beneficiary',
-			'/account/:accountId/transactions',
-			'/account/:accountId/transactions/incoming',
-			'/account/:accountId/transactions/outgoing',
-			'/account/:accountId/transactions/unconfirmed',
-			// no custom account transactions routes are registered
 
 			'/block/:height',
 			'/block/:height/transaction/:hash/merkle',
-			'/block/:height/transactions',
 			'/blocks/:height/limit/:limit',
 			'/state/:state/hash/:hash/merkle',
 
