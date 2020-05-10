@@ -49,14 +49,14 @@ module.exports = {
 		routeUtils.addPutPacketRoute(
 			server,
 			services.connections,
-			{ routeName: '/transaction', packetType: PacketType.pushTransactions },
+			{ routeName: '/transactions', packetType: PacketType.pushTransactions },
 			params => routeUtils.parseArgument(params, 'payload', convert.hexToUint8)
 		);
 
 		routeUtils.addGetPostDocumentRoutes(
 			server,
 			sender,
-			{ base: '/transaction', singular: 'transactionId', plural: 'transactionIds' },
+			{ base: '/transactions', singular: 'transactionId', plural: 'transactionIds' },
 			// params has already been converted by a parser below, so it is: string - in case of objectId, Uint8Array - in case of hash
 			params => (('string' === typeof params[0]) ? db.transactionsByIds(params) : db.transactionsByHashes(params)),
 			(transactionId, index, array) => {

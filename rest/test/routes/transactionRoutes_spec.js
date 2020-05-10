@@ -32,7 +32,7 @@ describe('transaction routes', () => {
 	describe('transaction', () => {
 		describe('PUT transaction', () => {
 			test.route.packet.addPutPacketRouteTests(transactionRoutes.register, {
-				routeName: '/transaction',
+				routeName: '/transactions',
 				packetType: '9',
 				inputs: {
 					valid: {
@@ -55,7 +55,7 @@ describe('transaction routes', () => {
 			const addGetPostTests = (dbApiName, key, ids, parsedIds) => {
 				const errorMessage = 'has an invalid format';
 				test.route.document.addGetPostDocumentRouteTests(transactionRoutes.register, {
-					routes: { singular: '/transaction/:transactionId', plural: '/transaction' },
+					routes: { singular: '/transactions/:transactionId', plural: '/transactions' },
 					inputs: {
 						valid: { object: { transactionId: ids[0] }, parsed: [parsedIds[0]], printable: ids[0] },
 						validMultiple: { object: { transactionIds: ids }, parsed: parsedIds },
@@ -82,7 +82,7 @@ describe('transaction routes', () => {
 					const errorMessage = 'element in array transactionIds has an invalid format';
 					return test.route.executeThrows(
 						registerRoutes,
-						'/transaction',
+						'/transactions',
 						'post',
 						{ transactionIds: ids },
 						db,
