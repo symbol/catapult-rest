@@ -45,7 +45,7 @@ describe('block routes', () => {
 		}
 	});
 
-	describe('block', () => {
+	describe('block at height', () => {
 		const builder = test.route.document.prepareGetDocumentRouteTests(blockRoutes.register, {
 			route: '/block/:height',
 			dbApiName: 'blockAtHeight',
@@ -58,49 +58,6 @@ describe('block routes', () => {
 			invalid: { object: { height: '10A' }, error: 'height has an invalid format' }
 		});
 		builder.addNotFoundInputTest({ object: { height: '11' }, parsed: [11], printable: '11' }, 'chain height is too small');
-	});
-
-	describe('blocks from height', () => {
-		const builder = test.route.document.prepareGetDocumentsRouteTests(blockRoutes.register, {
-			route: '/blocks/:height/limit/:limit',
-			dbApiName: 'blocksFrom',
-			type: 'blockHeaderWithMetadata',
-			config: routeConfig
-		});
-
-		builder.addValidInputTest({ object: { height: '1', limit: '80' }, parsed: [1, 80] }, '(default limit)');
-		builder.addValidInputTest({ object: { height: '3601', limit: '72' }, parsed: [3601, 72] }, '(custom valid limit)');
-		builder.addEmptyArrayTest({ object: { height: '1', limit: '40' }, parsed: [1, 40] });
-
-		// notice that this expands to four tests { 'height', 'limit'} x { '10A', '-4321' }
-		['height', 'limit'].forEach(property => ['10A', '-4321'].forEach(value => {
-			const object = Object.assign({ height: '1234', limit: '4321' }, { [property]: value });
-			const errorMessage = `${property} has an invalid format`;
-			builder.addInvalidKeyTest({ object, error: errorMessage }, `(${property} with value ${value})`);
-		}));
-
-		builder.addRedirectTest({ object: { height: '0', limit: '0' }, redirectUri: '/blocks/1/limit/30' }, '{ height: 0, limit: 0 }');
-
-		// limit is sanitized correctly
-		builder.addRedirectTest(
-			{ object: { height: '3601', limit: '0' }, redirectUri: '/blocks/3601/limit/30' },
-			'{ height: 3601, limit: 0 }'
-		);
-
-		builder.addRedirectTest(
-			{ object: { height: '3601', limit: '29' }, redirectUri: '/blocks/3601/limit/30' },
-			'{ height: 3601, limit: 29 }'
-		);
-
-		builder.addRedirectTest(
-			{ object: { height: '3601', limit: '81' }, redirectUri: '/blocks/3601/limit/80' },
-			'{ height: 3601, limit: 81 }'
-		);
-
-		builder.addRedirectTest(
-			{ object: { height: '3601', limit: '100' }, redirectUri: '/blocks/3601/limit/80' },
-			'{ height: 3601, limit: 100 }'
-		);
 	});
 
 	describe('block with merkle tree', () => {

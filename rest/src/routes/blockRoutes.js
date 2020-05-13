@@ -32,12 +32,6 @@ const { BinaryParser } = catapult.parser;
 
 const parseHeight = params => routeUtils.parseArgument(params, 'height', 'uint');
 
-const getSanitizedLimit = (pageSize, limit) => {
-	let sanitizedLimit = Math.max(limit, pageSize.min);
-	sanitizedLimit = Math.min(sanitizedLimit, pageSize.max);
-	return sanitizedLimit;
-};
-
 module.exports = {
 	register: (server, db, services) => {
 		server.get('/block/:height', (req, res, next) => {
@@ -52,20 +46,6 @@ module.exports = {
 			'/block/:height/transaction/:hash/merkle',
 			routeUtils.blockRouteMerkleProcessor(db, 'numTransactions', 'transactionMerkleTree')
 		);
-
-		server.get('/blocks/:height/limit/:limit', (req, res, next) => {
-			const height = parseHeight(req.params) || 1;
-			const limit = routeUtils.parseArgument(req.params, 'limit', 'uint');
-			const sanitizedLimit = getSanitizedLimit(services.config.pageSize, limit);
-
-			if (sanitizedLimit !== limit)
-				return res.redirect(`/blocks/${height}/limit/${sanitizedLimit}`, next); // redirect calls next
-
-			return db.blocksFrom(height, sanitizedLimit).then(blocks => {
-				res.send({ payload: blocks, type: routeResultTypes.block });
-				next();
-			});
-		});
 
 		const buildResponse = (packet, codec, resultType) => {
 			const binaryParser = new BinaryParser();
