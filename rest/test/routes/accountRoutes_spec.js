@@ -30,7 +30,7 @@ describe('account routes', () => {
 	describe('get by account', () => {
 		const addGetTests = (key, ids, parsedIds, validBody, invalidBody, errorMessage) => {
 			test.route.document.addGetPostDocumentRouteTests(accountRoutes.register, {
-				routes: { singular: '/account/:accountId', plural: '/account' },
+				routes: { singular: '/accounts/:accountId', plural: '/accounts' },
 				inputs: {
 					valid: { object: { accountId: ids[0] }, parsed: [{ [key]: parsedIds[0] }], printable: ids[0] },
 					validMultiple: { object: validBody, parsed: parsedIds.map(parsedId => ({ [key]: parsedId })) },
@@ -76,7 +76,7 @@ describe('account routes', () => {
 			const errorMessage = 'publicKeys and addresses cannot both be provided';
 			return test.route.executeThrows(
 				registerRoutes,
-				'/account',
+				'/accounts',
 				'post',
 				{ addresses: addresses.valid, publicKeys: publicKeys.valid },
 				db,

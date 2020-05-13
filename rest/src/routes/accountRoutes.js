@@ -25,14 +25,14 @@ const errors = require('../server/errors');
 
 module.exports = {
 	register: (server, db) => {
-		server.get('/account/:accountId', (req, res, next) => {
+		server.get('/accounts/:accountId', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			const sender = routeUtils.createSender(routeResultTypes.account);
 			return db.accountsByIds([{ [type]: accountId }])
 				.then(sender.sendOne(req.params.accountId, res, next));
 		});
 
-		server.post('/account', (req, res, next) => {
+		server.post('/accounts', (req, res, next) => {
 			if (req.params.publicKeys && req.params.addresses)
 				throw errors.createInvalidArgumentError('publicKeys and addresses cannot both be provided');
 
