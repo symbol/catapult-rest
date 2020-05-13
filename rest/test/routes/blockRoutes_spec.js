@@ -20,6 +20,7 @@
 
 const { MockServer, test } = require('./utils/routeTestUtils');
 const blockRoutes = require('../../src/routes/blockRoutes');
+const routeResultTypes = require('../../src/routes/routeResultTypes');
 const routeUtils = require('../../src/routes/routeUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
@@ -43,6 +44,132 @@ describe('block routes', () => {
 		config: {
 			apiNode: { timeout: 1000 }
 		}
+	});
+
+	describe('blocks', () => {
+		describe('get', () => {
+			const testPublickeyString = '7DE16AEDF57EB9561D3E6EFA4AE66F27ABDA8AEC8BC020B6277360E31619DCE7';
+			const testPublickey = convert.hexToUint8(testPublickeyString);
+
+			const fakeBlock = { meta: { numTransactions: 0 }, block: { type: 33091 } };
+			const fakePaginatedBlock = {
+				data: [fakeBlock],
+				pagination: {
+					pageNumber: 1,
+					pageSize: 10,
+					totalEntries: 1,
+					totalPages: 1
+				}
+			};
+			const dbBlocksFake = sinon.fake.resolves(fakePaginatedBlock);
+
+			const mockServer = new MockServer();
+			const db = { blocks: dbBlocksFake };
+			const services = {
+				config: {
+					pageSize: {
+						min: 10,
+						max: 100,
+						default: 20
+					}
+				}
+			};
+			blockRoutes.register(mockServer.server, db, services);
+
+			const route = mockServer.getRoute('/blocks').get();
+
+			beforeEach(() => {
+				mockServer.resetStats();
+				dbBlocksFake.resetHistory();
+			});
+
+			describe('returns blocks', () => {
+				it('returns correct structure with blocks', () => {
+					const req = { params: {} };
+
+					// Act:
+					return mockServer.callRoute(route, req).then(() => {
+						// Assert:
+						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+							payload: fakePaginatedBlock,
+							type: routeResultTypes.blockWithId,
+							structure: 'page'
+						});
+						expect(mockServer.next.calledOnce).to.equal(true);
+					});
+				});
+			});
+
+			describe('parses filters', () => {
+				const runParseFilterTest = (filter, param, value) => {
+					it(filter, () => {
+						const req = { params: { [filter]: param } };
+
+						const expectedResult = {
+							signerPublicKey: undefined,
+							beneficiaryPublicKey: undefined
+						};
+
+						expectedResult[filter] = value;
+
+						// Act + Assert
+						return mockServer.callRoute(route, req).then(() => {
+							expect(dbBlocksFake.firstCall.args[0]).to.deep.equal(expectedResult);
+						});
+					});
+				};
+
+				const testCases = [
+					{ filter: 'signerPublicKey', param: testPublickeyString, value: testPublickey },
+					{ filter: 'beneficiaryPublicKey', param: testPublickeyString, value: testPublickey }
+				];
+
+				testCases.forEach(testCase => {
+					runParseFilterTest(testCase.filter, testCase.param, testCase.value);
+				});
+			});
+
+			describe('parses options', () => {
+				it('parses options correctly', () => {
+					const req = {
+						params: {
+							pageSize: '15', pageNumber: '5', sortField: 'id', order: 'desc'
+						}
+					};
+
+					// Act + Assert
+					return mockServer.callRoute(route, req).then(() => {
+						expect(dbBlocksFake.firstCall.args[1]).to.deep.equal({
+							pageSize: 15,
+							pageNumber: 5,
+							sortField: '_id',
+							sortDirection: -1,
+							offset: undefined
+						});
+					});
+				});
+
+				// force sort field to 'id' until this is indexed/decided/developed
+				it('always defaults sortField to id', () => {
+					const req = {
+						params: {
+							pageSize: '15', pageNumber: '1', sortField: 'meta.hash'
+						}
+					};
+
+					// Act + Assert
+					return mockServer.callRoute(route, req).then(() => {
+						expect(dbBlocksFake.firstCall.args[1]).to.deep.equal({
+							pageSize: 15,
+							pageNumber: 1,
+							sortField: '_id',
+							sortDirection: 1,
+							offset: undefined
+						});
+					});
+				});
+			});
+		});
 	});
 
 	describe('block at height', () => {
