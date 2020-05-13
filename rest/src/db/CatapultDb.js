@@ -192,6 +192,32 @@ class CatapultDb {
 			.then(chainStatistic => chainStatistic.current);
 	}
 
+	/**
+	 * Retrieves filtered and paginated blocks.
+	 * @param {object} filters Filters to be applied: `signerPublicKey` and `beneficiaryPublicKey`.
+	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	 * `pageSize` and `pageNumber`.
+	 * @returns {Promise.<object>} Blocks page.
+	 */
+	blocks(filters, options) {
+		const conditions = [];
+
+		// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+		// in fact, offset logic should be moved to `queryPagedDocuments`
+		if (options.offset)
+			conditions.push({ [options.sortField]: { [1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset) } });
+
+		if (filters.signerPublicKey)
+			conditions.push({ 'block.signerPublicKey': filters.signerPublicKey });
+
+		if (filters.beneficiaryPublicKey)
+			conditions.push({ 'block.beneficiaryPublicKey': filters.beneficiaryPublicKey });
+
+		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+
+		return this.queryPagedDocuments_2(conditions, [], sortConditions, 'blocks', options);
+	}
+
 	blockAtHeight(height) {
 		return this.queryDocument(
 			'blocks',

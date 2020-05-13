@@ -34,6 +34,24 @@ const parseHeight = params => routeUtils.parseArgument(params, 'height', 'uint')
 
 module.exports = {
 	register: (server, db, services) => {
+		server.get('/blocks', (req, res, next) => {
+			const { params } = req;
+
+			const filters = {
+				signerPublicKey: params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined,
+				beneficiaryPublicKey: params.beneficiaryPublicKey
+					? routeUtils.parseArgument(params, 'beneficiaryPublicKey', 'publicKey')
+					: undefined
+			};
+
+			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize);
+			// force sort field to 'id' until this is indexed/decided/developed
+			options.sortField = '_id';
+
+			return db.blocks(filters, options)
+				.then(result => routeUtils.createSender(routeResultTypes.blockWithId).sendPage(res, next)(result));
+		});
+
 		server.get('/blocks/:height', (req, res, next) => {
 			const height = parseHeight(req.params);
 
