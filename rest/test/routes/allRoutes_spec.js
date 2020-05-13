@@ -43,8 +43,8 @@ describe('all routes', () => {
 		test.assert.assertRoutes(routes, [
 			'/account/:accountId',
 
-			'/block/:height',
-			'/block/:height/transaction/:hash/merkle',
+			'/blocks/:height',
+			'/blocks/:height/transaction/:hash/merkle',
 			'/state/:state/hash/:hash/merkle',
 
 			'/chain/height',

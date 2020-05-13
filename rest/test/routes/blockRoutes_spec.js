@@ -47,7 +47,7 @@ describe('block routes', () => {
 
 	describe('block at height', () => {
 		const builder = test.route.document.prepareGetDocumentRouteTests(blockRoutes.register, {
-			route: '/block/:height',
+			route: '/blocks/:height',
 			dbApiName: 'blockAtHeight',
 			type: 'blockHeaderWithMetadata',
 			extendDb: addChainStatisticToDb,

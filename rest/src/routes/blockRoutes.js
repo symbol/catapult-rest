@@ -34,7 +34,7 @@ const parseHeight = params => routeUtils.parseArgument(params, 'height', 'uint')
 
 module.exports = {
 	register: (server, db, services) => {
-		server.get('/block/:height', (req, res, next) => {
+		server.get('/blocks/:height', (req, res, next) => {
 			const height = parseHeight(req.params);
 
 			return dbFacade.runHeightDependentOperation(db, height, () => db.blockAtHeight(height))
@@ -43,7 +43,7 @@ module.exports = {
 		});
 
 		server.get(
-			'/block/:height/transaction/:hash/merkle',
+			'/blocks/:height/transaction/:hash/merkle',
 			routeUtils.blockRouteMerkleProcessor(db, 'numTransactions', 'transactionMerkleTree')
 		);
 
