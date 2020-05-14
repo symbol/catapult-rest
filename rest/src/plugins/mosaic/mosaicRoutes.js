@@ -32,7 +32,7 @@ module.exports = {
 		routeUtils.addGetPostDocumentRoutes(
 			server,
 			mosaicSender,
-			{ base: '/mosaic', singular: 'mosaicId', plural: 'mosaicIds' },
+			{ base: '/mosaics', singular: 'mosaicId', plural: 'mosaicIds' },
 			params => db.mosaicsByIds(params),
 			uint64.fromHex
 		);
