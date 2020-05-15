@@ -37,18 +37,16 @@ module.exports = {
 		server.get('/blocks', (req, res, next) => {
 			const { params } = req;
 
-			const filters = {
-				signerPublicKey: params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined,
-				beneficiaryPublicKey: params.beneficiaryPublicKey
-					? routeUtils.parseArgument(params, 'beneficiaryPublicKey', 'publicKey')
-					: undefined
-			};
+			const signerPublicKey = params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined;
+			const beneficiaryPublicKey = params.beneficiaryPublicKey
+				? routeUtils.parseArgument(params, 'beneficiaryPublicKey', 'publicKey')
+				: undefined;
 
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize);
 			// force sort field to 'id' until this is indexed/decided/developed
 			options.sortField = '_id';
 
-			return db.blocks(filters, options)
+			return db.blocks(signerPublicKey, beneficiaryPublicKey, options)
 				.then(result => routeUtils.createSender(routeResultTypes.block).sendPage(res, next)(result));
 		});
 

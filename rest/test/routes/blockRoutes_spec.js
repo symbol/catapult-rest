@@ -100,57 +100,38 @@ describe('block routes', () => {
 				});
 			});
 
-			describe('parses filters', () => {
-				const runParseFilterTest = (filter, param, value) => {
-					it(filter, () => {
-						const req = { params: { [filter]: param } };
+			describe('forwards signerPublicKey filter', () =>
+				mockServer.callRoute(route, { params: { signerPublicKey: testPublickeyString } }).then(() => {
+					expect(dbBlocksFake.firstCall.args[0]).to.deep.equal(testPublickey);
+					expect(dbBlocksFake.firstCall.args[1]).to.deep.equal(undefined);
+				})
+			);
 
-						const expectedResult = {
-							signerPublicKey: undefined,
-							beneficiaryPublicKey: undefined
-						};
+			describe('forwards beneficiaryPublicKey filter', () =>
+				mockServer.callRoute(route, { params: { beneficiaryPublicKey: testPublickeyString } }).then(() => {
+					expect(dbBlocksFake.firstCall.args[0]).to.deep.equal(undefined);
+					expect(dbBlocksFake.firstCall.args[1]).to.deep.equal(testPublickey);
+				})
+			);
 
-						expectedResult[filter] = value;
+			describe('parses paging', () => {
+				it('parses and forwards paging options', () => {
+					// Arrange:
+					const pagingBag = 'fakePagingBagObject';
+					const paginationParser = sinon.stub(routeUtils, 'parsePaginationArguments').returns(pagingBag);
 
-						// Act + Assert
-						return mockServer.callRoute(route, req).then(() => {
-							expect(dbBlocksFake.firstCall.args[0]).to.deep.equal(expectedResult);
-						});
-					});
-				};
+					const req = { params: {} };
 
-				const testCases = [
-					{ filter: 'signerPublicKey', param: testPublickeyString, value: testPublickey },
-					{ filter: 'beneficiaryPublicKey', param: testPublickeyString, value: testPublickey }
-				];
-
-				testCases.forEach(testCase => {
-					runParseFilterTest(testCase.filter, testCase.param, testCase.value);
-				});
-			});
-
-			describe('parses options', () => {
-				it('parses options correctly', () => {
-					const req = {
-						params: {
-							pageSize: '15', pageNumber: '5', sortField: 'id', order: 'desc'
-						}
-					};
-
-					// Act + Assert
-					return mockServer.callRoute(route, req).then(() => {
-						expect(dbBlocksFake.firstCall.args[1]).to.deep.equal({
-							pageSize: 15,
-							pageNumber: 5,
-							sortField: '_id',
-							sortDirection: -1,
-							offset: undefined
-						});
+					// Act:
+					return mockServer.callRoute(route, { params: {} }).then(() => {
+						// Assert:
+						expect(dbBlocksFake.calledOnce).to.equal(true);
+						expect(dbBlocksFake.firstCall.args[2]).to.deep.equal(pagingBag);
+						paginationParser.restore();
 					});
 				});
 
-				// force sort field to 'id' until this is indexed/decided/developed
-				it('always defaults sortField to id', () => {
+				it('overrides sortField to id', () => {
 					const req = {
 						params: {
 							pageSize: '15', pageNumber: '1', sortField: 'meta.hash'
@@ -159,7 +140,7 @@ describe('block routes', () => {
 
 					// Act + Assert
 					return mockServer.callRoute(route, req).then(() => {
-						expect(dbBlocksFake.firstCall.args[1]).to.deep.equal({
+						expect(dbBlocksFake.firstCall.args[2]).to.deep.equal({
 							pageSize: 15,
 							pageNumber: 1,
 							sortField: '_id',
