@@ -51,7 +51,7 @@ describe('block routes', () => {
 			const testPublickeyString = '7DE16AEDF57EB9561D3E6EFA4AE66F27ABDA8AEC8BC020B6277360E31619DCE7';
 			const testPublickey = convert.hexToUint8(testPublickeyString);
 
-			const fakeBlock = { meta: { numTransactions: 0 }, block: { type: 33091 } };
+			const fakeBlock = { id: 0, meta: { numTransactions: 0 }, block: { type: 33091 } };
 			const fakePaginatedBlock = {
 				data: [fakeBlock],
 				pagination: {
@@ -92,7 +92,7 @@ describe('block routes', () => {
 						// Assert:
 						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 							payload: fakePaginatedBlock,
-							type: routeResultTypes.blockWithId,
+							type: routeResultTypes.block,
 							structure: 'page'
 						});
 						expect(mockServer.next.calledOnce).to.equal(true);

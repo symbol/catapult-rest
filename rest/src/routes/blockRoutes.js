@@ -49,7 +49,7 @@ module.exports = {
 			options.sortField = '_id';
 
 			return db.blocks(filters, options)
-				.then(result => routeUtils.createSender(routeResultTypes.blockWithId).sendPage(res, next)(result));
+				.then(result => routeUtils.createSender(routeResultTypes.block).sendPage(res, next)(result));
 		});
 
 		server.get('/blocks/:height', (req, res, next) => {
