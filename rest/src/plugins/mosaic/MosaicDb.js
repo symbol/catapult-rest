@@ -32,10 +32,21 @@ class MosaicDb {
 		this.catapultDb = db;
 	}
 
-	// region mosaic retrieval
+	/**
+	 * Retrieves filtered and paginated mosaics.
+	 * @param {Uint8Array} ownerAddress Mosaic owner address
+	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	 * `pageSize`.
+	 * @returns {Promise.<object>} Mosaics page.
+	 */
+	mosaics(ownerAddress, options) {
+		const conditions = ownerAddress ? [{ 'mosaic.ownerAddress': ownerAddress }] : [];
+		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+		return this.queryPagedDocuments_2(conditions, [], sortConditions, 'mosaics', options);
+	}
 
 	/**
-	 * Retrieves mosaics.
+	 * Retrieves mosaics given their ids.
 	 * @param {Array.<module:catapult.utils/uint64~uint64>} ids Mosaic ids.
 	 * @returns {Promise.<array>} Mosaics.
 	 */
@@ -48,23 +59,6 @@ class MosaicDb {
 			.toArray()
 			.then(entities => Promise.resolve(this.catapultDb.sanitizer.deleteIds(entities)));
 	}
-
-	/**
-	 * Retrieves mosaics owned by specified owners.
-	 * @param {module:db/AccountType} type Type of account ids.
-	 * @param {array<object>} accountIds Account ids.
-	 * @returns {Promise.<array>} Owned mosaics.
-	 */
-	mosaicsByOwners(type, accountIds) {
-		const buffers = accountIds.map(accountId => Buffer.from(accountId));
-		const fieldName = (AccountType.publicKey === type) ? 'mosaic.ownerPublicKey' : 'mosaic.ownerAddress';
-		const conditions = { [fieldName]: { $in: buffers } };
-
-		return this.catapultDb.queryDocuments('mosaics', conditions)
-			.then(mosaics => mosaics.map(mosaic => mosaic.mosaic));
-	}
-
-	// endregion
 }
 
 module.exports = MosaicDb;

@@ -38,10 +38,6 @@ const mosaicPlugin = {
 			delta: ModelType.uint64
 		});
 
-		builder.addSchema('ownedMosaics', {
-			mosaics: { type: ModelType.array, schemaName: 'mosaicDescriptor.mosaic' }
-		});
-
 		builder.addSchema('mosaicDescriptor', {
 			meta: { type: ModelType.object, schemaName: 'transactionMetadata' },
 			mosaic: { type: ModelType.object, schemaName: 'mosaicDescriptor.mosaic' }
