@@ -104,23 +104,19 @@ describe('block routes', () => {
 				mockServer.callRoute(route, { params: { signerPublicKey: testPublickeyString } }).then(() => {
 					expect(dbBlocksFake.firstCall.args[0]).to.deep.equal(testPublickey);
 					expect(dbBlocksFake.firstCall.args[1]).to.deep.equal(undefined);
-				})
-			);
+				}));
 
 			describe('forwards beneficiaryPublicKey filter', () =>
 				mockServer.callRoute(route, { params: { beneficiaryPublicKey: testPublickeyString } }).then(() => {
 					expect(dbBlocksFake.firstCall.args[0]).to.deep.equal(undefined);
 					expect(dbBlocksFake.firstCall.args[1]).to.deep.equal(testPublickey);
-				})
-			);
+				}));
 
 			describe('parses paging', () => {
 				it('parses and forwards paging options', () => {
 					// Arrange:
 					const pagingBag = 'fakePagingBagObject';
 					const paginationParser = sinon.stub(routeUtils, 'parsePaginationArguments').returns(pagingBag);
-
-					const req = { params: {} };
 
 					// Act:
 					return mockServer.callRoute(route, { params: {} }).then(() => {
