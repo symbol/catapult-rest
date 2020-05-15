@@ -149,7 +149,7 @@ describe('catapult db', () => {
 	describe('blocks', () => {
 		const account1 = { publicKey: test.random.publicKey() };
 		const account2 = { publicKey: test.random.publicKey() };
-		
+
 		const paginationOptions = {
 			pageSize: 10,
 			pageNumber: 1,
@@ -165,12 +165,12 @@ describe('catapult db', () => {
 			block: { signerPublicKey, beneficiaryPublicKey }
 		});
 
-		const runTestAndVerifyIds = (dbBlocks, signerPublicKey, beneficiaryPublicKey, options, expectedIds) => {
+		const runTestAndVerifyIds = (dbBlocks, dbQuery, expectedIds) => {
 			const expectedObjectIds = expectedIds.map(id => createObjectId(id));
 
 			return runDbTest(
 				{ blocks: dbBlocks },
-				db => db.blocks(signerPublicKey, beneficiaryPublicKey, options),
+				dbQuery,
 				blocksPage => {
 					const returnedIds = blocksPage.data.map(t => t.id);
 					expect(blocksPage.data.length).to.equal(expectedObjectIds.length);
@@ -205,7 +205,7 @@ describe('catapult db', () => {
 			];
 
 			// Act + Assert:
-			return runTestAndVerifyIds(dbBlocks, undefined, undefined, paginationOptions, [10, 20, 30]);
+			return runTestAndVerifyIds(dbBlocks, db => db.blocks(undefined, undefined, paginationOptions), [10, 20, 30]);
 		});
 
 		it('all the provided filters are taken into account', () => {
@@ -217,7 +217,7 @@ describe('catapult db', () => {
 			];
 
 			// Act + Assert:
-			return runTestAndVerifyIds(dbBlocks, account1.publicKey, account2.publicKey, paginationOptions, [30]);
+			return runTestAndVerifyIds(dbBlocks, db => db.blocks(account1.publicKey, account2.publicKey, paginationOptions), [30]);
 		});
 
 		describe('respects offset', () => {
@@ -239,14 +239,14 @@ describe('catapult db', () => {
 				options.sortDirection = 1;
 
 				// Act + Assert:
-				return runTestAndVerifyIds(dbBlocks(), undefined, undefined, options, [30]);
+				return runTestAndVerifyIds(dbBlocks(), db => db.blocks(undefined, undefined, options), [30]);
 			});
 
 			it('lt', () => {
 				options.sortDirection = -1;
 
 				// Act + Assert:
-				return runTestAndVerifyIds(dbBlocks(), undefined, undefined, options, [10]);
+				return runTestAndVerifyIds(dbBlocks(), db => db.blocks(undefined, undefined, options), [10]);
 			});
 		});
 
@@ -328,7 +328,7 @@ describe('catapult db', () => {
 				];
 
 				// Act + Assert:
-				return runTestAndVerifyIds(dbBlocks, account1.publicKey, undefined, paginationOptions, [10]);
+				return runTestAndVerifyIds(dbBlocks, db => db.blocks(account1.publicKey, undefined, paginationOptions), [10]);
 			});
 
 			it('beneficiaryPublicKey', () => {
@@ -339,7 +339,7 @@ describe('catapult db', () => {
 				];
 
 				// Act + Assert:
-				return runTestAndVerifyIds(dbBlocks, undefined, account1.publicKey, paginationOptions, [10]);
+				return runTestAndVerifyIds(dbBlocks, db => db.blocks(undefined, account1.publicKey, paginationOptions), [10]);
 			});
 		});
 	});
