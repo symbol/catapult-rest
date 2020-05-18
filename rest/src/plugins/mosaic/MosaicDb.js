@@ -18,10 +18,10 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const AccountType = require('../AccountType');
 const MongoDb = require('mongodb');
 
-const { Long } = MongoDb;
+const { Long, ObjectId } = MongoDb;
+
 
 class MosaicDb {
 	/**
@@ -36,13 +36,22 @@ class MosaicDb {
 	 * Retrieves filtered and paginated mosaics.
 	 * @param {Uint8Array} ownerAddress Mosaic owner address
 	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
-	 * `pageSize`.
+	 * `pageSize` and `pageNumber`.
 	 * @returns {Promise.<object>} Mosaics page.
 	 */
 	mosaics(ownerAddress, options) {
-		const conditions = ownerAddress ? [{ 'mosaic.ownerAddress': ownerAddress }] : [];
+		const conditions = [];
+
+		// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+		// in fact, offset logic should be moved to `queryPagedDocuments`
+		if (options.offset)
+			conditions.push({ [options.sortField]: { [1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset) } });
+
+		if (ownerAddress)
+			conditions.push({ 'mosaic.ownerAddress': ownerAddress });
+
 		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
-		return this.queryPagedDocuments_2(conditions, [], sortConditions, 'mosaics', options);
+		return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, 'mosaics', options);
 	}
 
 	/**

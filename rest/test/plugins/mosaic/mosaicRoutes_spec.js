@@ -18,7 +18,6 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const AccountType = require('../../../src/plugins/AccountType');
 const mosaicRoutes = require('../../../src/plugins/mosaic/mosaicRoutes');
 const routeUtils = require('../../../src/routes/routeUtils');
 const { MockServer } = require('../../routes/utils/routeTestUtils');
@@ -28,7 +27,6 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 
 const { address } = catapult.model;
-const { convert } = catapult.utils;
 
 describe('mosaic routes', () => {
 	describe('mosaics', () => {
@@ -77,9 +75,8 @@ describe('mosaic routes', () => {
 			}
 		};
 
-		const dbMosaicsFake = sinon.fake((ownerAddress, options) =>
-			ownerAddress ? Promise.resolve(emptyPageSample) : Promise.resolve(pageSample)
-		);
+		const dbMosaicsFake = sinon.fake(ownerAddress =>
+			(ownerAddress ? Promise.resolve(emptyPageSample) : Promise.resolve(pageSample)));
 
 		const services = {
 			config: {
@@ -107,11 +104,10 @@ describe('mosaic routes', () => {
 				// Arrange:
 				const pagingBag = 'fakePagingBagObject';
 				const paginationParser = sinon.stub(routeUtils, 'parsePaginationArguments').returns(pagingBag);
-
 				const req = { params: {} };
 
 				// Act:
-				return mockServer.callRoute(route, { params: {} }).then(() => {
+				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
 					expect(dbMosaicsFake.calledOnce).to.equal(true);
 					expect(dbMosaicsFake.firstCall.args[1]).to.deep.equal(pagingBag);
@@ -149,9 +145,12 @@ describe('mosaic routes', () => {
 				});
 			});
 
-			it('forwards query without address if not provided', () => {
+			it('forwards query without ownerAddress if not provided', () => {
+				// Arrange:
+				const req = { params: {} };
+
 				// Act:
-				return mockServer.callRoute(route, { params: {} }).then(() => {
+				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
 					expect(dbMosaicsFake.calledOnce).to.equal(true);
 					expect(dbMosaicsFake.firstCall.args[0]).to.deep.equal(undefined);
