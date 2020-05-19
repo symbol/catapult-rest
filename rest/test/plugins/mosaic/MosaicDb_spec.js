@@ -213,7 +213,6 @@ describe('mosaic db', () => {
 
 	describe('mosaics by ids', () => {
 		const createMosaic = (id, mosaicId, ownerPublicKey, parentId) => {
-			// mosaic data
 			const mosaic = {
 				ownerPublicKey: new Binary(ownerPublicKey),
 				id: Long.fromNumber(mosaicId),
@@ -223,10 +222,11 @@ describe('mosaic db', () => {
 			return { _id: createObjectId(id), mosaic };
 		};
 
+		/*
+		 * Creates mosaics with ids in the 1000s range, whereas namespace ids will be in the 2000s range
+		 */
 		const createMosaics = (numNamespaces, numMosaicsPerNamespace) => {
 			const ownerPublicKey = test.random.publicKey();
-
-			// mosaic ids start at 10000, namespace ids start at 20000 in order to differentiate from db _id
 			const mosaics = [];
 			let dbId = 0;
 			let id = 10000;
@@ -239,7 +239,7 @@ describe('mosaic db', () => {
 		};
 
 		it('returns empty array for unknown mosaic ids', () => {
-			// Arrange: mosaic ids: 10000, 10001, ... 10011
+			// Arrange:
 			const mosaics = createMosaics(3, 4);
 
 			// Assert:
@@ -251,7 +251,7 @@ describe('mosaic db', () => {
 		});
 
 		it('returns single matching mosaic', () => {
-			// Arrange: mosaic ids: 10000, 10001, ... 10011
+			// Arrange:
 			const mosaics = createMosaics(3, 4);
 
 			// Assert:
@@ -263,7 +263,7 @@ describe('mosaic db', () => {
 		});
 
 		it('returns multiple matching mosaics', () => {
-			// Arrange: mosaic ids: 10000, 10001, ... 10011
+			// Arrange:
 			const mosaics = createMosaics(3, 4);
 
 			// Assert:
@@ -275,7 +275,7 @@ describe('mosaic db', () => {
 		});
 
 		it('returns only known mosaics', () => {
-			// Arrange: mosaic ids: 10000, 10001, ... 10011
+			// Arrange:
 			const mosaics = createMosaics(3, 4);
 
 			// Assert:
