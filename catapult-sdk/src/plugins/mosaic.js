@@ -40,7 +40,6 @@ const mosaicPlugin = {
 
 		builder.addSchema('mosaicDescriptor', {
 			id: ModelType.objectId,
-			meta: { type: ModelType.object, schemaName: 'transactionMetadata' },
 			mosaic: { type: ModelType.object, schemaName: 'mosaicDescriptor.mosaic' }
 		});
 

@@ -60,8 +60,8 @@ describe('mosaic plugin', () => {
 			expect(modelSchema.mosaicSupplyChange).to.contain.all.keys(['mosaicId', 'delta']);
 
 			// - mosaic descriptor
-			expect(Object.keys(modelSchema.mosaicDescriptor).length).to.equal(3);
-			expect(modelSchema.mosaicDescriptor).to.contain.all.keys(['id', 'meta', 'mosaic']);
+			expect(Object.keys(modelSchema.mosaicDescriptor).length).to.equal(2);
+			expect(modelSchema.mosaicDescriptor).to.contain.all.keys(['id', 'mosaic']);
 
 			// - mosaic descriptor mosaic
 			expect(Object.keys(modelSchema['mosaicDescriptor.mosaic']).length).to.equal(6);
