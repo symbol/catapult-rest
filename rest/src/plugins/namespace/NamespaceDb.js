@@ -22,7 +22,7 @@ const { convertToLong } = require('../../db/dbUtils');
 const catapult = require('catapult-sdk');
 const MongoDb = require('mongodb');
 
-const { Long } = MongoDb;
+const { Long, ObjectId } = MongoDb;
 
 const createActiveConditions = () => {
 	const conditions = { $and: [{ 'meta.active': true }] };
@@ -39,6 +39,43 @@ class NamespaceDb {
 	}
 
 	// region namespace retrieval
+
+	/**
+	 * Retrieves filtered and paginated namespaces.
+	 * @param {Uint32} aliasType Namespace alias type
+	 * @param {module:catapult.utils/uint64~uint64} level0 Namespace level0
+	 * @param {Uint8Array} ownerAddress Namespace owner address
+	 * @param {Uint32} registrationType Namespace registration type
+	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	 * `pageSize` and `pageNumber`.
+	 * @returns {Promise.<object>} Namespaces page.
+	 */
+	namespaces(aliasType, level0, ownerAddress, registrationType, options) {
+		const conditions = [];
+
+		// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+		// in fact, offset logic should be moved to `queryPagedDocuments`
+		if (options.offset)
+			conditions.push({ [options.sortField]: { [1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset) } });
+
+		if (aliasType)
+			conditions.push({ 'namespace.alias.type': aliasType });
+
+		if (level0)
+			conditions.push({ 'namespace.level0': new Long(level0[0], level0[1]) });
+
+		if (ownerAddress)
+			conditions.push({ 'namespace.ownerAddress': Buffer.from(ownerAddress) });
+
+		if (registrationType)
+			conditions.push({ 'namespace.registrationType': registrationType });
+
+		// Returning only active namespaces
+		conditions.push({ 'meta.active': true });
+
+		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+		return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, 'namespaces', options);
+	}
 
 	/**
 	 * Retrieves a namespace.

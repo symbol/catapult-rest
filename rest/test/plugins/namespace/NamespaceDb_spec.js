@@ -22,16 +22,264 @@ const test = require('./namespaceDbTestUtils');
 const CatapultDb = require('../../../src/db/CatapultDb');
 const dbUtils = require('../../../src/db/dbUtils');
 const NamespaceDb = require('../../../src/plugins/namespace/NamespaceDb');
+const dbTestUtils = require('../../db/utils/dbTestUtils');
 const testDbOptions = require('../../db/utils/testDbOptions');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
 const MongoDb = require('mongodb');
 
 const { address } = catapult.model;
+const { uint64 } = catapult.utils;
 const { convertToLong } = dbUtils;
 const { Binary } = MongoDb;
 
 describe('namespace db', () => {
+	describe('namespaces', () => {
+		const { createObjectId } = dbTestUtils.db;
+
+		const runNamespacesDbTest = (dbEntities, issueDbCommand, assertDbCommandResult) =>
+			dbTestUtils.db.runDbTest(dbEntities, 'namespaces', db => new NamespaceDb(db), issueDbCommand, assertDbCommandResult);
+
+		const level0Test1 = uint64.fromHex('85BBEA6CC462B244');
+		const level0Test2 = uint64.fromHex('3C2437767AF232DC');
+		const ownerAddressTest1 = address.stringToAddress('SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXWV');
+		const ownerAddressTest2 = address.stringToAddress('NAR3W7B4BCOZSZMFIZRYB3N5YGOUSWIYJCJ6HDFG');
+
+		const paginationOptions = {
+			pageSize: 10,
+			pageNumber: 1,
+			sortField: '_id',
+			sortDirection: -1
+		};
+
+		const createNamespace = (objectId, aliasType, level0, ownerAddress, registrationType, active = true) => ({
+			_id: createObjectId(objectId),
+			meta: { active },
+			namespace: {
+				alias: { type: aliasType },
+				level0: convertToLong(level0),
+				ownerAddress: ownerAddress ? Buffer.from(ownerAddress) : undefined,
+				registrationType
+			}
+		});
+
+		const runTestAndVerifyIds = (dbNamespaces, dbQuery, expectedIds) => {
+			const expectedObjectIds = expectedIds.map(id => createObjectId(id));
+
+			return runNamespacesDbTest(
+				dbNamespaces,
+				dbQuery,
+				namespacesPage => {
+					const returnedIds = namespacesPage.data.map(t => t.id);
+					expect(namespacesPage.data.length).to.equal(expectedObjectIds.length);
+					expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
+				}
+			);
+		};
+
+		it('returns expected structure', () => {
+			// Arrange:
+			const dbNamespaces = [createNamespace(10, 1, level0Test1, ownerAddressTest1, 0)];
+
+			// Act + Assert:
+			return runNamespacesDbTest(
+				dbNamespaces,
+				db => db.namespaces(undefined, undefined, undefined, undefined, paginationOptions),
+				page => {
+					const expected_keys = ['id', 'meta', 'namespace'];
+					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
+				}
+			);
+		});
+
+		describe('return empty array for unknown param', () => {
+			// Arrange:
+			const dbNamespaces = () => [createNamespace(10, 1, level0Test1, ownerAddressTest1, 0)];
+
+			it('aliasType', () =>
+				runTestAndVerifyIds(dbNamespaces(), db => db.namespaces(2, undefined, undefined, undefined, paginationOptions), []));
+
+			it('level0', () =>
+				runTestAndVerifyIds(
+					dbNamespaces(),
+					db => db.namespaces(undefined, level0Test2, undefined, undefined, paginationOptions), []
+				));
+
+			it('ownerAddress', () =>
+				runTestAndVerifyIds(
+					dbNamespaces(),
+					db => db.namespaces(undefined, undefined, ownerAddressTest2, undefined, paginationOptions), []
+				));
+
+			it('registrationType', () =>
+				runTestAndVerifyIds(dbNamespaces(), db => db.namespaces(undefined, undefined, undefined, 1, paginationOptions), []));
+		});
+
+		describe('returns filtered namespaces by param', () => {
+			// Arrange:
+			const dbNamespaces = () => [
+				createNamespace(10, 2, level0Test1, ownerAddressTest1, 0),
+				createNamespace(20, 1, level0Test2, ownerAddressTest1, 0),
+				createNamespace(30, 1, level0Test1, ownerAddressTest2, 0),
+				createNamespace(40, 1, level0Test1, ownerAddressTest1, 1)
+			];
+
+			it('aliasType', () =>
+				runTestAndVerifyIds(
+					dbNamespaces(),
+					db => db.namespaces(2, undefined, undefined, undefined, paginationOptions), [10]
+				));
+
+			it('level0', () =>
+				runTestAndVerifyIds(
+					dbNamespaces(),
+					db => db.namespaces(undefined, level0Test2, undefined, undefined, paginationOptions), [20]
+				));
+
+			it('ownerAddress', () =>
+				runTestAndVerifyIds(
+					dbNamespaces(),
+					db => db.namespaces(undefined, undefined, ownerAddressTest2, undefined, paginationOptions), [30]
+				));
+
+			it('registrationType', () =>
+				runTestAndVerifyIds(
+					dbNamespaces(),
+					db => db.namespaces(undefined, undefined, undefined, 1, paginationOptions), [40]
+				));
+		});
+
+		it('returns all namepsaces if no params are provided', () => {
+			// Arrange:
+			const dbNamespaces = [
+				createNamespace(10, 2, level0Test1, ownerAddressTest1, 0),
+				createNamespace(20, 1, level0Test2, ownerAddressTest2, 0),
+				createNamespace(30, 1, level0Test2, ownerAddressTest1, 1)
+			];
+
+			// Act + Assert:
+			return runTestAndVerifyIds(
+				dbNamespaces,
+				db => db.namespaces(undefined, undefined, undefined, undefined, paginationOptions),
+				[10, 20, 30]
+			);
+		});
+
+		it('only returns active namespaces', () => {
+			// Arrange:
+			const dbNamespaces = [
+				createNamespace(10, 1, level0Test1, ownerAddressTest1, 0, false),
+				createNamespace(20, 1, level0Test2, ownerAddressTest1, 0, true)
+			];
+
+			// Act + Assert:
+			return runTestAndVerifyIds(
+				dbNamespaces,
+				db => db.namespaces(undefined, undefined, undefined, undefined, paginationOptions),
+				[20]
+			);
+		});
+
+		describe('respects sort conditions', () => {
+			// Arrange:
+			const dbNamespaces = () => [
+				createNamespace(10, 1, level0Test1, ownerAddressTest1, 0),
+				createNamespace(20, 2, level0Test1, ownerAddressTest1, 0),
+				createNamespace(30, 0, level0Test1, ownerAddressTest1, 0)
+			];
+
+			it('direction ascending', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: 1
+				};
+
+				// Act + Assert:
+				return runNamespacesDbTest(
+					dbNamespaces(),
+					db => db.namespaces(undefined, undefined, undefined, undefined, options),
+					page => {
+						expect(page.data[0].id).to.deep.equal(createObjectId(10));
+						expect(page.data[1].id).to.deep.equal(createObjectId(20));
+						expect(page.data[2].id).to.deep.equal(createObjectId(30));
+					}
+				);
+			});
+
+			it('direction descending', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: -1
+				};
+
+				// Act + Assert:
+				return runNamespacesDbTest(
+					dbNamespaces(),
+					db => db.namespaces(undefined, undefined, undefined, undefined, options),
+					page => {
+						expect(page.data[0].id).to.deep.equal(createObjectId(30));
+						expect(page.data[1].id).to.deep.equal(createObjectId(20));
+						expect(page.data[2].id).to.deep.equal(createObjectId(10));
+					}
+				);
+			});
+
+			it('sort field', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: 'namespace.alias.type',
+					sortDirection: 1
+				};
+
+				// Act + Assert:
+				return runNamespacesDbTest(
+					dbNamespaces(),
+					db => db.namespaces(undefined, undefined, undefined, undefined, options),
+					page => {
+						expect(page.data[0].id).to.deep.equal(createObjectId(30));
+						expect(page.data[1].id).to.deep.equal(createObjectId(10));
+						expect(page.data[2].id).to.deep.equal(createObjectId(20));
+					}
+				);
+			});
+		});
+
+		describe('respects offset', () => {
+			// Arrange:
+			const dbNamespaces = () => [
+				createNamespace(10, 1, level0Test1, ownerAddressTest1, 0),
+				createNamespace(20, 2, level0Test1, ownerAddressTest1, 0),
+				createNamespace(30, 0, level0Test1, ownerAddressTest1, 0)
+			];
+			const options = {
+				pageSize: 10,
+				pageNumber: 1,
+				sortField: '_id',
+				sortDirection: 1,
+				offset: createObjectId(20).toString()
+			};
+
+			it('gt', () => {
+				options.sortDirection = 1;
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbNamespaces(), db => db.namespaces(undefined, undefined, undefined, undefined, options), [30]);
+			});
+
+			it('lt', () => {
+				options.sortDirection = -1;
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbNamespaces(), db => db.namespaces(undefined, undefined, undefined, undefined, options), [10]);
+			});
+		});
+	});
+
 	const createOwner = test.random.account;
 
 	describe('namespace by id', () => {
@@ -233,6 +481,7 @@ describe('namespace db', () => {
 			.drop()
 			.catch(() => Promise.resolve())
 			.then(() => db.database.collection(collectionName)[Array.isArray(entities) ? 'insertMany' : 'insertOne'](entities));
+
 
 	describe('activeNamespacesWithAlias', () => {
 		const aliasTypeMosaic = catapult.model.namespace.aliasType.mosaic;
