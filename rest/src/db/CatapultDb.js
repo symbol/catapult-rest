@@ -494,6 +494,33 @@ class CatapultDb {
 
 	// region account retrieval
 
+	/**
+	 * Retrieves filtered and paginated accounts
+	 * @param {Uint8Array} address Filters by address
+	 * @param {uint64} mosaicId Filters by accounts with some mosaicId balance. Required if provided `sortField` is `balance`
+	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	 * `pageSize` and `pageNumber`
+	 * @returns {Promise.<object>} Accounts page.
+	 */
+	accounts(address, mosaicId, options) {
+		const conditions = [];
+
+		// FIXME it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+		// in fact, offset logic should be moved to `queryPagedDocuments`
+		if (options.offset)
+			conditions.push({ [options.sortField]: { [1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset) } });
+
+		if (address)
+			conditions.push({ 'account.address': address });
+
+		if (mosaicId)
+			conditions.push({ 'account.mosaics.id': convertToLong(mosaicId) });
+
+		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+
+		return this.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options);
+	}
+
 	accountsByIds(ids) {
 		// id will either have address property or publicKey property set; in the case of publicKey, convert it to address
 		const buffers = ids.map(id => Buffer.from((id.publicKey
