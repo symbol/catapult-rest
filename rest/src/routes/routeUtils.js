@@ -161,8 +161,8 @@ const routeUtils = {
 	 * Parses pagination arguments and throws an invalid argument error if any is invalid.
 	 * @param {object} args Arguments to parse.
 	 * @param {object} optionsPageSize Page size options.
-	 * @param {object} allowedSortFields Sort fields this enpoint allows, will match provided `sortField` and throw if invalid. Must have at
-	 * least one value, and the first is treated as default if no `sortField` is provided.
+	 * @param {object} allowedSortFields Sort fields this endpoint allows, will match provided `sortField` and throw if invalid. Must have
+	 * at least one value, and the first is treated as default if no `sortField` is provided.
 	 * @returns {object} Parsed pagination options.
 	 */
 	parsePaginationArguments: (args, optionsPageSize, allowedSortFields) => {
