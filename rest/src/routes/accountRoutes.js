@@ -31,12 +31,9 @@ module.exports = {
 			const address = req.params.address ? routeUtils.parseArgument(req.params, 'address', 'address') : undefined;
 			const mosaicId = req.params.mosaicId ? routeUtils.parseArgument(req.params, 'mosaicId', 'uint64') : undefined;
 
-			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize);
-			// force sort field to 'id' until this is indexed/decided/developed
-			// FIXME allow balance
-			options.sortField = '_id';
-
-			// FIXME if sortField = 'balance', 'mosaicId' mandatory check
+			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize, ['_id', 'balance']);
+			if ('balance' === options.sortField && !mosaicId)
+				throw errors.createInvalidArgumentError('mosaicId must be provided when sorting by balance');
 
 			return db.accounts(address, mosaicId, options)
 				.then(result => sender.sendPage(res, next)(result));
