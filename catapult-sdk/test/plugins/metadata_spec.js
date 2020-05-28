@@ -75,8 +75,8 @@ describe('metadata plugin', () => {
 			expect(Object.keys(modelSchema['metadata.entry.element']).length).to.equal(6);
 			expect(modelSchema['metadata.entry.element']).to.contain.all.keys([
 				'compositeHash',
-				'senderPublicKey',
-				'targetPublicKey',
+				'sourceAddress',
+				'targetAddress',
 				'scopedMetadataKey',
 				'targetId',
 				'value'

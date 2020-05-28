@@ -63,8 +63,8 @@ const metadataPlugin = {
 
 		builder.addSchema('metadata.entry.element', {
 			compositeHash: ModelType.binary,
-			senderPublicKey: ModelType.binary,
-			targetPublicKey: ModelType.binary,
+			sourceAddress: ModelType.binary,
+			targetAddress: ModelType.binary,
 			scopedMetadataKey: ModelType.uint64HexIdentifier,
 			targetId: ModelType.uint64HexIdentifier,
 			value: ModelType.binary
