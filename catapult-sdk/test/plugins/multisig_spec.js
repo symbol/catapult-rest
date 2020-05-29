@@ -58,7 +58,7 @@ describe('multisig plugin', () => {
 			expect(Object.keys(modelSchema.multisigEntry).length).to.equal(1);
 			expect(modelSchema.multisigEntry).to.contain.all.keys(['multisig']);
 
-			expect(Object.keys(modelSchema['multisigEntry.multisig']).length).to.equal(4);
+			expect(Object.keys(modelSchema['multisigEntry.multisig']).length).to.equal(3);
 			expect(modelSchema['multisigEntry.multisig'])
 				.to.contain.all.keys(['accountAddress', 'multisigAddresses', 'cosignatoryAddresses']);
 
@@ -99,8 +99,8 @@ describe('multisig plugin', () => {
 				minRemovalDelta: 0x2B,
 				minApprovalDelta: 0x4D,
 				multisigAccountModificationTransactionBody_Reserved1: 0,
-				addressAdditions: [],
-				addressDeletions: []
+				publicKeyAdditions: [],
+				publicKeyDeletions: []
 			}
 		});
 
@@ -125,8 +125,8 @@ describe('multisig plugin', () => {
 				data.buffer.writeUInt8(2, 2); // addressAdditionsCount, two additions at 2 bytes offset
 				data.buffer.writeUInt8(1, 3); // addressDeletionsCount, one deletion at 3 bytes offset
 
-				data.object.addressAdditions = [keyAddition1, keyAddition2];
-				data.object.addressDeletions = [keyDeletion1];
+				data.object.publicKeyAdditions = [keyAddition1, keyAddition2];
+				data.object.publicKeyDeletions = [keyDeletion1];
 
 				return data;
 			};
@@ -151,8 +151,8 @@ describe('multisig plugin', () => {
 					object: {
 						minRemovalDelta: -94,
 						minApprovalDelta: -55,
-						addressAdditions: [],
-						addressDeletions: [],
+						publicKeyAdditions: [],
+						publicKeyDeletions: [],
 						multisigAccountModificationTransactionBody_Reserved1: 0
 					}
 				}));
