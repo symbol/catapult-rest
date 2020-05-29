@@ -32,15 +32,23 @@ const { BinaryParser } = catapult.parser;
 
 const parseHeight = params => routeUtils.parseArgument(params, 'height', 'uint');
 
-const getSanitizedLimit = (pageSize, limit) => {
-	let sanitizedLimit = Math.max(limit, pageSize.min);
-	sanitizedLimit = Math.min(sanitizedLimit, pageSize.max);
-	return sanitizedLimit;
-};
-
 module.exports = {
 	register: (server, db, services) => {
-		server.get('/block/:height', (req, res, next) => {
+		server.get('/blocks', (req, res, next) => {
+			const { params } = req;
+
+			const signerPublicKey = params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined;
+			const beneficiaryPublicKey = params.beneficiaryPublicKey
+				? routeUtils.parseArgument(params, 'beneficiaryPublicKey', 'publicKey')
+				: undefined;
+
+			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, ['_id']);
+
+			return db.blocks(signerPublicKey, beneficiaryPublicKey, options)
+				.then(result => routeUtils.createSender(routeResultTypes.block).sendPage(res, next)(result));
+		});
+
+		server.get('/blocks/:height', (req, res, next) => {
 			const height = parseHeight(req.params);
 
 			return dbFacade.runHeightDependentOperation(db, height, () => db.blockAtHeight(height))
@@ -49,40 +57,9 @@ module.exports = {
 		});
 
 		server.get(
-			'/block/:height/transaction/:hash/merkle',
+			'/blocks/:height/transaction/:hash/merkle',
 			routeUtils.blockRouteMerkleProcessor(db, 'numTransactions', 'transactionMerkleTree')
 		);
-
-		server.get('/block/:height/transactions', (req, res, next) => {
-			const height = parseHeight(req.params);
-			const transactionTypes = req.params.type ? routeUtils.parseArgumentAsArray(req.params, 'type', 'uint') : undefined;
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-
-			const operation = () => db.transactionsAtHeight(height, transactionTypes, pagingOptions.id, pagingOptions.pageSize);
-			return dbFacade.runHeightDependentOperation(db, height, operation)
-				.then(result => {
-					if (!result.isRequestValid) {
-						res.send(errors.createNotFoundError(height));
-						return next();
-					}
-
-					return routeUtils.createSender(routeResultTypes.transaction).sendArray('height', res, next)(result.payload);
-				});
-		});
-
-		server.get('/blocks/:height/limit/:limit', (req, res, next) => {
-			const height = parseHeight(req.params) || 1;
-			const limit = routeUtils.parseArgument(req.params, 'limit', 'uint');
-			const sanitizedLimit = getSanitizedLimit(services.config.pageSize, limit);
-
-			if (sanitizedLimit !== limit)
-				return res.redirect(`/blocks/${height}/limit/${sanitizedLimit}`, next); // redirect calls next
-
-			return db.blocksFrom(height, sanitizedLimit).then(blocks => {
-				res.send({ payload: blocks, type: routeResultTypes.block });
-				next();
-			});
-		});
 
 		const buildResponse = (packet, codec, resultType) => {
 			const binaryParser = new BinaryParser();

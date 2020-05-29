@@ -42,18 +42,10 @@ describe('all routes', () => {
 		// Assert:
 		test.assert.assertRoutes(routes, [
 			'/account/:accountId',
-			'/account/:accountId/harvest',
-			'/account/:accountId/beneficiary',
-			'/account/:accountId/transactions',
-			'/account/:accountId/transactions/incoming',
-			'/account/:accountId/transactions/outgoing',
-			'/account/:accountId/transactions/unconfirmed',
-			// no custom account transactions routes are registered
 
-			'/block/:height',
-			'/block/:height/transaction/:hash/merkle',
-			'/block/:height/transactions',
-			'/blocks/:height/limit/:limit',
+			'/blocks',
+			'/blocks/:height',
+			'/blocks/:height/transaction/:hash/merkle',
 			'/state/:state/hash/:hash/merkle',
 
 			'/chain/height',
@@ -70,8 +62,9 @@ describe('all routes', () => {
 			'/node/storage',
 			'/node/time',
 
-			'/transaction/:transactionId',
-			'/transaction/:hash/status'
+			'/transactions/:transactionId',
+			'/transactions/:hash/status',
+			'/transactions'
 		]);
 	});
 
@@ -86,8 +79,8 @@ describe('all routes', () => {
 		// Assert:
 		test.assert.assertRoutes(routes, [
 			'/account',
-			'/transaction',
-			'/transaction/statuses'
+			'/transactions',
+			'/transactions/statuses'
 		]);
 	});
 
@@ -101,7 +94,7 @@ describe('all routes', () => {
 
 		// Assert:
 		test.assert.assertRoutes(routes, [
-			'/transaction'
+			'/transactions'
 		]);
 	});
 

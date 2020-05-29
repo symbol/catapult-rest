@@ -25,7 +25,7 @@ const catapult = require('catapult-sdk');
 
 const { address } = catapult.model;
 const { buildAuditPath, indexOfLeafWithHash } = catapult.crypto.merkle;
-const { convert } = catapult.utils;
+const { convert, uint64 } = catapult.utils;
 const packetHeader = catapult.packet.header;
 const constants = {
 	sizes: {
@@ -52,6 +52,7 @@ const namedParserMap = {
 
 		return result;
 	},
+	uint64: str => uint64.fromHex(str),
 	address: str => {
 		if (constants.sizes.addressEncoded === str.length)
 			return address.stringToAddress(str);
@@ -83,8 +84,20 @@ const namedParserMap = {
 			return convert.hexToUint8(str);
 
 		throw Error(`invalid length of hash512 '${str.length}'`);
+	},
+	boolean: str => {
+		if (('true' !== str) && ('false' !== str))
+			throw Error('must be boolean value \'true\' or \'false\'');
+
+		return 'true' === str;
 	}
 };
+
+const getBoundedPageSize = (pageSize, optionsPageSize) =>
+	Math.max(optionsPageSize.min, Math.min(optionsPageSize.max, pageSize || optionsPageSize.default));
+
+const isPage = page => undefined !== page.data && undefined !== page.pagination.totalEntries && undefined !== page.pagination.pageNumber
+	&& undefined !== page.pagination.pageSize && undefined !== page.pagination.totalPages;
 
 const routeUtils = {
 	/**
@@ -145,6 +158,49 @@ const routeUtils = {
 	},
 
 	/**
+	 * Parses pagination arguments and throws an invalid argument error if any is invalid.
+	 * @param {object} args Arguments to parse.
+	 * @param {object} optionsPageSize Page size options.
+	 * @param {object} allowedSortFields Sort fields this endpoint allows, will match provided `sortField` and throw if invalid. Must have
+	 * at least one value, and the first is treated as default if no `sortField` is provided.
+	 * @returns {object} Parsed pagination options.
+	 */
+	parsePaginationArguments: (args, optionsPageSize, allowedSortFields) => {
+		if (args.sortField && !allowedSortFields.includes(args.sortField))
+			throw errors.createInvalidArgumentError(`sorting by ${args.sortField} is not allowed`);
+
+		const parsedArgs = {
+			offset: args.offset,
+			sortField: allowedSortFields.includes(args.sortField) ? args.sortField : allowedSortFields[0],
+			sortDirection: 'desc' === args.order ? -1 : 1
+		};
+
+		if (args.pageSize) {
+			const numericPageSize = convert.tryParseUint(args.pageSize);
+			if (undefined === numericPageSize)
+				throw errors.createInvalidArgumentError('pageSize is not a valid unsigned integer');
+
+			parsedArgs.pageSize = getBoundedPageSize(numericPageSize, optionsPageSize);
+		} else {
+			parsedArgs.pageSize = optionsPageSize.default;
+		}
+
+		if (args.pageNumber) {
+			const numericPageNumber = convert.tryParseUint(args.pageNumber);
+			if (undefined === numericPageNumber)
+				throw errors.createInvalidArgumentError('pageNumber is not a valid unsigned integer');
+
+			parsedArgs.pageNumber = numericPageNumber;
+		}
+		parsedArgs.pageNumber = 0 < parsedArgs.pageNumber ? parsedArgs.pageNumber : 1;
+
+		if (args.offset && !isObjectId(args.offset))
+			throw errors.createInvalidArgumentError('offset is not a valid object id');
+
+		return parsedArgs;
+	},
+
+	/**
 	 * Creates a sender for forwarding one or more objects of a given type.
 	 * @param {module:routes/routeResultTypes} type Object type.
 	 * @returns {object} Sender.
@@ -194,6 +250,22 @@ const routeUtils = {
 					sendOneObject(object);
 				}
 
+				next();
+			};
+		},
+
+		/**
+		 * Creates a page handler that forwards a paginated result.
+		 * @param {object} res Restify response object.
+		 * @param {Function} next Restify next callback handler.
+		 * @returns {Function} An appropriate object handler.
+		 */
+		sendPage(res, next) {
+			return page => {
+				if (!isPage(page))
+					res.send(errors.createInternalError('error retrieving data'));
+				else
+					res.send({ payload: page, type, structure: 'page' });
 				next();
 			};
 		}

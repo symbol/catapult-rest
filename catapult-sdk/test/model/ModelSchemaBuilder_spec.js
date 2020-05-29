@@ -72,7 +72,6 @@ describe('model schema builder', () => {
 				'blockHeader',
 				'blockHeaderMetadata',
 				'blockHeaderWithMetadata',
-				'blockHeaderWithMetadataAndId',
 				'merkleProofInfo',
 				'merkleProofInfoPathNode',
 
@@ -83,6 +82,7 @@ describe('model schema builder', () => {
 				'transactionStatus',
 
 				'account',
+				'supplementalAccountKey',
 				'activityBucket',
 				'mosaic',
 				'accountMeta',
@@ -148,8 +148,6 @@ describe('model schema builder', () => {
 			expect(matchingProperties).to.deep.equal([
 				'blockHeaderWithMetadata.meta',
 				'blockHeaderWithMetadata.block',
-				'blockHeaderWithMetadataAndId.meta',
-				'blockHeaderWithMetadataAndId.block',
 
 				'transactionWithMetadata.meta',
 				'transactionWithMetadata.transaction',
@@ -171,6 +169,7 @@ describe('model schema builder', () => {
 			expect(matchingProperties).to.deep.equal([
 				'blockHeaderMetadata.stateHashSubCacheMerkleRoots',
 				'merkleProofInfo.merklePath',
+				'account.supplementalAccountKeys',
 				'account.activityBuckets',
 				'account.mosaics',
 				'stateTree.tree'
@@ -190,6 +189,9 @@ describe('model schema builder', () => {
 				'verifiableEntity.signature',
 				'verifiableEntity.signerPublicKey',
 
+				'blockHeader.proofGamma',
+				'blockHeader.proofVerificationHash',
+				'blockHeader.proofScalar',
 				'blockHeader.previousBlockHash',
 				'blockHeader.transactionsHash',
 				'blockHeader.receiptsHash',
@@ -213,10 +215,10 @@ describe('model schema builder', () => {
 
 				'account.address',
 				'account.publicKey',
-				'account.linkedAccountKey',
+				'supplementalAccountKey.key',
 
 				'nodeInfo.publicKey',
-				'nodeInfo.networkGenerationHash',
+				'nodeInfo.networkGenerationHashSeed',
 				'stateTree.tree.schemaName'
 			]);
 		});
@@ -273,9 +275,10 @@ describe('model schema builder', () => {
 
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
-				'blockHeaderWithMetadataAndId.id',
+				'blockHeaderWithMetadata.id',
 				'transactionMetadata.aggregateId',
-				'transactionMetadata.id'
+				'transactionMetadata.id',
+				'transactionWithMetadata.id'
 			]);
 		});
 

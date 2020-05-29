@@ -22,48 +22,14 @@ const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 const AccountType = require('../plugins/AccountType');
 const errors = require('../server/errors');
-const catapult = require('catapult-sdk');
-
-const { address, networkInfo } = catapult.model;
 
 module.exports = {
-	register: (server, db, services) => {
-		const transactionSender = routeUtils.createSender(routeResultTypes.transaction);
-
-		const accountIdToPublicKey = (type, accountId) => {
-			if (AccountType.publicKey === type)
-				return Promise.resolve(accountId);
-
-			return routeUtils.addressToPublicKey(db, accountId);
-		};
-
+	register: (server, db) => {
 		server.get('/account/:accountId', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			const sender = routeUtils.createSender(routeResultTypes.account);
 			return db.accountsByIds([{ [type]: accountId }])
 				.then(sender.sendOne(req.params.accountId, res, next));
-		});
-
-		// Get account blocks harvested and beneficiary by public key
-		const accountBlocks = [
-			{ dbField: 'block.signerPublicKey', routePostfix: '/harvest' },
-			{ dbField: 'block.beneficiaryPublicKey', routePostfix: '/beneficiary' }
-		];
-
-		accountBlocks.forEach(blockType => {
-			server.get(`/account/:accountId${blockType.routePostfix}`, (req, res, next) => {
-				const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-				const pagingOptions = routeUtils.parsePagingArguments(req.params);
-				const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
-				const sender = routeUtils.createSender(routeResultTypes.blockWithId);
-
-				return accountIdToPublicKey(type, accountId).then(accountPublicKey =>
-					db.getBlocksBy(blockType.dbField, Buffer.from(accountPublicKey), pagingOptions.id, pagingOptions.pageSize, ordering)
-						.then(sender.sendArray('accountId', res, next)))
-					.catch(() => {
-						sender.sendArray('accountId', res, next)([]);
-					});
-			});
 		});
 
 		server.post('/account', (req, res, next) => {
@@ -80,50 +46,5 @@ module.exports = {
 			return db.accountsByIds(accountIds.map(accountId => ({ [idOptions.type]: accountId })))
 				.then(sender.sendArray(idOptions.keyName, res, next));
 		});
-
-		// region account transactions
-
-		const transactionStates = [
-			{ dbPostfix: 'Confirmed', routePostfix: '' },
-			{ dbPostfix: 'Incoming', routePostfix: '/incoming' },
-			{ dbPostfix: 'Unconfirmed', routePostfix: '/unconfirmed' }
-		];
-
-		transactionStates.concat(services.config.transactionStates).forEach(state => {
-			server.get(`/account/:accountId/transactions${state.routePostfix}`, (req, res, next) => {
-				const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-				const transactionTypes = req.params.type ? routeUtils.parseArgumentAsArray(req.params, 'type', 'uint') : undefined;
-				const pagingOptions = routeUtils.parsePagingArguments(req.params);
-				const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
-
-				const accountAddress = (AccountType.publicKey === type)
-					? address.publicKeyToAddress(accountId, networkInfo.networks[services.config.network.name].id)
-					: accountId;
-
-				return db[`accountTransactions${state.dbPostfix}`](
-					accountAddress,
-					transactionTypes,
-					pagingOptions.id,
-					pagingOptions.pageSize,
-					ordering
-				).then(transactionSender.sendArray('accountId', res, next));
-			});
-		});
-
-		server.get('/account/:accountId/transactions/outgoing', (req, res, next) => {
-			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-			const transactionTypes = req.params.type ? routeUtils.parseArgumentAsArray(req.params, 'type', 'uint') : undefined;
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
-
-			return accountIdToPublicKey(type, accountId).then(publicKey =>
-				db.accountTransactionsOutgoing(publicKey, transactionTypes, pagingOptions.id, pagingOptions.pageSize, ordering)
-					.then(transactionSender.sendArray('accountId', res, next)))
-				.catch(() => {
-					transactionSender.sendArray('accountId', res, next)([]);
-				});
-		});
-
-		// endregion
 	}
 };

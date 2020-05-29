@@ -49,7 +49,21 @@ const sizes = {
 	/**
 	 * @property {numeric} Size of a sha3 512 hash.
 	 */
-	hash512: 64
+	hash512: 64,
+
+	/**
+	 * @property {numeric} Size of VRF proof properties.
+	 */
+	vrfProof: {
+		gamma: 32,
+		verificationHash: 16,
+		scalar: 32
+	},
+
+	/**
+	 * @property {numeric} Size of a voting key.
+	 */
+	votingKey: 48
 };
 
 module.exports = sizes;
