@@ -30,7 +30,7 @@ const MongoDb = require('mongodb');
 const sinon = require('sinon');
 
 const { Binary } = MongoDb;
-const { convert, uint64 } = catapult.utils;
+const { uint64 } = catapult.utils;
 const { address } = catapult.model;
 
 describe('namespace routes', () => {
@@ -96,7 +96,7 @@ describe('namespace routes', () => {
 			}
 		};
 
-		const dbNamespacesFake = sinon.fake((aliasType, level0, ownerAddress, registrationType, options) => {
+		const dbNamespacesFake = sinon.fake((aliasType, level0, ownerAddress, registrationType) => {
 			if (aliasType || ownerAddress || registrationType)
 				return Promise.resolve(emptyPageSample);
 
@@ -298,99 +298,6 @@ describe('namespace routes', () => {
 			},
 			dbApiName: 'namespaceById',
 			type: 'namespaceDescriptor'
-		});
-	});
-
-	describe('by owner', () => {
-		const testAddress = 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXWV';
-		const nonExistingTestAddress = 'NAR3W7B4BCOZSZMFIZRYB3N5YGOUSWIYJCJ6HDFG';
-
-		const ownedNamespaceSample = {
-			meta: {
-				id: ''
-			},
-			namespace: {
-				ownerAddress: ''
-			}
-		};
-
-		const dbNamespacesByOwnersFake = sinon.fake((addresses, id, pageSize, options) => {
-			if (Buffer.from(addresses[0]).equals(Buffer.from(address.stringToAddress(nonExistingTestAddress))))
-				return Promise.resolve([]);
-
-			return Promise.resolve([ownedNamespaceSample]);
-		});
-
-		const mockServer = new MockServer();
-		const db = { namespacesByOwners: dbNamespacesByOwnersFake };
-		namespaceRoutes.register(mockServer.server, db);
-
-		beforeEach(() => {
-			mockServer.resetStats();
-			dbNamespacesByOwnersFake.resetHistory();
-		});
-
-		describe('GET', () => {
-			const route = mockServer.getRoute('/account/:address/namespaces').get();
-
-			it('returns empty if address not found', () => {
-				// Arrange:
-				const req = { params: { address: nonExistingTestAddress } };
-
-				// Act:
-				return mockServer.callRoute(route, req).then(() => {
-					// Assert:
-					expect(dbNamespacesByOwnersFake.calledOnce).to.equal(true);
-					expect(dbNamespacesByOwnersFake.firstCall.args[0]).to.deep.equal([address.stringToAddress(nonExistingTestAddress)]);
-
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
-						payload: { namespaces: [] },
-						type: 'namespaces'
-					});
-					expect(mockServer.next.calledOnce).to.equal(true);
-				});
-			});
-
-			it('parses and forwards pagination params correctly', () => {
-				// Arrange:
-				const req = { params: { address: testAddress, id: '00123456789AABBBCCDDEEFF', pageSize: '25' } };
-
-				// Act:
-				return mockServer.callRoute(route, req).then(() => {
-					// Assert:
-					expect(dbNamespacesByOwnersFake.calledOnce).to.equal(true);
-					expect(dbNamespacesByOwnersFake.firstCall.args[1]).to.equal('00123456789AABBBCCDDEEFF');
-					expect(dbNamespacesByOwnersFake.firstCall.args[2]).to.equal(25);
-
-					expect(mockServer.next.calledOnce).to.equal(true);
-				});
-			});
-
-			it('returns owned namespaces by address', () => {
-				// Arrange:
-				const req = { params: { address: testAddress } };
-
-				// Act:
-				return mockServer.callRoute(route, req).then(() => {
-					// Assert:
-					expect(dbNamespacesByOwnersFake.calledOnce).to.equal(true);
-					expect(dbNamespacesByOwnersFake.firstCall.args[0]).to.deep.equal([address.stringToAddress(testAddress)]);
-
-					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
-						payload: { namespaces: [ownedNamespaceSample] },
-						type: 'namespaces'
-					});
-					expect(mockServer.next.calledOnce).to.equal(true);
-				});
-			});
-
-			it('throws error if address is invalid', () => {
-				// Arrange:
-				const req = { params: { address: 'AB12345' } };
-
-				// Act + Assert:
-				expect(() => mockServer.callRoute(route, req)).to.throw('address has an invalid format');
-			});
 		});
 	});
 

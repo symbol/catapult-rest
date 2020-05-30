@@ -52,14 +52,6 @@ module.exports = {
 				.then(namespaceSender.sendOne(req.params.namespaceId, res, next));
 		});
 
-		server.get('/account/:address/namespaces', (req, res, next) => {
-			const accountAddress = routeUtils.parseArgument(req.params, 'address', 'address');
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-
-			return db.namespacesByOwners([accountAddress], pagingOptions.id, pagingOptions.pageSize)
-				.then(namespaces => routeUtils.createSender('namespaces').sendOne('accountId', res, next)({ namespaces }));
-		});
-
 		const collectNames = (namespaceNameTuples, namespaceIds) => {
 			const type = catapult.model.EntityType.registerNamespace;
 			return db.catapultDb.findNamesByIds(namespaceIds, type, { id: 'id', name: 'name', parentId: 'parentId' })

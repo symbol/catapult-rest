@@ -99,23 +99,6 @@ class NamespaceDb {
 	}
 
 	/**
-	 * Retrieves namespaces owned by specified owners.
-	 * @param {array<{Uint8Array}>} addresses Account addresses.
-	 * @param {string} id Paging id.
-	 * @param {int} pageSize Page size.
-	 * @param {object} options Additional options.
-	 * @returns {Promise.<array>} Owned namespaces.
-	 */
-	namespacesByOwners(addresses, id, pageSize, options) {
-		const buffers = addresses.map(address => Buffer.from(address));
-		const conditions = createActiveConditions();
-		conditions.$and.push({ 'namespace.ownerAddress': { $in: buffers } });
-
-		return this.catapultDb.queryPagedDocuments('namespaces', conditions, id, pageSize, options)
-			.then(this.catapultDb.sanitizer.copyAndDeleteIds);
-	}
-
-	/**
 	 * Retrieves non expired namespaces aliasing mosaics or addresses.
 	 * @param {Array.<module:catapult.model.namespace/aliasType>} aliasType Alias type.
 	 * @param {*} ids Set of mosaic or address ids.
