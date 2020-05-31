@@ -27,8 +27,8 @@ const Ripemd160 = require('ripemd160');
 const constants = {
 	sizes: {
 		ripemd160: 20,
-		addressDecoded: 25,
-		addressEncoded: 40,
+		addressDecoded: 24,
+		addressEncoded: 39,
 		key: 32,
 		checksum: 4
 	}

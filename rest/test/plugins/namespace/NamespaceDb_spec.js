@@ -238,9 +238,9 @@ describe('namespace db', () => {
 		const aliasTypeMosaic = catapult.model.namespace.aliasType.mosaic;
 		const aliasTypeAddress = catapult.model.namespace.aliasType.address;
 		const testAddress = {
-			one: 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXWV',
-			two: 'SCFZFP7N5C3P6EHP5D2UJ7GQD7Q7ZIENV4NZ6ELN',
-			three: 'SAAM2O7SSJ2A7AU3DZJMSTTRFZT5TFDPQ3ZIIJX7'
+			one: 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXW',
+			two: 'SCFZFP7N5C3P6EHP5D2UJ7GQD7Q7ZIENV4NZ6EL',
+			three: 'SAAM2O7SSJ2A7AU3DZJMSTTRFZT5TFDPQ3ZIIJX'
 		};
 		const lifetime = { start: 0, end: 100 };
 		const createNamespace = (namespaceId, aliasTarget, aliasType, depth, expirationHeight) => ({

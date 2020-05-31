@@ -120,7 +120,7 @@ describe('lock secret plugin', () => {
 						Secret_Buffer, // secret 32b
 						Buffer.of(0x00, 0x00), // proof size 2b
 						Buffer.of(0xFF), // hash algorithm
-						RecipientAddress_Buffer, // recipient 25b
+						RecipientAddress_Buffer, // recipient 24b
 						Proof_Buffer // proofBufferSize
 					]),
 
@@ -135,7 +135,7 @@ describe('lock secret plugin', () => {
 				return data;
 			};
 
-			const size = 1 + 32 + 25 + 2 + proofBufferSize;
+			const size = test.constants.sizes.hash256 + 2 + 1 + test.constants.sizes.addressDecoded + proofBufferSize;
 			test.binary.test.addAll(getCodec(EntityType.secretProof), size, generateTransaction);
 		});
 	});

@@ -23,7 +23,7 @@ const convert = require('../../src/utils/convert');
 const test = require('../testUtils');
 const { expect } = require('chai');
 
-const Address_Decoded_Size = 25;
+const Address_Decoded_Size = 24;
 const Network_Mijin_Identifier = 0x60;
 const Network_Public_Test_Identifier = 0x98;
 
