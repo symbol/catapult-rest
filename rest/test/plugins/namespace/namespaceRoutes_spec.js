@@ -49,8 +49,8 @@ describe('namespace routes', () => {
 	});
 
 	describe('by owner', () => {
-		const testAddress = 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXW';
-		const nonExistingTestAddress = 'NAR3W7B4BCOZSZMFIZRYB3N5YGOUSWIYJCJ6HDF';
+		const testAddress = 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXQ';
+		const nonExistingTestAddress = 'NAR3W7B4BCOZSZMFIZRYB3N5YGOUSWIYJCJ6HDA';
 
 		const ownedNamespaceSample = {
 			meta: {
@@ -400,8 +400,8 @@ describe('namespace routes', () => {
 	describe('get account names', () => {
 		describe('calls aliasNamesRoutesProcessor with correct params', () => {
 			const testAddress = {
-				one: 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXW',
-				two: 'SCFZFP7N5C3P6EHP5D2UJ7GQD7Q7ZIENV4NZ6EL'
+				one: 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXQ',
+				two: 'NAR3W7B4BCOZSZMFIZRYB3N5YGOUSWIYJCJ6HDA'
 			};
 
 			it('is called once for each endpoint using it with correct parameters', () => {
