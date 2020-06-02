@@ -26,7 +26,7 @@ const { expect } = require('chai');
 
 const constants = {
 	sizes: {
-		addressDecoded: 25,
+		addressDecoded: 24,
 		modifyMultisigAccount: 8
 	}
 };

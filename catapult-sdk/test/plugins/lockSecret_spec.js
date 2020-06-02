@@ -87,14 +87,14 @@ describe('lock secret plugin', () => {
 			const recipientAddressBuffer = test.random.bytes(test.constants.sizes.addressDecoded);
 			const secretBuffer = test.random.bytes(test.constants.sizes.hash256);
 
-			test.binary.test.addAll(getCodec(EntityType.secretLock), 82, () => ({
+			test.binary.test.addAll(getCodec(EntityType.secretLock), 81, () => ({
 				buffer: Buffer.concat([
 					Buffer.from(secretBuffer), // secret 25b
 					Buffer.of(0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF), // mosaic
 					Buffer.of(0xCA, 0xD0, 0x8E, 0x6E, 0xFF, 0x21, 0x2F, 0x49), // amount
 					Buffer.of(0x99, 0x00, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF), // duration
 					Buffer.of(0xFF), // hash algorithm
-					Buffer.from(recipientAddressBuffer) // recipientAddress 32b
+					Buffer.from(recipientAddressBuffer) // recipientAddress 24b
 				]),
 
 				object: {

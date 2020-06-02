@@ -369,7 +369,7 @@ describe('restrictions plugin', () => {
 			describe('supports mosaic restriction address', () => {
 				const targetAddress = test.random.bytes(test.constants.sizes.addressDecoded); // 24
 
-				test.binary.test.addAll(getCodec(EntityType.mosaicRestrictionAddress), 57, () => ({
+				test.binary.test.addAll(getCodec(EntityType.mosaicRestrictionAddress), 56, () => ({
 					buffer: Buffer.concat([
 						Buffer.of(0xA4, 0x78, 0xB2, 0x05, 0x04, 0x40, 0x38, 0x36), // mosaicId
 						Buffer.of(0xFF, 0x12, 0x77, 0x31, 0x82, 0x33, 0x32, 0x29), // restrictionKey
