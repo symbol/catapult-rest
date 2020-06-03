@@ -110,7 +110,7 @@ describe('metadata plugin', () => {
 		const getCodec = entityType => getCodecs()[entityType];
 
 		describe('supports account metadata', () => {
-			const targetAddress = test.random.bytes(test.constants.sizes.addressDecoded); // 25
+			const targetAddress = test.random.bytes(test.constants.sizes.addressDecoded);
 			const valueBuffer = Buffer.of(0x6d, 0x65, 0x74, 0x61, 0x20, 0x69, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e);
 
 			test.binary.test.addAll(getCodec(EntityType.accountMetadata), 52, () => ({
@@ -132,7 +132,7 @@ describe('metadata plugin', () => {
 		});
 
 		describe('supports mosaic metadata', () => {
-			const targetAddress = test.random.bytes(test.constants.sizes.addressDecoded); // 25
+			const targetAddress = test.random.bytes(test.constants.sizes.addressDecoded);
 			const valueBuffer = Buffer.of(0x6d, 0x65, 0x74, 0x61, 0x20, 0x69, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e);
 
 			test.binary.test.addAll(getCodec(EntityType.mosaicMetadata), 60, () => ({
@@ -156,7 +156,7 @@ describe('metadata plugin', () => {
 		});
 
 		describe('supports namespace metadata', () => {
-			const targetAddress = test.random.bytes(test.constants.sizes.addressDecoded); // 25
+			const targetAddress = test.random.bytes(test.constants.sizes.addressDecoded);
 			const valueBuffer = Buffer.of(0x6d, 0x65, 0x74, 0x61, 0x20, 0x69, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e);
 
 			test.binary.test.addAll(getCodec(EntityType.namespaceMetadata), 60, () => ({
