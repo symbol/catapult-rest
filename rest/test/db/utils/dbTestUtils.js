@@ -236,7 +236,7 @@ const populateDatabase = (db, dbEntities) => {
 
 const copyAndDeleteId = (item, collectionName) => {
 	if (!['accounts', 'blocks'].includes(collectionName) && item.meta)
-		item.meta.id = item._id;
+		item.id = item._id;
 
 	delete item._id;
 };

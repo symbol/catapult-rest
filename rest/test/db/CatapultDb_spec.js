@@ -69,7 +69,7 @@ describe('catapult db', () => {
 		});
 
 		const getAttributes = documents => {
-			const documentToIdString = document => (document && document.meta ? document.meta.id.toString() : undefined);
+			const documentToIdString = document => (document ? document.id.toString() : undefined);
 			const subTxIds = documents.map(document => (document.transaction.transactions || []).map(documentToIdString));
 			return {
 				numDocuments: documents.length,
@@ -949,7 +949,7 @@ describe('catapult db', () => {
 
 		const createTransaction = (objectId, addresses, type) => ({
 			_id: objectId,
-			meta: { addresses: addresses.map(a => new Binary(a)) },
+			meta: { height: 1, addresses: addresses.map(a => new Binary(a)) },
 			transaction: { type }
 		});
 
@@ -973,7 +973,7 @@ describe('catapult db', () => {
 				transactions => {
 					transactions.forEach(transaction => {
 						expect(Object.keys(transaction.meta).length).to.equal(1);
-						expect(transaction.meta).to.contain.all.keys(['id']);
+						expect(transaction.meta).to.contain.all.keys(['height']);
 					});
 				});
 		});
@@ -993,7 +993,7 @@ describe('catapult db', () => {
 				db => db.queryTransactions({ 'meta.addresses': Buffer.from(testAddressOne) }),
 				transactions => {
 					expect(transactions.length).to.equal(1);
-					expect(transactions[0].meta.id).to.deep.equal(id1);
+					expect(transactions[0].id).to.deep.equal(id1);
 				});
 		});
 
@@ -1017,7 +1017,7 @@ describe('catapult db', () => {
 				),
 				transactions => {
 					expect(transactions.length).to.equal(1);
-					expect(transactions[0].meta.id).to.deep.equal(id2);
+					expect(transactions[0].id).to.deep.equal(id2);
 				});
 		});
 
@@ -1043,7 +1043,7 @@ describe('catapult db', () => {
 			return runDbTest({ transactions: dbTransactions },
 				db => db.queryTransactions({ 'meta.addresses': Buffer.from(testAddressOne) }),
 				transactions => {
-					const ids = transactions.map(transaction => transaction.meta.id);
+					const ids = transactions.map(transaction => transaction.id);
 					expect(ids.length).to.equal(3);
 					expect(ids).to.deep.equal([id3, id2, id1]);
 				});
@@ -1066,8 +1066,8 @@ describe('catapult db', () => {
 				transactions => {
 					expect(transactions.length).to.equal(2);
 					expect(transactions).to.deep.equal([
-						{ meta: { id: id2 }, transaction: { type: EntityType.mosaicSupplyChange } },
-						{ meta: { id: id1 }, transaction: { type: EntityType.transfer } }
+						{ id: id2, meta: { height: 1 }, transaction: { type: EntityType.mosaicSupplyChange } },
+						{ id: id1, meta: { height: 1 }, transaction: { type: EntityType.transfer } }
 					]);
 				});
 		});
@@ -1101,22 +1101,24 @@ describe('catapult db', () => {
 					expect(transactions.length).to.equal(2);
 					expect(transactions).to.deep.equal([
 						{
-							meta: { id: id2 },
+							id: id2,
+							meta: { height: 1 },
 							transaction: {
 								type: EntityType.aggregateBonded,
 								transactions: [
-									{ meta: { aggregateId: id2, id: id6 }, transaction: {} },
-									{ meta: { aggregateId: id2, id: id7 }, transaction: {} }
+									{ id: id6, meta: { aggregateId: id2 }, transaction: {} },
+									{ id: id7, meta: { aggregateId: id2 }, transaction: {} }
 								]
 							}
 						},
 						{
-							meta: { id: id1 },
+							id: id1,
+							meta: { height: 1 },
 							transaction: {
 								type: EntityType.aggregateComplete,
 								transactions: [
-									{ meta: { aggregateId: id1, id: id4 }, transaction: {} },
-									{ meta: { aggregateId: id1, id: id5 }, transaction: {} }
+									{ id: id4, meta: { aggregateId: id1 }, transaction: {} },
+									{ id: id5, meta: { aggregateId: id1 }, transaction: {} }
 								]
 							}
 						}
@@ -1138,7 +1140,7 @@ describe('catapult db', () => {
 					for (let i = 14; 0 <= i; --i)
 						expectedIds.push(test.db.createObjectId(i));
 
-					expect(transactions.map(t => t.meta.id)).to.deep.equal(expectedIds);
+					expect(transactions.map(t => t.id)).to.deep.equal(expectedIds);
 				});
 		});
 
@@ -1153,7 +1155,7 @@ describe('catapult db', () => {
 				db => db.queryTransactions(
 					{ 'meta.addresses': Buffer.from(testAddressOne) }, undefined, undefined, { sortOrder: ordering }
 				),
-				transactions => { expect(transactions.map(t => t.meta.id)).to.deep.equal(exepctedIds); });
+				transactions => { expect(transactions.map(t => t.id)).to.deep.equal(exepctedIds); });
 		};
 
 		it('query respects options ordering asc', () => {
