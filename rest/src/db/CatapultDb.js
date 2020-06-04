@@ -62,6 +62,14 @@ const createSanitizer = () => ({
 			delete dbObject._id;
 		});
 		return dbObjects;
+	},
+
+	renameIds: dbObjects => {
+		dbObjects.forEach(dbObject => {
+			dbObject.id = dbObject._id;
+			delete dbObject._id;
+		});
+		return dbObjects;
 	}
 });
 
