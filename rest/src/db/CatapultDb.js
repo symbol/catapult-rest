@@ -64,6 +64,15 @@ const createSanitizer = () => ({
 		return dbObjects;
 	},
 
+	renameId: dbObject => {
+		if (dbObject) {
+			dbObject.id = dbObject._id;
+			delete dbObject._id;
+		}
+
+		return dbObject;
+	},
+
 	renameIds: dbObjects => {
 		dbObjects.forEach(dbObject => {
 			dbObject.id = dbObject._id;
@@ -232,7 +241,7 @@ class CatapultDb {
 			'blocks',
 			{ 'block.height': convertToLong(height) },
 			{ 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 }
-		).then(this.sanitizer.deleteId);
+		).then(this.sanitizer.renameId);
 	}
 
 	blockWithMerkleTreeAtHeight(height, merkleTreeName) {

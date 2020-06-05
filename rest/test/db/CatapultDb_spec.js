@@ -45,6 +45,15 @@ describe('catapult db', () => {
 		});
 	};
 
+	const renameId = dbObject => {
+		if (dbObject) {
+			dbObject.id = dbObject._id;
+			delete dbObject._id;
+		}
+
+		return dbObject;
+	};
+
 	const keyToAddress = key => Buffer.from(address.publicKeyToAddress(key, Mijin_Test_Network));
 
 	const runDbTest = (dbEntities, issueDbCommand, assertDbCommandResult) => {
@@ -353,6 +362,15 @@ describe('catapult db', () => {
 	});
 
 	describe('block at height', () => {
+		const runBlockAtHeightDbTest = (dbEntities, issueDbCommand, assertDbCommandResult) => {
+			const db = new CatapultDb(Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions));
+			return db.connect(testDbOptions.url, 'test')
+				.then(() => test.db.populateDatabase(db, dbEntities))
+				.then(() => issueDbCommand(db))
+				.then(assertDbCommandResult)
+				.then(() => db.close());
+		};
+
 		it('undefined is returned for block at unknown height', () =>
 			// Assert:
 			runDbTest(
@@ -368,10 +386,10 @@ describe('catapult db', () => {
 			const seedBlock = test.db.createDbBlock(Default_Height);
 
 			// Assert:
-			return runDbTest(
-				{ block: seedBlock },
+			return runBlockAtHeightDbTest(
+				{ blocks: seedBlock },
 				db => db.blockAtHeight(height),
-				block => expect(block).to.deep.equal(stripExtraneousBlockInformation(seedBlock))
+				block => expect(block).to.deep.equal(stripExtraneousBlockInformation(renameId(seedBlock)))
 			);
 		};
 
@@ -385,10 +403,10 @@ describe('catapult db', () => {
 			const blockTransactions = test.db.createDbTransactions(2, test.random.publicKey(), test.random.address());
 
 			// Assert:
-			return runDbTest(
-				{ block: seedBlock, transactions: blockTransactions },
+			return runBlockAtHeightDbTest(
+				{ blocks: seedBlock, transactions: blockTransactions },
 				db => db.blockAtHeight(Long.fromNumber(Default_Height)),
-				block => expect(block).to.deep.equal(stripExtraneousBlockInformation(seedBlock))
+				block => expect(block).to.deep.equal(stripExtraneousBlockInformation(renameId(seedBlock)))
 			);
 		});
 	});
