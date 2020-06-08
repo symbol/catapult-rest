@@ -34,7 +34,7 @@ const isAggregateType = document => EntityType.aggregateComplete === document.tr
 const createSanitizer = () => ({
 	copyAndDeleteId: dbObject => {
 		if (dbObject) {
-			Object.assign(dbObject, { id: dbObject._id });
+			Object.assign(dbObject.meta, { id: dbObject._id });
 			delete dbObject._id;
 		}
 
@@ -43,7 +43,7 @@ const createSanitizer = () => ({
 
 	copyAndDeleteIds: dbObjects => {
 		dbObjects.forEach(dbObject => {
-			Object.assign(dbObject, { id: dbObject._id });
+			Object.assign(dbObject.meta, { id: dbObject._id });
 			delete dbObject._id;
 		});
 
@@ -160,7 +160,7 @@ class CatapultDb {
 		return collection.find(conditions)
 			.project(options.projection)
 			.toArray()
-			.then(this.sanitizer.copyAndDeleteIds);
+			.then(this.sanitizer.renameIds);
 	}
 
 	queryPagedDocuments(collectionName, conditions, id, pageSize, options = {}) {
@@ -304,7 +304,7 @@ class CatapultDb {
 		const transactionConditions = { $and: [{ 'meta.aggregateId': { $exists: false } }, conditions] };
 
 		return this.queryPagedDocuments(collectionName, transactionConditions, id, pageSize, optionsWithProjection)
-			.then(this.sanitizer.copyAndDeleteIds)
+			.then(this.sanitizer.renameIds)
 			.then(transactions => {
 				const aggregateIds = [];
 				const aggregateIdToTransactionMap = {};

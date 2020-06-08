@@ -27,7 +27,7 @@ const { restriction } = catapult.model;
 describe('restrictions db', () => {
 	describe('account restrictions', () => {
 		const removeMongoId = entity => {
-			delete entity.id;
+			delete entity.meta.id;
 			return entity;
 		};
 

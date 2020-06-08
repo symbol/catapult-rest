@@ -746,6 +746,18 @@ describe('catapult db', () => {
 	};
 
 	describe('transaction by id', () => {
+		const runTransactionsDbTest = (dbEntities, issueDbCommand, assertDbCommandResult) => {
+			// Arrange:
+			const db = new CatapultDb(Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions));
+
+			// Act + Assert:
+			return db.connect(testDbOptions.url, 'test')
+				.then(() => test.db.populateDatabase(db, dbEntities))
+				.then(() => issueDbCommand(db))
+				.then(assertDbCommandResult)
+				.then(() => db.close());
+		};
+
 		const addTestsWithId = (traits, idTraits) => {
 			it('can retrieve each transaction by id', () => {
 				// Arrange:
@@ -753,7 +765,7 @@ describe('catapult db', () => {
 				const allIds = traits.allIds.map(idTraits.convertToId);
 
 				// Act + Assert:
-				return runDbTest(
+				return runTransactionsDbTest(
 					{ [idTraits.collectionName]: seedTransactions },
 					db => idTraits.transactionsByIds(db, allIds),
 					transactions => assertEqualDocuments(traits.expected(seedTransactions, traits.allIds), transactions)
@@ -766,7 +778,7 @@ describe('catapult db', () => {
 				const documentId = idTraits.convertToId(traits.validId);
 
 				// Act + Assert:
-				return runDbTest(
+				return runTransactionsDbTest(
 					{ [idTraits.collectionName]: seedTransactions },
 					db => idTraits.transactionsByIds(db, [documentId]),
 					transactions => assertEqualDocuments(traits.expected(seedTransactions, [traits.validId]), transactions)
@@ -779,7 +791,7 @@ describe('catapult db', () => {
 				const documentId = idTraits.convertToId(traits.invalidId);
 
 				// Act + Assert:
-				return runDbTest(
+				return runTransactionsDbTest(
 					{ [idTraits.collectionName]: seedTransactions },
 					db => idTraits.transactionsByIds(db, [documentId]),
 					transactions => expect(transactions).to.deep.equal([])
@@ -795,7 +807,7 @@ describe('catapult db', () => {
 				mixedIds.splice(mixedIds.length / 2, 0, idTraits.convertToId(traits.invalidId));
 
 				// Act + Assert:
-				return runDbTest(
+				return runTransactionsDbTest(
 					{ [idTraits.collectionName]: seedTransactions },
 					db => idTraits.transactionsByIds(db, mixedIds),
 					transactions => assertEqualDocuments(traits.expected(seedTransactions, traits.allIds), transactions)
@@ -836,7 +848,7 @@ describe('catapult db', () => {
 		describe('for transactions', () => {
 			addTests({
 				createSeedTransactions: () => createSeedTransactions(3, [21, 34]),
-				expected: (transactions, ids) => ids.map(id => transactions[id - 1]),
+				expected: (transactions, ids) => ids.map(id => transactions[id - 1]).map(renameId),
 				allIds: [1, 2, 3, 4, 5, 6],
 				validId: 2,
 				invalidId: (3 * 2) + 1
@@ -853,9 +865,9 @@ describe('catapult db', () => {
 				expected: (transactions, ids) => ids.map(id => {
 					const index = id - 1;
 					const stitchedAggregate = Object.assign({}, transactions[index]);
-					stitchedAggregate.transaction.transactions = [transactions[index + 1], transactions[index + 2]];
+					stitchedAggregate.transaction.transactions = [transactions[index + 1], transactions[index + 2]].map(renameId);
 					return stitchedAggregate;
-				}),
+				}).map(renameId),
 				allIds: [1, 4, 7, 10, 13, 16],
 				// transaction with id 4 is an aggregate
 				validId: 4,
@@ -874,10 +886,10 @@ describe('catapult db', () => {
 				const documentId = test.db.createObjectId(5);
 
 				// Act + Assert:
-				return runDbTest(
+				return runTransactionsDbTest(
 					{ transactions: seedTransactions },
 					db => db.transactionsByIds([documentId]),
-					transactions => assertEqualDocuments([seedTransactions[4]], transactions)
+					transactions => assertEqualDocuments([renameId(seedTransactions[4])], transactions)
 				);
 			});
 		});
