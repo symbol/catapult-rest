@@ -20,7 +20,7 @@ Version number is described as follows:
 
 `v1.X.Y.Z`
 
-- The first numer is symbolic for pre-release and should not be taken into consideration
+- The first numer is symbolic for pre-release and should not be taken into consideration.
 - X: This serves to lock for compatibility with `catapult-server`, thus it is safe to update by keeping this number without REST
 losing server compatibility. Additionally, any breaking change to the server should require to upgrade this number.
 - Y: This serves to lock on safe updates to this project, thus it is safe to update by keeping this number without worrying about
