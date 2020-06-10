@@ -295,41 +295,6 @@ class CatapultDb {
 		return this.queryDocumentsAndCopyIds(collectionName, { 'meta.aggregateId': { $in: aggregateIds } });
 	}
 
-	queryTransactions(conditions, id, pageSize, options) {
-		// don't expose private meta.addresses field
-		const optionsWithProjection = Object.assign({ projection: { 'meta.addresses': 0 } }, options);
-
-		// filter out dependent documents
-		const collectionName = (options || {}).collectionName || 'transactions';
-		const transactionConditions = { $and: [{ 'meta.aggregateId': { $exists: false } }, conditions] };
-
-		return this.queryPagedDocuments(collectionName, transactionConditions, id, pageSize, optionsWithProjection)
-			.then(this.sanitizer.renameIds)
-			.then(transactions => {
-				const aggregateIds = [];
-				const aggregateIdToTransactionMap = {};
-				transactions
-					.filter(isAggregateType)
-					.forEach(document => {
-						const aggregateId = document.id;
-						aggregateIds.push(aggregateId);
-						aggregateIdToTransactionMap[aggregateId.toString()] = document.transaction;
-					});
-
-				return this.queryDependentDocuments(collectionName, aggregateIds).then(dependentDocuments => {
-					dependentDocuments.forEach(dependentDocument => {
-						const transaction = aggregateIdToTransactionMap[dependentDocument.meta.aggregateId];
-						if (!transaction.transactions)
-							transaction.transactions = [];
-
-						transaction.transactions.push(dependentDocument);
-					});
-
-					return transactions;
-				});
-			});
-	}
-
 	/**
 	 * Makes a paginated query with the provided arguments.
 	 * @param {array<object>} queryConditions The conditions that determine the query results, may be empty.
