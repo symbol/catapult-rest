@@ -175,8 +175,9 @@ describe('catapult db', () => {
 
 		const createBlock = (objectId, height, signerPublicKey, beneficiaryAddress) => ({
 			_id: createObjectId(objectId),
-			meta: { height },
+			meta: {},
 			block: {
+				height,
 				signerPublicKey: signerPublicKey ? Buffer.from(signerPublicKey) : undefined,
 				beneficiaryAddress: beneficiaryAddress ? Buffer.from(beneficiaryAddress) : undefined
 			}
@@ -247,7 +248,7 @@ describe('catapult db', () => {
 			const options = {
 				pageSize: 10,
 				pageNumber: 1,
-				sortField: '_id',
+				sortField: 'id',
 				sortDirection: 1,
 				offset: createObjectId(20).toString()
 			};
@@ -279,7 +280,7 @@ describe('catapult db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: '_id',
+					sortField: 'id',
 					sortDirection: 1
 				};
 
@@ -299,7 +300,7 @@ describe('catapult db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: '_id',
+					sortField: 'id',
 					sortDirection: -1
 				};
 
@@ -319,7 +320,7 @@ describe('catapult db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: 'meta.height',
+					sortField: 'height',
 					sortDirection: 1
 				};
 
