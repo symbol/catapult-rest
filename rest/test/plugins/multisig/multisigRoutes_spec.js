@@ -18,7 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const routeAccountIdGetTestUtils = require('./routeAccountIdGetTestUtils');
+const routeAddressGetTestUtils = require('./routeAddressGetTestUtils');
 const multisigRoutes = require('../../../src/plugins/multisig/multisigRoutes');
 const { test } = require('../../routes/utils/routeTestUtils');
 const catapult = require('catapult-sdk');
@@ -26,7 +26,7 @@ const { expect } = require('chai');
 
 describe('multisig routes', () => {
 	describe('get by account', () => {
-		routeAccountIdGetTestUtils.addDefaultTests({
+		routeAddressGetTestUtils.addDefaultTests({
 			registerRoutes: multisigRoutes.register,
 			route: '/account/:address/multisig',
 			dbApiName: 'multisigsByAddresses',
@@ -35,7 +35,7 @@ describe('multisig routes', () => {
 	});
 
 	describe('get multisig graph by account', () => {
-		const createRouteDescriptor = routeAccountIdGetTestUtils.routeDescriptorFactory({
+		const createRouteDescriptor = routeAddressGetTestUtils.routeDescriptorFactory({
 			registerRoutes: multisigRoutes.register,
 			route: '/account/:address/multisig/graph',
 			dbApiName: 'multisigsByAddresses',
@@ -57,7 +57,7 @@ describe('multisig routes', () => {
 
 		// note: multisig/graph has complicated "valid" tests (below), so instead of using
 		// addDefaultTests, use addGetDocumentTests to run only invalid tests.
-		routeAccountIdGetTestUtils.addGetDocumentTests(addGetTests);
+		routeAddressGetTestUtils.addGetDocumentTests(addGetTests);
 
 		const createMultisigEntry = (marker, upstreamCount, downstreamCount) => {
 			const upstreamArray = [];

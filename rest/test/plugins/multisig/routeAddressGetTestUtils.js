@@ -23,7 +23,7 @@ const catapult = require('catapult-sdk');
 
 const Valid_Address = test.sets.addresses.valid[0];
 
-const routeAccountIdGetTestUtils = {
+const routeAddressGetTestUtils = {
 	routeDescriptorFactory: traits =>
 		dataTraits => ({
 			route: traits.route,
@@ -49,7 +49,7 @@ const routeAccountIdGetTestUtils = {
 	},
 
 	addDefaultTests: traits => {
-		const createRouteDescriptor = routeAccountIdGetTestUtils.routeDescriptorFactory(traits);
+		const createRouteDescriptor = routeAddressGetTestUtils.routeDescriptorFactory(traits);
 		const addGetTests = dataTraits => {
 			const routeDescriptor = createRouteDescriptor(dataTraits);
 
@@ -57,8 +57,8 @@ const routeAccountIdGetTestUtils = {
 			test.route.document.addGetDocumentRouteTests(traits.registerRoutes, routeDescriptor);
 		};
 
-		routeAccountIdGetTestUtils.addGetDocumentTests(addGetTests);
+		routeAddressGetTestUtils.addGetDocumentTests(addGetTests);
 	}
 };
 
-module.exports = routeAccountIdGetTestUtils;
+module.exports = routeAddressGetTestUtils;
