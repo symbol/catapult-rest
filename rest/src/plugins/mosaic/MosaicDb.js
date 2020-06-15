@@ -36,7 +36,7 @@ class MosaicDb {
 	 * Retrieves filtered and paginated mosaics.
 	 * @param {Uint8Array} ownerAddress Mosaic owner address
 	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
-	 * `pageSize` and `pageNumber`.
+	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<object>} Mosaics page.
 	 */
 	mosaics(ownerAddress, options) {

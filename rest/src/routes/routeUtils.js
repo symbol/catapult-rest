@@ -195,7 +195,7 @@ const routeUtils = {
 		parsedArgs.pageNumber = 0 < parsedArgs.pageNumber ? parsedArgs.pageNumber : 1;
 
 		if (args.offset)
-			parsedArgs.offset = parseArgument(args, 'offset', offsetParsers[parsedArgs.sortField]);
+			parsedArgs.offset = routeUtils.parseArgument(args, 'offset', offsetParsers[parsedArgs.sortField]);
 
 		return parsedArgs;
 	},

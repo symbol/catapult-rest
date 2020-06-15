@@ -24,6 +24,7 @@ const CatapultDb = require('../../src/db/CatapultDb');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
 const MongoDb = require('mongodb');
+const sinon = require('sinon');
 
 const { address, EntityType } = catapult.model;
 
@@ -317,6 +318,7 @@ describe('catapult db', () => {
 			});
 
 			it('sort field', () => {
+				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments_2');
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
@@ -329,9 +331,9 @@ describe('catapult db', () => {
 					{ blocks: dbBlocks() },
 					db => db.blocks(undefined, undefined, options),
 					blocksPage => {
-						expect(blocksPage.data[0].id).to.deep.equal(createObjectId(30));
-						expect(blocksPage.data[1].id).to.deep.equal(createObjectId(10));
-						expect(blocksPage.data[2].id).to.deep.equal(createObjectId(20));
+						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2]['$sort'])[0]).to.equal('block.height');
+						queryPagedDocumentsSpy.restore();
 					}
 				);
 			});
@@ -1565,10 +1567,11 @@ describe('catapult db', () => {
 			});
 
 			it('sort field', () => {
+				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments_2');
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: 'meta.height',
+					sortField: 'id',
 					sortDirection: 1
 				};
 
@@ -1577,9 +1580,9 @@ describe('catapult db', () => {
 					{ transactions: dbTransactions() },
 					db => db.transactions([], options),
 					transactionsPage => {
-						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
-						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(10));
-						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(20));
+						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2]['$sort'])[0]).to.equal('_id');
+						queryPagedDocumentsSpy.restore();
 					}
 				);
 			});

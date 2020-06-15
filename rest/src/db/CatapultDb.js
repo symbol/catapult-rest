@@ -214,7 +214,7 @@ class CatapultDb {
 	 * @param {Uint8Array} signerPublicKey Filters by signer public key
 	 * @param {Uint8Array} beneficiaryAddress Filters by beneficiary address
 	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
-	 * `pageSize` and `pageNumber`.
+	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<object>} Blocks page.
 	 */
 	blocks(signerPublicKey, beneficiaryAddress, options) {
@@ -370,7 +370,7 @@ class CatapultDb {
 	 * @param {object} filters Filters to be applied: `address` for an involved address in the query, `signerPublicKey`, `recipientAddress`,
 	 * `group`, `height`, `embedded`, `transactionTypes` array of uint. If `address` is provided, other account related filters are omitted.
 	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
-	 * `pageSize` and `pageNumber`.
+	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<object>} Transactions page.
 	 */
 	transactions(filters, options) {
@@ -433,9 +433,6 @@ class CatapultDb {
 		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
 		const conditions = buildConditions();
 
-		console.log("############")
-		console.log(sortConditions)
-		console.log(conditions)
 		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, collectionName, options);
 	}
 
