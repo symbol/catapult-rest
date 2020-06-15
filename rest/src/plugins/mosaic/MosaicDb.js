@@ -20,7 +20,7 @@
 
 const MongoDb = require('mongodb');
 
-const { Long, ObjectId } = MongoDb;
+const { Long } = MongoDb;
 
 
 class MosaicDb {
@@ -45,7 +45,7 @@ class MosaicDb {
 		const conditions = [];
 
 		if (options.offset)
-				conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
+			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
 
 		if (ownerAddress)
 			conditions.push({ 'mosaic.ownerAddress': Buffer.from(ownerAddress) });

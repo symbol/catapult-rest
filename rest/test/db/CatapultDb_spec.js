@@ -330,9 +330,9 @@ describe('catapult db', () => {
 				return runDbTest(
 					{ blocks: dbBlocks() },
 					db => db.blocks(undefined, undefined, options),
-					blocksPage => {
+					() => {
 						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
-						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2]['$sort'])[0]).to.equal('block.height');
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2].$sort)[0]).to.equal('block.height');
 						queryPagedDocumentsSpy.restore();
 					}
 				);
@@ -1579,9 +1579,9 @@ describe('catapult db', () => {
 				return runDbTest(
 					{ transactions: dbTransactions() },
 					db => db.transactions([], options),
-					transactionsPage => {
+					() => {
 						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
-						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2]['$sort'])[0]).to.equal('_id');
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2].$sort)[0]).to.equal('_id');
 						queryPagedDocumentsSpy.restore();
 					}
 				);

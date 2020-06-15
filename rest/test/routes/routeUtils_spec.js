@@ -348,7 +348,11 @@ describe('route utils', () => {
 
 		it('succeeds when valid sort field is provided', () => {
 			// Act:
-			const options = routeUtils.parsePaginationArguments({ orderBy: 'hash' }, servicesConfigPageSize, { id: 'objectId', hash: 'hash256' });
+			const options = routeUtils.parsePaginationArguments(
+				{ orderBy: 'hash' },
+				servicesConfigPageSize,
+				{ id: 'objectId', hash: 'hash256' }
+			);
 
 			// Assert:
 			expect(options).to.deep.equal({
@@ -434,7 +438,7 @@ describe('route utils', () => {
 				pageNumber: '5',
 				orderBy: 'signerPublicKey',
 				order: 'desc'
-			}, servicesConfigPageSize, { signerPublicKey: 'publicKey'});
+			}, servicesConfigPageSize, { signerPublicKey: 'publicKey' });
 
 			// Assert:
 			expect(options).to.deep.equal({
@@ -485,8 +489,8 @@ describe('route utils', () => {
 			expect(() => routeUtils.parsePaginationArguments(
 				{ orderBy: 'hash' },
 				servicesConfigPageSize,
-				{ id: 'objectId', address: 'address' })
-			).to.throw('sorting by hash is not allowed');
+				{ id: 'objectId', address: 'address' }
+			)).to.throw('sorting by hash is not allowed');
 		});
 
 		it('fails when invalid offset is provided', () => {

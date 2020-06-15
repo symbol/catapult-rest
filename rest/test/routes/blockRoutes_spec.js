@@ -135,7 +135,7 @@ describe('block routes', () => {
 					const expectedAllowedSortFields = {
 						id: 'objectId',
 						height: 'uint64'
-					};;
+					};
 
 					// Act:
 					return mockServer.callRoute(route, { params: {} }).then(() => {

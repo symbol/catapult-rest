@@ -174,9 +174,9 @@ describe('mosaic db', () => {
 				return runMosaicsDbTest(
 					dbMosaics(),
 					db => db.mosaics(undefined, options),
-					page => {
+					() => {
 						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
-						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2]['$sort'])[0]).to.equal('_id');
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2].$sort)[0]).to.equal('_id');
 						queryPagedDocumentsSpy.restore();
 					}
 				);
