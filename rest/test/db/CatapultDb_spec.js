@@ -250,7 +250,7 @@ describe('catapult db', () => {
 				pageNumber: 1,
 				sortField: 'id',
 				sortDirection: 1,
-				offset: createObjectId(20).toString()
+				offset: createObjectId(20)
 			};
 
 			it('gt', () => {
@@ -1331,7 +1331,7 @@ describe('catapult db', () => {
 		const paginationOptions = {
 			pageSize: 10,
 			pageNumber: 1,
-			sortField: '_id',
+			sortField: 'id',
 			sortDirection: -1
 		};
 
@@ -1496,9 +1496,9 @@ describe('catapult db', () => {
 			const options = {
 				pageSize: 10,
 				pageNumber: 1,
-				sortField: '_id',
+				sortField: 'id',
 				sortDirection: 1,
-				offset: createObjectId(20).toString()
+				offset: createObjectId(20)
 			};
 
 			it('gt', () => {
@@ -1528,7 +1528,7 @@ describe('catapult db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: '_id',
+					sortField: 'id',
 					sortDirection: 1
 				};
 
@@ -1548,7 +1548,7 @@ describe('catapult db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: '_id',
+					sortField: 'id',
 					sortDirection: -1
 				};
 

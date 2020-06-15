@@ -374,6 +374,8 @@ class CatapultDb {
 	 * @returns {Promise.<object>} Transactions page.
 	 */
 	transactions(filters, options) {
+		const sortingOptions = { id: '_id' };
+
 		const getCollectionName = (transactionStatus = 'confirmed') => {
 			const collectionNames = {
 				confirmed: 'transactions',
@@ -408,10 +410,8 @@ class CatapultDb {
 		const buildConditions = () => {
 			const conditions = [];
 
-			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
-			// in fact, offset logic should be moved to `queryPagedDocuments`
 			if (options.offset)
-				conditions.push({ [options.sortField]: { [1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset) } });
+				conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
 
 			if (filters.height)
 				conditions.push({ 'meta.height': convertToLong(filters.height) });
@@ -430,9 +430,12 @@ class CatapultDb {
 		};
 
 		const removedFields = ['meta.addresses'];
-		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
 		const conditions = buildConditions();
 
+		console.log("############")
+		console.log(sortConditions)
+		console.log(conditions)
 		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, collectionName, options);
 	}
 

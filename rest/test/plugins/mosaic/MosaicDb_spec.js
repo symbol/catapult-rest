@@ -40,7 +40,7 @@ describe('mosaic db', () => {
 		const paginationOptions = {
 			pageSize: 10,
 			pageNumber: 1,
-			sortField: '_id',
+			sortField: 'id',
 			sortDirection: -1
 		};
 
@@ -123,7 +123,7 @@ describe('mosaic db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: '_id',
+					sortField: 'id',
 					sortDirection: 1
 				};
 
@@ -143,7 +143,7 @@ describe('mosaic db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: '_id',
+					sortField: 'id',
 					sortDirection: -1
 				};
 
@@ -190,9 +190,9 @@ describe('mosaic db', () => {
 			const options = {
 				pageSize: 10,
 				pageNumber: 1,
-				sortField: '_id',
+				sortField: 'id',
 				sortDirection: 1,
-				offset: createObjectId(20).toString()
+				offset: createObjectId(20)
 			};
 
 			it('gt', () => {
