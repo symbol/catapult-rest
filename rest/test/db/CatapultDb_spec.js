@@ -38,6 +38,12 @@ const DefaultPagingOptions = {
 	pageSizeDefault: 20
 };
 
+const TransactionGroups = {
+	confirmed: 'confirmed',
+	unconfirmed: 'unconfirmed',
+	partial: 'partial'
+};
+
 describe('catapult db', () => {
 	const deleteIds = dbEntities => {
 		test.collection.names.forEach(collectionName => {
@@ -1367,7 +1373,7 @@ describe('catapult db', () => {
 
 			return runDbTest(
 				{ transactions: dbTransactions },
-				db => db.transactions(filters, options),
+				db => db.transactions(TransactionGroups.confirmed, filters, options),
 				transactionsPage => {
 					const returnedIds = transactionsPage.data.map(t => t.id);
 					expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
@@ -1385,7 +1391,7 @@ describe('catapult db', () => {
 			// Act + Assert:
 			return runDbTest(
 				{ transactions: dbTransactions },
-				db => db.transactions({}, paginationOptions),
+				db => db.transactions(TransactionGroups.confirmed, {}, paginationOptions),
 				page => {
 					const expected_keys = ['meta', 'transaction', 'id'];
 					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
@@ -1402,7 +1408,7 @@ describe('catapult db', () => {
 			// Act + Assert:
 			return runDbTest(
 				{ transactions: dbTransactions },
-				db => db.transactions({}, paginationOptions),
+				db => db.transactions(TransactionGroups.confirmed, {}, paginationOptions),
 				transactionsPage => {
 					expect(transactionsPage.data[0].meta.addresses).to.equal(undefined);
 				}
@@ -1537,7 +1543,7 @@ describe('catapult db', () => {
 				// Act + Assert:
 				return runDbTest(
 					{ transactions: dbTransactions() },
-					db => db.transactions([], options),
+					db => db.transactions(TransactionGroups.confirmed, [], options),
 					transactionsPage => {
 						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
 						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
@@ -1557,7 +1563,7 @@ describe('catapult db', () => {
 				// Act + Assert:
 				return runDbTest(
 					{ transactions: dbTransactions() },
-					db => db.transactions([], options),
+					db => db.transactions(TransactionGroups.confirmed, [], options),
 					transactionsPage => {
 						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
 						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
@@ -1578,7 +1584,7 @@ describe('catapult db', () => {
 				// Act + Assert:
 				return runDbTest(
 					{ transactions: dbTransactions() },
-					db => db.transactions([], options),
+					db => db.transactions(TransactionGroups.confirmed, [], options),
 					() => {
 						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
 						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2].$sort)[0]).to.equal('_id');
@@ -1714,7 +1720,7 @@ describe('catapult db', () => {
 
 						return runDbTest(
 							dbTransactions(),
-							db => db.transactions({ group }, paginationOptions),
+							db => db.transactions(group, {}, paginationOptions),
 							transactionsPage => {
 								const returnedIds = transactionsPage.data.map(t => t.id);
 								expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
@@ -1724,15 +1730,15 @@ describe('catapult db', () => {
 					});
 				};
 
-				runGroupTest('confirmed', [10]);
-				runGroupTest('partial', [20]);
-				runGroupTest('unconfirmed', [30]);
+				runGroupTest(TransactionGroups.confirmed, [10]);
+				runGroupTest(TransactionGroups.partial, [20]);
+				runGroupTest(TransactionGroups.unconfirmed, [30]);
 
 				it('defaults to confirmed', () =>
 					// Act + Assert:
 					runDbTest(
 						dbTransactions(),
-						db => db.transactions({}, paginationOptions),
+						db => db.transactions(TransactionGroups.confirmed, {}, paginationOptions),
 						transactionsPage => {
 							expect(transactionsPage.data.length).to.equal(1);
 							expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));

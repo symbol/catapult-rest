@@ -29,6 +29,12 @@ const sinon = require('sinon');
 const { address } = catapult.model;
 const { convert } = catapult.utils;
 
+const TransactionGroups = {
+	confirmed: 'confirmed',
+	unconfirmed: 'unconfirmed',
+	partial: 'partial'
+};
+
 describe('transaction routes', () => {
 	describe('transactions', () => {
 		const validObjectId = 'CCDDEEFF0011223344556677';
@@ -48,7 +54,7 @@ describe('transaction routes', () => {
 				};
 				transactionRoutes.register(mockServer.server, db, {});
 
-				const route = mockServer.getRoute('/transactions/:transactionId').get();
+				const route = mockServer.getRoute('/transactions/:group/:transactionId').get();
 
 				beforeEach(() => {
 					mockServer.resetStats();
@@ -58,20 +64,20 @@ describe('transaction routes', () => {
 
 				const runParseArgumentParamTest = (params, parserName) => {
 					// Arrange
-					const req = { params: { transactionId: params } };
+					const req = { params: { group: TransactionGroups.confirmed, transactionId: params } };
 					const parseArgumentSpy = sinon.spy(routeUtils, 'parseArgument');
 
 					// Act:
 					return mockServer.callRoute(route, req).then(() => {
 						// Assert:
-						expect(parseArgumentSpy.calledOnceWith({ transactionId: params }, 'transactionId', parserName)).to.equal(true);
+						expect(parseArgumentSpy.calledOnceWith({ group: TransactionGroups.confirmed, transactionId: params }, 'transactionId', parserName)).to.equal(true);
 						parseArgumentSpy.restore();
 					});
 				};
 
 				it('throws if invalid length of transaction id', () => {
 					// Arrange
-					const req = { params: { transactionId: '12345' } };
+					const req = { params: { group: TransactionGroups.confirmed, transactionId: '12345' } };
 
 					// Act + Assert:
 					expect(() => mockServer.callRoute(route, req)).to.throw('invalid length of transaction id \'12345\'');
@@ -83,13 +89,13 @@ describe('transaction routes', () => {
 				describe('calls correct transaction retriever with correct params', () => {
 					it('id param', () => {
 						// Arrange
-						const req = { params: { transactionId: validObjectId } };
+						const req = { params: { group: TransactionGroups.confirmed, transactionId: validObjectId } };
 
 						// Act:
 						return mockServer.callRoute(route, req).then(() => {
 							// Assert:
 							expect(dbTransactionsByIdsFake.calledOnce).to.equal(true);
-							expect(dbTransactionsByIdsFake.firstCall.args[0]).to.deep.equal([validObjectId]);
+							expect(dbTransactionsByIdsFake.firstCall.args[1]).to.deep.equal([validObjectId]);
 
 							expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 								payload: fakeTransaction,
@@ -101,13 +107,13 @@ describe('transaction routes', () => {
 
 					it('hash param', () => {
 						// Arrange
-						const req = { params: { transactionId: validHash } };
+						const req = { params: { group: TransactionGroups.confirmed, transactionId: validHash } };
 
 						// Act:
 						return mockServer.callRoute(route, req).then(() => {
 							// Assert:
 							expect(dbTransactionsByHashesFake.calledOnce).to.equal(true);
-							expect(dbTransactionsByHashesFake.firstCall.args[0]).to.deep.equal([convert.hexToUint8(validHash)]);
+							expect(dbTransactionsByHashesFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(validHash)]);
 
 							expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 								payload: fakeTransaction,
@@ -151,7 +157,7 @@ describe('transaction routes', () => {
 				};
 				transactionRoutes.register(mockServer.server, db, services);
 
-				const route = mockServer.getRoute('/transactions').get();
+				const route = mockServer.getRoute('/transactions/:group').get();
 
 				beforeEach(() => {
 					mockServer.resetStats();
@@ -161,7 +167,7 @@ describe('transaction routes', () => {
 				describe('returns transactions', () => {
 					it('returns correct structure with transactions', () => {
 						const req = {
-							params: {}
+							params: { group: TransactionGroups.confirmed }
 						};
 
 						// Act:
@@ -180,14 +186,13 @@ describe('transaction routes', () => {
 				describe('parses filters', () => {
 					const runParseFilterTest = (filter, param, value) => {
 						it(filter, () => {
-							const req = { params: { [filter]: param } };
+							const req = { params: { group: TransactionGroups.confirmed, [filter]: param } };
 
 							const expectedResult = {
 								address: undefined,
 								height: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
-								group: undefined,
 								embedded: undefined,
 								transactionTypes: undefined
 							};
@@ -196,7 +201,7 @@ describe('transaction routes', () => {
 
 							// Act + Assert
 							return mockServer.callRoute(route, req).then(() => {
-								expect(dbTransactionsFake.firstCall.args[0]).to.deep.equal(expectedResult);
+								expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal(expectedResult);
 							});
 						});
 					};
@@ -206,8 +211,7 @@ describe('transaction routes', () => {
 						{ filter: 'address', param: testAddressString, value: testAddress },
 						{ filter: 'signerPublicKey', param: testPublickeyString, value: testPublickey },
 						{ filter: 'recipientAddress', param: testAddressString, value: testAddress },
-						{ filter: 'embedded', param: 'true', value: true },
-						{ filter: 'group', param: 'confirmed', value: 'confirmed' }
+						{ filter: 'embedded', param: 'true', value: true }
 					];
 
 					testCases.forEach(testCase => {
@@ -215,16 +219,15 @@ describe('transaction routes', () => {
 					});
 
 					it('transactionTypes', () => {
-						const req = { params: { type: ['1', '5', '25'] } };
+						const req = { params: { group: TransactionGroups.confirmed, type: ['1', '5', '25'] } };
 
 						// Act + Assert
 						return mockServer.callRoute(route, req).then(() => {
-							expect(dbTransactionsFake.firstCall.args[0]).to.deep.equal({
+							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
 								address: undefined,
 								height: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
-								group: undefined,
 								embedded: undefined,
 								transactionTypes: [1, 5, 25]
 							});
@@ -239,10 +242,10 @@ describe('transaction routes', () => {
 						const paginationParser = sinon.stub(routeUtils, 'parsePaginationArguments').returns(pagingBag);
 
 						// Act:
-						return mockServer.callRoute(route, { params: {} }).then(() => {
+						return mockServer.callRoute(route, { params: { group: TransactionGroups.confirmed } }).then(() => {
 							// Assert:
 							expect(dbTransactionsFake.calledOnce).to.equal(true);
-							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal(pagingBag);
+							expect(dbTransactionsFake.firstCall.args[2]).to.deep.equal(pagingBag);
 							paginationParser.restore();
 						});
 					});
@@ -253,7 +256,7 @@ describe('transaction routes', () => {
 						const expectedAllowedSortFields = { id: 'objectId' };
 
 						// Act:
-						return mockServer.callRoute(route, { params: {} }).then(() => {
+						return mockServer.callRoute(route, { params: { group: TransactionGroups.confirmed } }).then(() => {
 							// Assert:
 							expect(paginationParserSpy.calledOnce).to.equal(true);
 							expect(paginationParserSpy.firstCall.args[2]).to.deep.equal(expectedAllowedSortFields);
@@ -267,7 +270,7 @@ describe('transaction routes', () => {
 
 					it('address and signer public key', () => {
 						const req = {
-							params: { address: testAddressString, signerPublicKey: testPublickeyString }
+							params: { group: TransactionGroups.confirmed, address: testAddressString, signerPublicKey: testPublickeyString }
 						};
 
 						// Act + Assert
@@ -276,7 +279,7 @@ describe('transaction routes', () => {
 
 					it('address and recipient address', () => {
 						const req = {
-							params: { address: testAddressString, recipientAddress: testAddressString }
+							params: { group: TransactionGroups.confirmed, address: testAddressString, recipientAddress: testAddressString }
 						};
 
 						// Act + Assert
@@ -289,19 +292,18 @@ describe('transaction routes', () => {
 						it(group, () =>
 							// Act + Assert
 							mockServer.callRoute(route, { params: { group } }).then(() => {
-								expect(dbTransactionsFake.firstCall.args[0]).to.deep.equal({
+								expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
 									address: undefined,
 									height: undefined,
 									recipientAddress: undefined,
 									signerPublicKey: undefined,
-									group,
 									embedded: undefined,
 									transactionTypes: undefined
 								});
 							}));
 					};
 
-					['confirmed', 'unconfirmed', 'partial'].forEach(group => runValidGroupTest(group));
+					Object.keys(TransactionGroups).forEach(group => runValidGroupTest(group));
 
 					it('invalid', () => {
 						const req = {
@@ -328,7 +330,7 @@ describe('transaction routes', () => {
 			};
 			transactionRoutes.register(mockServer.server, db, {});
 
-			const route = mockServer.getRoute('/transactions').post();
+			const route = mockServer.getRoute('/transactions/:group').post();
 
 			beforeEach(() => {
 				mockServer.resetStats();
@@ -338,7 +340,7 @@ describe('transaction routes', () => {
 
 			it('throws if ids or hashes are not provided', () => {
 				// Arrange
-				const req = { params: {} };
+				const req = { params: { group: TransactionGroups.confirmed } };
 
 				// Act + Assert:
 				expect(() => mockServer.callRoute(route, req)).to.throw('either ids or hashes must be provided');
@@ -346,7 +348,7 @@ describe('transaction routes', () => {
 
 			it('throws if both ids and hashes are provided', () => {
 				// Arrange
-				const req = { params: { transactionIds: [], hashes: [] } };
+				const req = { params: { group: TransactionGroups.confirmed, transactionIds: [], hashes: [] } };
 
 				// Act + Assert:
 				expect(() => mockServer.callRoute(route, req)).to.throw('either ids or hashes must be provided');
@@ -354,13 +356,17 @@ describe('transaction routes', () => {
 
 			const runParseArgumentAsArrayParamTest = (paramValues, paramName, parserName) => {
 				// Arrange
-				const req = { params: { [paramName]: paramValues } };
+				const req = { params: { group: TransactionGroups.confirmed, [paramName]: paramValues } };
 				const parseArgumentsAsArraySpy = sinon.spy(routeUtils, 'parseArgumentAsArray');
 
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
-					expect(parseArgumentsAsArraySpy.calledOnceWith({ [paramName]: paramValues }, paramName, parserName)).to.equal(true);
+					expect(parseArgumentsAsArraySpy.calledOnceWith(
+						{ group: TransactionGroups.confirmed, [paramName]: paramValues },
+						paramName,
+						parserName)
+					).to.equal(true);
 					parseArgumentsAsArraySpy.restore();
 				});
 			};
@@ -373,13 +379,13 @@ describe('transaction routes', () => {
 			describe('calls correct transaction retriever with correct params', () => {
 				it('id params', () => {
 					// Arrange
-					const req = { params: { transactionIds: [validObjectId] } };
+					const req = { params: { group: TransactionGroups.confirmed, transactionIds: [validObjectId] } };
 
 					// Act:
 					return mockServer.callRoute(route, req).then(() => {
 						// Assert:
 						expect(dbTransactionsByIdsFake.calledOnce).to.equal(true);
-						expect(dbTransactionsByIdsFake.firstCall.args[0]).to.deep.equal([validObjectId]);
+						expect(dbTransactionsByIdsFake.firstCall.args[1]).to.deep.equal([validObjectId]);
 
 						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 							payload: fakeTransactions,
@@ -391,13 +397,13 @@ describe('transaction routes', () => {
 
 				it('hash params', () => {
 					// Arrange
-					const req = { params: { hashes: [validHash] } };
+					const req = { params: { group: TransactionGroups.confirmed, hashes: [validHash] } };
 
 					// Act:
 					return mockServer.callRoute(route, req).then(() => {
 						// Assert:
 						expect(dbTransactionsByHashesFake.calledOnce).to.equal(true);
-						expect(dbTransactionsByHashesFake.firstCall.args[0]).to.deep.equal([convert.hexToUint8(validHash)]);
+						expect(dbTransactionsByHashesFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(validHash)]);
 
 						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 							payload: fakeTransactions,
