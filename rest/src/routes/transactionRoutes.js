@@ -33,15 +33,6 @@ const constants = {
 	}
 };
 
-const parseHeight = params => routeUtils.parseArgument(params, 'height', 'uint');
-
-const parseObjectId = str => {
-	if (!convert.isHexString(str))
-		throw Error('must be 12-byte hex string');
-
-	return str;
-};
-
 module.exports = {
 	register: (server, db, services) => {
 		const sender = routeUtils.createSender(routeResultTypes.transaction);
@@ -51,25 +42,6 @@ module.exports = {
 			services.connections,
 			{ routeName: '/transactions', packetType: PacketType.pushTransactions },
 			params => routeUtils.parseArgument(params, 'payload', convert.hexToUint8)
-		);
-
-		routeUtils.addGetPostDocumentRoutes(
-			server,
-			sender,
-			{ base: '/transactions', singular: 'transactionId', plural: 'transactionIds' },
-			// params has already been converted by a parser below, so it is: string - in case of objectId, Uint8Array - in case of hash
-			params => (('string' === typeof params[0]) ? db.transactionsByIds(params) : db.transactionsByHashes(params)),
-			(transactionId, index, array) => {
-				if (0 < index && array[0].length !== transactionId.length)
-					throw Error(`all ids must be homogeneous, element ${index}`);
-
-				if (constants.sizes.objectId === transactionId.length)
-					return parseObjectId(transactionId);
-				if (constants.sizes.hash === transactionId.length)
-					return convert.hexToUint8(transactionId);
-
-				throw Error(`invalid length of transaction id '${transactionId}'`);
-			}
 		);
 
 		server.get('/transactions', (req, res, next) => {
@@ -85,7 +57,7 @@ module.exports = {
 				throw errors.createInvalidArgumentError('invalid transaction group provided');
 
 			const filters = {
-				height: params.height ? parseHeight(params) : undefined,
+				height: params.height ? routeUtils.parseArgument(params, 'height', 'uint') : undefined,
 				address: params.address ? routeUtils.parseArgument(params, 'address', 'address') : undefined,
 				signerPublicKey: params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined,
 				recipientAddress: params.recipientAddress ? routeUtils.parseArgument(params, 'recipientAddress', 'address') : undefined,
@@ -98,6 +70,32 @@ module.exports = {
 
 			return db.transactions(filters, options)
 				.then(result => routeUtils.createSender(routeResultTypes.transaction).sendPage(res, next)(result));
+		});
+
+		server.get('/transactions/:transactionId', (req, res, next) => {
+			const { params } = req;
+			let paramType = constants.sizes.objectId === params.transactionId.length ? 'id' : undefined;
+			paramType = constants.sizes.objectId === params.transactionId.length ? 'hash' : paramType;
+			if (!paramType)
+				throw Error(`invalid length of transaction id '${params.transactionId}'`);
+
+			const transactionId = routeUtils.parseArgument(params, 'transactionId', 'id' === paramType ? 'objectId' : 'hash256');
+
+			const dbTransactionsRetriever = 'id' === paramType ? db.transactionsByIds : db.transactionsByHashes
+			return dbTransactionsRetriever([transactionId]).then(sender.sendOne(params.transactionId, res, next));
+		});
+
+		server.post('/transactions', (req, res, next) => {
+			const { params } = req;
+			if ((req.params.transactionIds && req.params.hashes) || (!params.transactionIds && !params.hashes))
+				throw errors.createInvalidArgumentError('either ids or hashes must be provided');
+
+			const transactionIds = routeUtils.parseArgumentAsArray(
+				params, 'transactionIds', params.transactionIds ? 'objectId' : 'hash256'
+			);
+
+			const dbTransactionsRetriever = params.transactionIds ? db.transactionsByIds : db.transactionsByHashes;
+			return dbTransactionsRetriever(transactionIds).then(sender.sendArray(params.transactionIds || params.hashes, res, next));
 		});
 	}
 };
