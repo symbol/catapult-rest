@@ -829,28 +829,28 @@ describe('catapult db', () => {
 				addTestsWithId(traits, {
 					convertToId: test.db.createObjectId,
 					collectionName: 'transactions',
-					transactionsByIds: (db, ids) => db.transactionsByIds(ids)
+					transactionsByIds: (db, ids) => db.transactionsByIds(TransactionGroups.confirmed, ids)
 				}));
 
 			describe('by transaction hash', () =>
 				addTestsWithId(traits, {
 					convertToId: createTransactionHash,
 					collectionName: 'transactions',
-					transactionsByIds: (db, ids) => db.transactionsByHashes(ids)
+					transactionsByIds: (db, ids) => db.transactionsByHashes(TransactionGroups.confirmed, ids)
 				}));
 
 			describe('by transaction hash (unconfirmed)', () =>
 				addTestsWithId(traits, {
 					convertToId: createTransactionHash,
 					collectionName: 'unconfirmedTransactions',
-					transactionsByIds: (db, ids) => db.transactionsByHashesUnconfirmed(ids)
+					transactionsByIds: (db, ids) => db.transactionsByHashes(TransactionGroups.unconfirmed, ids)
 				}));
 
 			describe('by transaction hash (partial)', () =>
 				addTestsWithId(traits, {
 					convertToId: createTransactionHash,
 					collectionName: 'partialTransactions',
-					transactionsByIds: (db, ids) => db.transactionsByHashesPartial(ids)
+					transactionsByIds: (db, ids) => db.transactionsByHashes(TransactionGroups.partial, ids)
 				}));
 		};
 
@@ -897,7 +897,7 @@ describe('catapult db', () => {
 				// Act + Assert:
 				return runTransactionsDbTest(
 					{ transactions: seedTransactions },
-					db => db.transactionsByIds([documentId]),
+					db => db.transactionsByIds(TransactionGroups.confirmed, [documentId]),
 					transactions => assertEqualDocuments([renameId(seedTransactions[4])], transactions)
 				);
 			});
