@@ -75,13 +75,13 @@ module.exports = {
 		server.get('/transactions/:transactionId', (req, res, next) => {
 			const { params } = req;
 			let paramType = constants.sizes.objectId === params.transactionId.length ? 'id' : undefined;
-			paramType = constants.sizes.objectId === params.transactionId.length ? 'hash' : paramType;
+			paramType = constants.sizes.hash === params.transactionId.length ? 'hash' : paramType;
 			if (!paramType)
 				throw Error(`invalid length of transaction id '${params.transactionId}'`);
 
 			const transactionId = routeUtils.parseArgument(params, 'transactionId', 'id' === paramType ? 'objectId' : 'hash256');
 
-			const dbTransactionsRetriever = 'id' === paramType ? db.transactionsByIds : db.transactionsByHashes
+			const dbTransactionsRetriever = 'id' === paramType ? db.transactionsByIds : db.transactionsByHashes;
 			return dbTransactionsRetriever([transactionId]).then(sender.sendOne(params.transactionId, res, next));
 		});
 
@@ -90,9 +90,9 @@ module.exports = {
 			if ((req.params.transactionIds && req.params.hashes) || (!params.transactionIds && !params.hashes))
 				throw errors.createInvalidArgumentError('either ids or hashes must be provided');
 
-			const transactionIds = routeUtils.parseArgumentAsArray(
-				params, 'transactionIds', params.transactionIds ? 'objectId' : 'hash256'
-			);
+			const transactionIds = params.transactionIds
+				? routeUtils.parseArgumentAsArray(params, 'transactionIds', 'objectId')
+				: routeUtils.parseArgumentAsArray(params, 'hashes', 'hash256');
 
 			const dbTransactionsRetriever = params.transactionIds ? db.transactionsByIds : db.transactionsByHashes;
 			return dbTransactionsRetriever(transactionIds).then(sender.sendArray(params.transactionIds || params.hashes, res, next));
