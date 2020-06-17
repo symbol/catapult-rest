@@ -902,6 +902,44 @@ describe('catapult db', () => {
 				);
 			});
 		});
+
+		describe('translates group to collection name', () => {
+			const validObjectId = test.db.createObjectId(10);
+			const validHash = '112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00';
+
+			const runTransactionsByIdTest = (dbCall, param, group, collection) => {
+				it(group, () => {
+					// Arrange:
+					const transactionsByIdsImplStub = sinon.stub(CatapultDb.prototype, 'transactionsByIdsImpl').returns('');
+					const db = new CatapultDb(Object.assign({ networkId: Mijin_Test_Network }, DefaultPagingOptions));
+
+					// Act
+					db[dbCall](group, [param]);
+
+					// Assert
+					expect(transactionsByIdsImplStub.calledOnce).to.equal(true);
+					expect(transactionsByIdsImplStub.firstCall.args[0]).to.equal(collection);
+					transactionsByIdsImplStub.restore();
+				});
+			};
+
+			const groupToCollectionName = {
+				confirmed: 'transactions',
+				unconfirmed: 'unconfirmedTransactions',
+				partial: 'partialTransactions'
+			};
+
+			describe('transactions by ids', () => {
+				Object.keys(groupToCollectionName).forEach(group => {
+					runTransactionsByIdTest('transactionsByIds', validObjectId, group, groupToCollectionName[group]);
+				});
+			});
+			describe('transactions by hashes', () => {
+				Object.keys(groupToCollectionName).forEach(group => {
+					runTransactionsByIdTest('transactionsByHashes', validHash, group, groupToCollectionName[group]);
+				});
+			});
+		});
 	});
 
 	describe('names by ids', () => {
