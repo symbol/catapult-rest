@@ -128,7 +128,7 @@ describe('transaction routes', () => {
 
 						// Assert:
 						expect(mockServer.next.calledOnce).to.equal(true);
-						expect(mockServer.next.firstCall.args[0].body.code).to.equal('NotFound');
+						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(404);
 					});
 				});
 
@@ -360,7 +360,7 @@ describe('transaction routes', () => {
 
 						// Assert:
 						expect(mockServer.next.calledOnce).to.equal(true);
-						expect(mockServer.next.firstCall.args[0].body.code).to.equal('NotFound');
+						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(404);
 					});
 				});
 			});
@@ -440,7 +440,7 @@ describe('transaction routes', () => {
 
 					// Assert:
 					expect(mockServer.next.calledOnce).to.equal(true);
-					expect(mockServer.next.firstCall.args[0].body.code).to.equal('NotFound');
+					expect(mockServer.next.firstCall.args[0].statusCode).to.equal(404);
 				});
 			});
 
