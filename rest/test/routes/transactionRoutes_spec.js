@@ -90,6 +90,48 @@ describe('transaction routes', () => {
 				it('calls parseArgument with correct parser for id', () => runParseArgumentParamTest(validObjectId, 'objectId'));
 				it('calls parseArgument with correct parser for hash', () => runParseArgumentParamTest(validHash, 'hash256'));
 
+				describe('checks correct group is provided', () => {
+					const runValidGroupTest = group => {
+						it(`${group} - by id`, () => {
+							// Arrange
+							const req = { params: { group, transactionId: validObjectId } };
+
+							// Act:
+							mockServer.callRoute(route, req).then(() => {
+								// Assert:
+								expect(dbTransactionsByIdsFake.calledOnce).to.equal(true);
+								expect(dbTransactionsByIdsFake.firstCall.args[0]).to.equal(group);
+							});
+						});
+
+						it(`${group} - by hash`, () => {
+							// Arrange
+							const req = { params: { group, transactionId: validHash } };
+
+							// Act:
+							mockServer.callRoute(route, req).then(() => {
+								// Assert:
+								expect(dbTransactionsByHashesFake.calledOnce).to.equal(true);
+								expect(dbTransactionsByHashesFake.firstCall.args[0]).to.equal(group);
+							});
+						});
+					};
+
+					Object.keys(TransactionGroups).forEach(group => runValidGroupTest(group));
+
+					it('not found if group does not exists', () => {
+						// Arrange
+						const req = { params: { group: 'nonExistingGroup', transactionId: validObjectId } };
+
+						// Act:
+						mockServer.callRoute(route, req);
+
+						// Assert:
+						expect(mockServer.next.calledOnce).to.equal(true);
+						expect(mockServer.next.firstCall.args[0].body.code).to.equal('NotFound');
+					});
+				});
+
 				describe('calls correct transaction retriever with correct params', () => {
 					it('id param', () => {
 						// Arrange
@@ -309,13 +351,16 @@ describe('transaction routes', () => {
 
 					Object.keys(TransactionGroups).forEach(group => runValidGroupTest(group));
 
-					it('invalid', () => {
-						const req = {
-							params: { group: 'nonsenseGroup' }
-						};
+					it('not found if group does not exists', () => {
+						// Arrange:
+						const req = { params: { group: 'nonExistingGroup' } };
 
-						// Act + Assert
-						expect(() => mockServer.callRoute(route, req)).to.throw('invalid transaction group provided');
+						// Act:
+						mockServer.callRoute(route, req);
+
+						// Assert:
+						expect(mockServer.next.calledOnce).to.equal(true);
+						expect(mockServer.next.firstCall.args[0].body.code).to.equal('NotFound');
 					});
 				});
 			});
@@ -356,6 +401,47 @@ describe('transaction routes', () => {
 
 				// Act + Assert:
 				expect(() => mockServer.callRoute(route, req)).to.throw('either ids or hashes must be provided');
+			});
+
+			describe('checks correct group is provided', () => {
+				const runValidGroupTest = group => {
+					it(`${group} - by ids`, () => {
+						// Arrange
+						const req = { params: { group, transactionIds: [validObjectId] } };
+
+						// Act:
+						mockServer.callRoute(route, req).then(() => {
+							// Assert:
+							expect(dbTransactionsByIdsFake.calledOnce).to.equal(true);
+							expect(dbTransactionsByIdsFake.firstCall.args[0]).to.equal(group);
+						});
+					});
+					it(`${group} - by hashes`, () => {
+						// Arrange
+						const req = { params: { group, hashes: [validHash] } };
+
+						// Act:
+						mockServer.callRoute(route, req).then(() => {
+							// Assert:
+							expect(dbTransactionsByHashesFake.calledOnce).to.equal(true);
+							expect(dbTransactionsByHashesFake.firstCall.args[0]).to.equal(group);
+						});
+					});
+				};
+
+				Object.keys(TransactionGroups).forEach(group => runValidGroupTest(group));
+
+				it('not found if group does not exists', () => {
+					// Arrange
+					const req = { params: { group: 'nonExistingGroup', transactionIds: [validObjectId] } };
+
+					// Act:
+					mockServer.callRoute(route, req);
+
+					// Assert:
+					expect(mockServer.next.calledOnce).to.equal(true);
+					expect(mockServer.next.firstCall.args[0].body.code).to.equal('NotFound');
+				});
 			});
 
 			const runParseArgumentAsArrayParamTest = (paramValues, paramName, parserName) => {
