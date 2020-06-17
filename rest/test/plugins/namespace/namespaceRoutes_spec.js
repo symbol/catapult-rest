@@ -207,7 +207,7 @@ describe('namespace routes', () => {
 
 			it('forwards ownerAddress', () => {
 				// Arrange:
-				const ownerAddress = 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXWV';
+				const ownerAddress = 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXQ';
 				const req = { params: { ownerAddress } };
 
 				// Act:

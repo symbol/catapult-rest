@@ -42,8 +42,8 @@ describe('namespace db', () => {
 
 		const level0Test1 = uint64.fromHex('85BBEA6CC462B244');
 		const level0Test2 = uint64.fromHex('3C2437767AF232DC');
-		const ownerAddressTest1 = address.stringToAddress('SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXWV');
-		const ownerAddressTest2 = address.stringToAddress('NAR3W7B4BCOZSZMFIZRYB3N5YGOUSWIYJCJ6HDFG');
+		const ownerAddressTest1 = address.stringToAddress('SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXQ');
+		const ownerAddressTest2 = address.stringToAddress('NAR3W7B4BCOZSZMFIZRYB3N5YGOUSWIYJCJ6HDA');
 
 		const paginationOptions = {
 			pageSize: 10,
