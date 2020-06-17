@@ -70,7 +70,11 @@ describe('transaction routes', () => {
 					// Act:
 					return mockServer.callRoute(route, req).then(() => {
 						// Assert:
-						expect(parseArgumentSpy.calledOnceWith({ group: TransactionGroups.confirmed, transactionId: params }, 'transactionId', parserName)).to.equal(true);
+						expect(parseArgumentSpy.calledOnceWith(
+							{ group: TransactionGroups.confirmed, transactionId: params },
+							'transactionId',
+							parserName
+						)).to.equal(true);
 						parseArgumentSpy.restore();
 					});
 				};
@@ -365,8 +369,8 @@ describe('transaction routes', () => {
 					expect(parseArgumentsAsArraySpy.calledOnceWith(
 						{ group: TransactionGroups.confirmed, [paramName]: paramValues },
 						paramName,
-						parserName)
-					).to.equal(true);
+						parserName
+					)).to.equal(true);
 					parseArgumentsAsArraySpy.restore();
 				});
 			};

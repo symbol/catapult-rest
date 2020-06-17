@@ -22,7 +22,7 @@ const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 const errors = require('../server/errors');
 const catapult = require('catapult-sdk');
-var { NotFoundError } = require('restify-errors');
+const { NotFoundError } = require('restify-errors');
 
 
 const { convert } = catapult.utils;
