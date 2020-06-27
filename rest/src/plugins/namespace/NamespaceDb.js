@@ -51,12 +51,11 @@ class NamespaceDb {
 	 * @returns {Promise.<object>} Namespaces page.
 	 */
 	namespaces(aliasType, level0, ownerAddress, registrationType, options) {
+		const sortingOptions = { id: '_id' };
 		const conditions = [];
 
-		// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
-		// in fact, offset logic should be moved to `queryPagedDocuments`
 		if (options.offset)
-			conditions.push({ [options.sortField]: { [1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset) } });
+			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
 
 		if (aliasType)
 			conditions.push({ 'namespace.alias.type': aliasType });
@@ -73,7 +72,7 @@ class NamespaceDb {
 		// Returning only active namespaces
 		conditions.push({ 'meta.active': true });
 
-		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
 		return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, 'namespaces', options);
 	}
 
@@ -95,7 +94,7 @@ class NamespaceDb {
 		}
 
 		return this.catapultDb.queryDocument('namespaces', conditions)
-			.then(this.catapultDb.sanitizer.copyAndDeleteId);
+			.then(this.catapultDb.sanitizer.renameId);
 	}
 
 	/**

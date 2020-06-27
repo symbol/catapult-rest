@@ -134,6 +134,9 @@ describe('namespace routes', () => {
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert:
+					expect(paginationParser.firstCall.args[0]).to.deep.equal(req.params);
+					expect(paginationParser.firstCall.args[2]).to.deep.equal({ id: 'objectId' });
+
 					expect(dbNamespacesFake.calledOnce).to.equal(true);
 					expect(dbNamespacesFake.firstCall.args[4]).to.deep.equal(pagingBag);
 					paginationParser.restore();

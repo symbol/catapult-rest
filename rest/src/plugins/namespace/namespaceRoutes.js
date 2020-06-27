@@ -40,7 +40,7 @@ module.exports = {
 			const level0 = params.level0 ? routeUtils.parseArgument(req.params, 'level0', uint64.fromHex) : undefined;
 			const aliasType = params.aliasType ? routeUtils.parseArgument(params, 'aliasType', 'uint') : undefined;
 
-			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize, ['_id']);
+			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize, { id: 'objectId' });
 
 			return db.namespaces(aliasType, level0, ownerAddress, registrationType, options)
 				.then(result => routeUtils.createSender('namespaceDescriptorWithId').sendPage(res, next)(result));

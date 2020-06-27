@@ -27,6 +27,7 @@ const testDbOptions = require('../../db/utils/testDbOptions');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
 const MongoDb = require('mongodb');
+const sinon = require('sinon');
 
 const { address } = catapult.model;
 const { uint64 } = catapult.utils;
@@ -48,7 +49,7 @@ describe('namespace db', () => {
 		const paginationOptions = {
 			pageSize: 10,
 			pageNumber: 1,
-			sortField: '_id',
+			sortField: 'id',
 			sortDirection: -1
 		};
 
@@ -192,7 +193,7 @@ describe('namespace db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: '_id',
+					sortField: 'id',
 					sortDirection: 1
 				};
 
@@ -212,7 +213,7 @@ describe('namespace db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: '_id',
+					sortField: 'id',
 					sortDirection: -1
 				};
 
@@ -229,10 +230,11 @@ describe('namespace db', () => {
 			});
 
 			it('sort field', () => {
+				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments_2');
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: 'namespace.alias.type',
+					sortField: 'id',
 					sortDirection: 1
 				};
 
@@ -240,10 +242,10 @@ describe('namespace db', () => {
 				return runNamespacesDbTest(
 					dbNamespaces(),
 					db => db.namespaces(undefined, undefined, undefined, undefined, options),
-					page => {
-						expect(page.data[0].id).to.deep.equal(createObjectId(30));
-						expect(page.data[1].id).to.deep.equal(createObjectId(10));
-						expect(page.data[2].id).to.deep.equal(createObjectId(20));
+					() => {
+						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2].$sort)[0]).to.equal('_id');
+						queryPagedDocumentsSpy.restore();
 					}
 				);
 			});
@@ -259,9 +261,9 @@ describe('namespace db', () => {
 			const options = {
 				pageSize: 10,
 				pageNumber: 1,
-				sortField: '_id',
+				sortField: 'id',
 				sortDirection: 1,
-				offset: createObjectId(20).toString()
+				offset: createObjectId(20)
 			};
 
 			it('gt', () => {
