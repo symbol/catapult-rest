@@ -38,9 +38,8 @@ class LockSecretDb {
 	 */
 	secretLocks(addresses, options) {
 		const sortingOptions = { id: '_id' };
-
 		const buffers = addresses.map(address => Buffer.from(address));
-		const conditions = { 'lock.ownerAddress': { $in: buffers } };
+		const conditions = [{ 'lock.ownerAddress': { $in: buffers } }];
 
 		if (options.offset)
 			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
@@ -56,7 +55,7 @@ class LockSecretDb {
 	 */
 	secretLockBySecret(secret) {
 		return this.catapultDb.queryDocument('secretLocks', { 'lock.secret': Buffer.from(secret) })
-			.then(this.catapultDb.sanitizer.copyAndDeleteId);
+			.then(this.catapultDb.sanitizer.renameId);
 	}
 
 	// endregion
