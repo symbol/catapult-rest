@@ -31,7 +31,9 @@ module.exports = {
 			const address = req.params.address ? routeUtils.parseArgument(req.params, 'address', 'address') : undefined;
 			const mosaicId = req.params.mosaicId ? routeUtils.parseArgument(req.params, 'mosaicId', 'uint64') : undefined;
 
-			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize, ['_id', 'balance']);
+			// FIXME balance uint
+			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize, { id: 'objectId', balance: 'uint' });
+
 			if ('balance' === options.sortField && !mosaicId)
 				throw errors.createInvalidArgumentError('mosaicId must be provided when sorting by balance');
 

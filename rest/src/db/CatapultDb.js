@@ -503,12 +503,11 @@ class CatapultDb {
 	 * @returns {Promise.<object>} Accounts page.
 	 */
 	accounts(address, mosaicId, options) {
+		const sortingOptions = { id: '_id', balance: 'account.mosaics.amount' };
 		const conditions = [];
 
-		// FIXME it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
-		// in fact, offset logic should be moved to `queryPagedDocuments`
 		if (options.offset)
-			conditions.push({ [options.sortField]: { [1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset) } });
+			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
 
 		if (address)
 			conditions.push({ 'account.address': address });
@@ -516,11 +515,11 @@ class CatapultDb {
 		if (mosaicId)
 			conditions.push({ 'account.mosaics.id': convertToLong(mosaicId) });
 
-		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
-
+		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
 		return this.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options);
 	}
 
+	// FIXME sanitize ids
 	accountsByIds(ids) {
 		// id will either have address property or publicKey property set; in the case of publicKey, convert it to address
 		const buffers = ids.map(id => Buffer.from((id.publicKey
