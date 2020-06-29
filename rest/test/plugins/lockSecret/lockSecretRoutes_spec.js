@@ -86,8 +86,7 @@ describe('lock secret routes', () => {
 		const dbSecretLocksFake = sinon.fake(addresses =>
 			(Buffer.from(addresses[0]).equals(Buffer.from(address.stringToAddress(testAddress)))
 				? Promise.resolve(pageSample)
-				: Promise.resolve(emptyPageSample))
-		);
+				: Promise.resolve(emptyPageSample)));
 
 		const services = {
 			config: {
