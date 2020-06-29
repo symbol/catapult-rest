@@ -1810,7 +1810,84 @@ describe('catapult db', () => {
 		});
 	});
 
-	describe('account get', () => {
+	describe('accounts', () => {
+		describe('sorts by balance', () => {
+			const createAccount = (address, mosaics) => ({
+				account: {
+					address: address,
+					mosaics: mosaics
+				}
+			});
+
+			describe('sorts by correct mosaic', () => {
+				const seedAccounts = [];
+				seedAccounts.push(createAccount(
+					test.random.address(),
+					[
+						{ id: Long.fromNumber(22), amount: Long.fromNumber(1) },
+						{ id: Long.fromNumber(33), amount: Long.fromNumber(5) },
+						{ id: Long.fromNumber(44), amount: Long.fromNumber(3) }
+					]
+				));
+				seedAccounts.push(createAccount(
+					test.random.address(),
+					[
+						{ id: Long.fromNumber(22), amount: Long.fromNumber(7) }
+					]
+				));
+				seedAccounts.push(createAccount(
+					test.random.address(),
+					[
+						{ id: Long.fromNumber(33), amount: Long.fromNumber(8) }
+					]
+				));
+				seedAccounts.push(createAccount(
+					test.random.address(),
+					[
+						{ id: Long.fromNumber(44), amount: Long.fromNumber(9) }
+					]
+				));
+				seedAccounts.push(createAccount(
+					test.random.address(),
+					[
+						{ id: Long.fromNumber(22), amount: Long.fromNumber(4) },
+						{ id: Long.fromNumber(33), amount: Long.fromNumber(2) },
+						{ id: Long.fromNumber(44), amount: Long.fromNumber(6) }
+					]
+				));
+
+				const mosaicAmountEquals = (accountsPage, accountIndex, mosaicId, amount) =>
+					accountsPage.data[accountIndex].account.mosaics
+						.find(mosaic => mosaic.id.equals(Long.fromNumber(mosaicId))).amount.equals(Long.fromNumber(amount));
+
+				it('asc', () =>
+					runDbTest(
+						{ accounts: seedAccounts },
+						db => db.accounts(undefined, 33, { sortField: 'balance', sortDirection: 1, pageNumber: 1, pageSize: 10 }),
+						accountsPage => {
+							expect(mosaicAmountEquals(accountsPage, 0, 33, 2)).to.equal(true);
+							expect(mosaicAmountEquals(accountsPage, 1, 33, 5)).to.equal(true);
+							expect(mosaicAmountEquals(accountsPage, 2, 33, 8)).to.equal(true);
+						}
+					)
+				);
+
+				it('desc', () =>
+					runDbTest(
+						{ accounts: seedAccounts },
+						db => db.accounts(undefined, 33, { sortField: 'balance', sortDirection: -1, pageNumber: 1, pageSize: 10 }),
+						accountsPage => {
+							expect(mosaicAmountEquals(accountsPage, 0, 33, 8)).to.equal(true);
+							expect(mosaicAmountEquals(accountsPage, 0, 33, 5)).to.equal(true);
+							expect(mosaicAmountEquals(accountsPage, 0, 33, 2)).to.equal(true);
+						}
+					)
+				);
+			});
+		});
+	});
+
+	describe('accounts by ids', () => {
 		const publicKey = test.random.publicKey();
 		const decodedAddress = keyToAddress(publicKey);
 		const publicKeyUnknown = test.random.publicKey();
