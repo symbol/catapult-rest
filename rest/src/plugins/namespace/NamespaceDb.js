@@ -22,7 +22,7 @@ const { convertToLong } = require('../../db/dbUtils');
 const catapult = require('catapult-sdk');
 const MongoDb = require('mongodb');
 
-const { Long, ObjectId } = MongoDb;
+const { Long } = MongoDb;
 
 const createActiveConditions = () => {
 	const conditions = { $and: [{ 'meta.active': true }] };
@@ -47,7 +47,7 @@ class NamespaceDb {
 	 * @param {Uint8Array} ownerAddress Namespace owner address
 	 * @param {Uint32} registrationType Namespace registration type
 	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
-	 * `pageSize` and `pageNumber`.
+	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<object>} Namespaces page.
 	 */
 	namespaces(aliasType, level0, ownerAddress, registrationType, options) {

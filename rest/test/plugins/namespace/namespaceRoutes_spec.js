@@ -143,6 +143,21 @@ describe('namespace routes', () => {
 				});
 			});
 
+			it('allowed sort fields are taken into account', () => {
+				// Arrange:
+				const paginationParserSpy = sinon.spy(routeUtils, 'parsePaginationArguments');
+				const expectedAllowedSortFields = { id: 'objectId' };
+				const req = { params: {} };
+
+				// Act:
+				return mockServer.callRoute(route, req).then(() => {
+					// Assert:
+					expect(paginationParserSpy.calledOnce).to.equal(true);
+					expect(paginationParserSpy.firstCall.args[2]).to.deep.equal(expectedAllowedSortFields);
+					paginationParserSpy.restore();
+				});
+			});
+
 			it('returns empty page if no namespaces found', () => {
 				// Arrange:
 				const req = { params: { aliasType: '2' } };

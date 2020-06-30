@@ -285,6 +285,8 @@ describe('namespace db', () => {
 	const createOwner = test.random.account;
 
 	describe('namespace by id', () => {
+		const { createObjectId } = dbTestUtils.db;
+
 		it('returns undefined for unknown namespace id', () => {
 			// Arrange: create 5 namespaces and 5 inactive namespaces
 			const owner = createOwner();
@@ -308,8 +310,9 @@ describe('namespace db', () => {
 				namespaces,
 				db => db.namespaceById([12303, 0]),
 				entity => {
-					expect(entity.namespace.depth).to.equal(1);
-					expect(entity).to.deep.equal(namespaces[3]);
+					expect(entity.id).to.deep.equal(createObjectId(3));
+					expect(entity.meta.active).to.equal(true);
+					expect(entity.namespace).to.deep.equal(namespaces[3].namespace);
 				}
 			);
 		});
@@ -324,8 +327,9 @@ describe('namespace db', () => {
 				namespaces,
 				db => db.namespaceById([12301, 0]),
 				entity => {
-					expect(entity.namespace.depth).to.equal(2);
-					expect(entity).to.deep.equal(namespaces[1]);
+					expect(entity.id).to.deep.equal(createObjectId(1));
+					expect(entity.meta.active).to.equal(true);
+					expect(entity.namespace).to.deep.equal(namespaces[1].namespace);
 				}
 			);
 		});
@@ -340,8 +344,9 @@ describe('namespace db', () => {
 				namespaces,
 				db => db.namespaceById([12302, 0]),
 				entity => {
-					expect(entity.namespace.depth).to.equal(3);
-					expect(entity).to.deep.equal(namespaces[2]);
+					expect(entity.id).to.deep.equal(createObjectId(2));
+					expect(entity.meta.active).to.equal(true);
+					expect(entity.namespace).to.deep.equal(namespaces[2].namespace);
 				}
 			);
 		});
