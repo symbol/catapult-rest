@@ -546,12 +546,14 @@ class CatapultDb {
 		return this.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options);
 	}
 
-	// FIXME sanitize ids
 	accountsByIds(ids) {
 		// id will either have address property or publicKey property set; in the case of publicKey, convert it to address
 		const buffers = ids.map(id => Buffer.from((id.publicKey
 			? catapult.model.address.publicKeyToAddress(id.publicKey, this.networkId) : id.address)));
-		return this.queryDocuments('accounts', { 'account.address': { $in: buffers } })
+		return this.database.collection('accounts')
+			.find({ 'account.address': { $in: buffers } })
+			.toArray()
+			.then(this.sanitizer.renameIds)
 			.then(entities => entities.map(accountWithMetadata => {
 				const { account } = accountWithMetadata;
 				if (0 < account.importances.length) {
