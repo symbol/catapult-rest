@@ -1887,8 +1887,8 @@ describe('catapult db', () => {
 						}),
 						accountsPage => {
 							expect(mosaicAmountEquals(accountsPage, 0, 33, 8)).to.equal(true);
-							expect(mosaicAmountEquals(accountsPage, 0, 33, 5)).to.equal(true);
-							expect(mosaicAmountEquals(accountsPage, 0, 33, 2)).to.equal(true);
+							expect(mosaicAmountEquals(accountsPage, 1, 33, 5)).to.equal(true);
+							expect(mosaicAmountEquals(accountsPage, 2, 33, 2)).to.equal(true);
 						}
 					));
 			});

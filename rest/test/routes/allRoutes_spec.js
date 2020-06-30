@@ -41,6 +41,7 @@ describe('all routes', () => {
 
 		// Assert:
 		test.assert.assertRoutes(routes, [
+			'/accounts',
 			'/accounts/:accountId',
 
 			'/blocks',
