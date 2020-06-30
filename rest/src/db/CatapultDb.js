@@ -318,10 +318,10 @@ class CatapultDb {
 		const conditions = [];
 		if (queryConditions.length)
 			conditions.push(1 === queryConditions.length ? { $match: queryConditions[0] } : { $match: { $and: queryConditions } });
-		return this._queryPagedDocuments(conditions, removedFields, sortConditions, collectionName, options);
+		return this.queryPagedDocumentsWithConditions(conditions, removedFields, sortConditions, collectionName, options);
 	}
 
-	_queryPagedDocuments(builtConditions, removedFields, sortConditions, collectionName, options) {
+	queryPagedDocumentsWithConditions(builtConditions, removedFields, sortConditions, collectionName, options) {
 		builtConditions.push(sortConditions);
 
 		const { pageSize } = options;
@@ -372,7 +372,7 @@ class CatapultDb {
 
 				return formattedResult;
 			});
-	};
+	}
 
 	/**
 	 * Retrieves filtered and paginated transactions.
@@ -520,16 +520,16 @@ class CatapultDb {
 
 		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
 
-		const builtConditions = [{ '$unwind': '$account.mosaics'}];
+		const builtConditions = [{ $unwind: '$account.mosaics' }];
 		if (conditions.length)
 			builtConditions.push(1 === conditions.length ? { $match: conditions[0] } : { $match: { $and: conditions } });
 
-		if ('balance' === options.sortField)
+		if ('balance' === options.sortField) {
 			// fetch result sorted by specific mosaic amount, this unwinds mosaics and only returns matching mosaics (incomplete response)
-			return this._queryPagedDocuments(builtConditions, [], sortConditions, 'accounts', options)
+			return this.queryPagedDocumentsWithConditions(builtConditions, [], sortConditions, 'accounts', options)
 				.then(accountsPage => {
 					const accountIds = accountsPage.data.map(account => account.id);
-					conditions.push({ '_id': { '$in': accountIds } });
+					conditions.push({ _id: { $in: accountIds } });
 
 					// repeat the response with the found and sorted account ids, so that the result can be complete with all the mosaics
 					return this.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options)
@@ -537,11 +537,11 @@ class CatapultDb {
 							// $in results do not preserve query order
 							fullAccountsPage.data.sort((account1, account2) =>
 								accountIds.findIndex(accountId => accountId.equals(account1.id))
-								- accountIds.findIndex(accountId => accountId.equals(account2.id))
-							);
+								- accountIds.findIndex(accountId => accountId.equals(account2.id)));
 							return fullAccountsPage;
 						});
 				});
+		}
 
 		return this.queryPagedDocuments_2(conditions, [], sortConditions, 'accounts', options);
 	}

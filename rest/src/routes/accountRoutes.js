@@ -24,14 +24,18 @@ const AccountType = require('../plugins/AccountType');
 const errors = require('../server/errors');
 
 module.exports = {
-	register: (server, db) => {
+	register: (server, db, services) => {
 		const sender = routeUtils.createSender(routeResultTypes.account);
 
 		server.get('/accounts', (req, res, next) => {
 			const address = req.params.address ? routeUtils.parseArgument(req.params, 'address', 'address') : undefined;
 			const mosaicId = req.params.mosaicId ? routeUtils.parseArgument(req.params, 'mosaicId', 'uint64hex') : undefined;
 
-			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize, { id: 'objectId', balance: 'uint64' });
+			const offsetParsers = {
+				id: 'objectId',
+				balance: 'uint64'
+			};
+			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize, offsetParsers);
 
 			if ('balance' === options.sortField && !mosaicId)
 				throw errors.createInvalidArgumentError('mosaicId must be provided when sorting by balance');

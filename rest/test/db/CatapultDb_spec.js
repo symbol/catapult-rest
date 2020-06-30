@@ -1812,10 +1812,10 @@ describe('catapult db', () => {
 
 	describe('accounts', () => {
 		describe('sorts by balance', () => {
-			const createAccount = (address, mosaics) => ({
+			const createAccount = (accountAddress, mosaics) => ({
 				account: {
-					address: address,
-					mosaics: mosaics
+					address: accountAddress,
+					mosaics
 				}
 			});
 
@@ -1863,26 +1863,34 @@ describe('catapult db', () => {
 				it('asc', () =>
 					runDbTest(
 						{ accounts: seedAccounts },
-						db => db.accounts(undefined, 33, { sortField: 'balance', sortDirection: 1, pageNumber: 1, pageSize: 10 }),
+						db => db.accounts(undefined, 33, {
+							sortField: 'balance',
+							sortDirection: 1,
+							pageNumber: 1,
+							pageSize: 10
+						}),
 						accountsPage => {
 							expect(mosaicAmountEquals(accountsPage, 0, 33, 2)).to.equal(true);
 							expect(mosaicAmountEquals(accountsPage, 1, 33, 5)).to.equal(true);
 							expect(mosaicAmountEquals(accountsPage, 2, 33, 8)).to.equal(true);
 						}
-					)
-				);
+					));
 
 				it('desc', () =>
 					runDbTest(
 						{ accounts: seedAccounts },
-						db => db.accounts(undefined, 33, { sortField: 'balance', sortDirection: -1, pageNumber: 1, pageSize: 10 }),
+						db => db.accounts(undefined, 33, {
+							sortField: 'balance',
+							sortDirection: -1,
+							pageNumber: 1,
+							pageSize: 10
+						}),
 						accountsPage => {
 							expect(mosaicAmountEquals(accountsPage, 0, 33, 8)).to.equal(true);
 							expect(mosaicAmountEquals(accountsPage, 0, 33, 5)).to.equal(true);
 							expect(mosaicAmountEquals(accountsPage, 0, 33, 2)).to.equal(true);
 						}
-					)
-				);
+					));
 			});
 		});
 	});
