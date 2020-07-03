@@ -18,17 +18,18 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const routeResultTypes = require('../../routes/routeResultTypes');
 const routeUtils = require('../../routes/routeUtils');
 
 module.exports = {
-	register: (server, db) => {
+	register: (server, db, services) => {
 		server.get('/metadata', (req, res, next) => {
 			const { params } = req;
-			const sourceAddress = params.height ? routeUtils.parseArgument(params, 'sourceAddress', 'address') : undefined;
-			const targetAddress = params.address ? routeUtils.parseArgument(params, 'targetAddress', 'address') : undefined;
-			const scopedMetadataKey = params.signerPublicKey ? routeUtils.parseArgument(params, 'scopedMetadataKey', 'uint64hex') : undefined;
-			const targetId = params.recipientAddress ? routeUtils.parseArgument(params, 'targetId', 'uint64hex') : undefined;
-			const metadataType = params.type ? routeUtils.parseArgumentAsArray(params, 'metadataType', 'uint') : undefined;
+			const sourceAddress = params.sourceAddress ? routeUtils.parseArgument(params, 'sourceAddress', 'address') : undefined;
+			const targetAddress = params.targetAddress ? routeUtils.parseArgument(params, 'targetAddress', 'address') : undefined;
+			const scopedMetadataKey = params.scopedMetadataKey ? routeUtils.parseArgument(params, 'scopedMetadataKey', 'uint64hex') : undefined;
+			const targetId = params.targetId ? routeUtils.parseArgument(params, 'targetId', 'uint64hex') : undefined;
+			const metadataType = params.metadataType ? routeUtils.parseArgument(params, 'metadataType', 'uint') : undefined;
 
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });
 
