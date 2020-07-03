@@ -19,7 +19,6 @@
  */
 
 const { convertToLong } = require('../../db/dbUtils');
-const MongoDb = require('mongodb');
 
 class MetadataDb {
 	/**

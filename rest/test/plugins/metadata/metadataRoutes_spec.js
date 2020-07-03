@@ -78,7 +78,7 @@ describe('metadata routes', () => {
 			}
 		};
 
-		const dbMetadataFake = sinon.fake((sourceAddress) =>
+		const dbMetadataFake = sinon.fake(sourceAddress =>
 			(sourceAddress ? Promise.resolve(emptyPageSample) : Promise.resolve(pageSample)));
 
 		const services = {

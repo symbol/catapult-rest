@@ -63,12 +63,12 @@ describe('metadata plugin', () => {
 			]);
 
 			// - metadata
-			expect(Object.keys(modelSchema['metadata']).length).to.equal(2);
-			expect(modelSchema['metadata']).to.contain.all.keys(['metadataEntry', 'id']);
+			expect(Object.keys(modelSchema.metadata).length).to.equal(2);
+			expect(modelSchema.metadata).to.contain.all.keys(['metadataEntry', 'id']);
 
 			// - metadataEntry
-			expect(Object.keys(modelSchema['metadataEntry']).length).to.equal(6);
-			expect(modelSchema['metadataEntry']).to.contain.all.keys([
+			expect(Object.keys(modelSchema.metadataEntry).length).to.equal(6);
+			expect(modelSchema.metadataEntry).to.contain.all.keys([
 				'compositeHash',
 				'sourceAddress',
 				'targetAddress',

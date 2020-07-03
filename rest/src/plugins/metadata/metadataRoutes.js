@@ -27,7 +27,8 @@ module.exports = {
 			const { params } = req;
 			const sourceAddress = params.sourceAddress ? routeUtils.parseArgument(params, 'sourceAddress', 'address') : undefined;
 			const targetAddress = params.targetAddress ? routeUtils.parseArgument(params, 'targetAddress', 'address') : undefined;
-			const scopedMetadataKey = params.scopedMetadataKey ? routeUtils.parseArgument(params, 'scopedMetadataKey', 'uint64hex') : undefined;
+			const scopedMetadataKey = params.scopedMetadataKey
+				? routeUtils.parseArgument(params, 'scopedMetadataKey', 'uint64hex') : undefined;
 			const targetId = params.targetId ? routeUtils.parseArgument(params, 'targetId', 'uint64hex') : undefined;
 			const metadataType = params.metadataType ? routeUtils.parseArgument(params, 'metadataType', 'uint') : undefined;
 
