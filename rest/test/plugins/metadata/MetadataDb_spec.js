@@ -18,13 +18,12 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { convertToLong } = require('../../../src/db/dbUtils');
 const CatapultDb = require('../../../src/db/CatapultDb');
+const { convertToLong } = require('../../../src/db/dbUtils');
 const MetadataDb = require('../../../src/plugins/metadata/MetadataDb');
 const test = require('../../db/utils/dbTestUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
-const MongoDb = require('mongodb');
 const sinon = require('sinon');
 
 const { address } = catapult.model;
@@ -164,7 +163,10 @@ describe('metadata db', () => {
 			];
 
 			// Act + Assert:
-			return runTestAndVerifyIds(dbMetadata, db => db.metadata(undefined, undefined, undefined, undefined, undefined, paginationOptions), [10, 20]);
+			return runTestAndVerifyIds(
+				dbMetadata,
+				db => db.metadata(undefined, undefined, undefined, undefined, undefined, paginationOptions), [10, 20]
+			);
 		});
 
 		describe('respects sort conditions', () => {
@@ -256,14 +258,20 @@ describe('metadata db', () => {
 				options.sortDirection = 1;
 
 				// Act + Assert:
-				return runTestAndVerifyIds(dbMetadata(), db => db.metadata(undefined, undefined, undefined, undefined, undefined, options), [30]);
+				return runTestAndVerifyIds(
+					dbMetadata(),
+					db => db.metadata(undefined, undefined, undefined, undefined, undefined, options), [30]
+				);
 			});
 
 			it('lt', () => {
 				options.sortDirection = -1;
 
 				// Act + Assert:
-				return runTestAndVerifyIds(dbMetadata(), db => db.metadata(undefined, undefined, undefined, undefined, undefined, options), [10]);
+				return runTestAndVerifyIds(
+					dbMetadata(),
+					db => db.metadata(undefined, undefined, undefined, undefined, undefined, options), [10]
+				);
 			});
 		});
 	});

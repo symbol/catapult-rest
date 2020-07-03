@@ -30,8 +30,16 @@ class MetadataDb {
 	}
 
 	/**
-	 * FIXME
-	*/
+	 * Retrieves filtered and paginated metadata.
+	 * @param {Uint8Array} sourceAddress Metadata source address
+	 * @param {Uint8Array} targetAddress Metadata target address
+	 * @param {Uint64} scopedMetadataKey Metadata scoped key
+	 * @param {Uint64} targetId Metadata target id
+	 * @param {Uint32} metadataType Metadata type
+	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
+	 * @returns {Promise.<object>} Metadata page.
+	 */
 	metadata(sourceAddress, targetAddress, scopedMetadataKey, targetId, metadataType, options) {
 		const sortingOptions = { id: '_id' };
 
