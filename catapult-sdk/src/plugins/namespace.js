@@ -65,13 +65,8 @@ const namespacePlugin = {
 			namespaces: { type: ModelType.array, schemaName: 'namespaceDescriptor' }
 		});
 
-		builder.addSchema('namespaceDescriptorWithId', {
-			id: ModelType.objectId,
-			meta: { type: ModelType.object, schemaName: 'namespaceDescriptor.meta' },
-			namespace: { type: ModelType.object, schemaName: 'namespaceDescriptor.namespace' }
-		});
-
 		builder.addSchema('namespaceDescriptor', {
+			id: ModelType.objectId,
 			meta: { type: ModelType.object, schemaName: 'namespaceDescriptor.meta' },
 			namespace: { type: ModelType.object, schemaName: 'namespaceDescriptor.namespace' }
 		});

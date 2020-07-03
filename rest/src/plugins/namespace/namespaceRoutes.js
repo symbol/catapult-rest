@@ -43,7 +43,7 @@ module.exports = {
 			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize, { id: 'objectId' });
 
 			return db.namespaces(aliasType, level0, ownerAddress, registrationType, options)
-				.then(result => routeUtils.createSender('namespaceDescriptorWithId').sendPage(res, next)(result));
+				.then(result => namespaceSender.sendPage(res, next)(result));
 		});
 
 		server.get('/namespaces/:namespaceId', (req, res, next) => {

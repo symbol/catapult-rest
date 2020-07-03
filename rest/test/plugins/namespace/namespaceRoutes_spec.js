@@ -169,7 +169,7 @@ describe('namespace routes', () => {
 
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: emptyPageSample,
-						type: 'namespaceDescriptorWithId',
+						type: 'namespaceDescriptor',
 						structure: 'page'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
@@ -262,7 +262,7 @@ describe('namespace routes', () => {
 					// Assert:
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						payload: pageSample,
-						type: 'namespaceDescriptorWithId',
+						type: 'namespaceDescriptor',
 						structure: 'page'
 					});
 					expect(mockServer.next.calledOnce).to.equal(true);
