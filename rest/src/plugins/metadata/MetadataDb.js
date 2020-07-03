@@ -18,7 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { convertToLong } = require('./dbUtils');
+const { convertToLong } = require('../../db/dbUtils');
 const MongoDb = require('mongodb');
 
 class MetadataDb {
