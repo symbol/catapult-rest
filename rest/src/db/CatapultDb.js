@@ -502,7 +502,7 @@ class CatapultDb {
 	 * @param {Uint8Array} address Filters by address
 	 * @param {uint64} mosaicId Filters by accounts with some mosaicId balance. Required if provided `sortField` is `balance`
 	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
-	 * `pageSize` and `pageNumber`
+	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<object>} Accounts page.
 	 */
 	accounts(address, mosaicId, options) {
@@ -513,7 +513,7 @@ class CatapultDb {
 			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
 
 		if (address)
-			conditions.push({ 'account.address': address });
+			conditions.push({ 'account.address': Buffer.from(address) });
 
 		if (mosaicId)
 			conditions.push({ 'account.mosaics.id': convertToLong(mosaicId) });
