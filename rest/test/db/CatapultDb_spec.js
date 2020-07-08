@@ -2187,7 +2187,7 @@ describe('catapult db', () => {
 					pageNumber: 1,
 					sortField: 'balance',
 					sortDirection: 1,
-					offset: createObjectId(20)
+					offset: Long.fromNumber(2)
 				};
 
 				it('gt', () => {
