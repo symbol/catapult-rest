@@ -1936,6 +1936,33 @@ describe('catapult db', () => {
 			);
 		};
 
+		const runAccountsFilteredByAddressTest = pagination => {
+			it('returns accounts filtered by accountAddress', () => {
+				// Arrange:
+				const dbAccounts = [
+					createAccount(10, addressTest1, [{ id: mosaicIdTest1, amount: Long.fromNumber(1) }]),
+					createAccount(20, addressTest2, [{ id: mosaicIdTest1, amount: Long.fromNumber(1) }]),
+					createAccount(30, addressTest3, [])
+				];
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbAccounts, addressTest2, undefined, pagination, [20]);
+			});
+		};
+
+		const runAccountsFilteredByMosaicIdTest = pagination => {
+			it('returns accounts filtered by mosaicId', () => {
+				// Arrange:
+				const dbAccounts = [
+					createAccount(10, addressTest1, [{ id: mosaicIdTest1, amount: Long.fromNumber(1) }]),
+					createAccount(20, addressTest1, [{ id: mosaicIdTest2, amount: Long.fromNumber(1) }])
+				];
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbAccounts, undefined, mosaicIdTest2, pagination, [20]);
+			});
+		};
+
 		it('returns expected structure', () => {
 			// Arrange:
 			const dbAccounts = [createAccount(10, addressTest1, [])];
@@ -1971,27 +1998,9 @@ describe('catapult db', () => {
 			return runTestAndVerifyIds(dbAccounts, undefined, mosaicIdTest2, paginationOptions, []);
 		});
 
-		it('returns accounts filtered by accountAddress', () => {
-			// Arrange:
-			const dbAccounts = [
-				createAccount(10, addressTest1, []),
-				createAccount(20, addressTest2, [])
-			];
+		runAccountsFilteredByAddressTest(paginationOptions);
 
-			// Act + Assert:
-			return runTestAndVerifyIds(dbAccounts, addressTest2, undefined, paginationOptions, [20]);
-		});
-
-		it('returns accounts filtered by mosaicId', () => {
-			// Arrange:
-			const dbAccounts = [
-				createAccount(10, addressTest1, [{ id: mosaicIdTest1, amount: Long.fromNumber(1) }]),
-				createAccount(20, addressTest1, [{ id: mosaicIdTest2, amount: Long.fromNumber(1) }])
-			];
-
-			// Act + Assert:
-			return runTestAndVerifyIds(dbAccounts, undefined, mosaicIdTest2, paginationOptions, [20]);
-		});
+		runAccountsFilteredByMosaicIdTest(paginationOptions);
 
 		it('returns all accounts if no accountAddress or mosaicId are provided', () => {
 			// Arrange:
@@ -2129,21 +2138,6 @@ describe('catapult db', () => {
 				);
 			});
 
-			it('returns expected structure when account has no mosaics', () => {
-				// Arrange:
-				const dbAccounts = [createAccount(10, addressTest1, [])];
-
-				// Act + Assert:
-				return runDbTest(
-					{ accounts: dbAccounts },
-					db => db.accounts(undefined, undefined, paginationOptionsBalanceSorting),
-					page => {
-						const expected_keys = ['id', 'account'];
-						expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
-					}
-				);
-			});
-
 			it('returns empty for unknown accountAddress', () => {
 				// Arrange:
 				const dbAccounts = [createAccount(10, addressTest1, [])];
@@ -2164,27 +2158,9 @@ describe('catapult db', () => {
 				return runTestAndVerifyIds(dbAccounts, undefined, mosaicIdTest2, paginationOptionsBalanceSorting, []);
 			});
 
-			it('returns accounts filtered by accountAddress', () => {
-				// Arrange:
-				const dbAccounts = [
-					createAccount(10, addressTest1, []),
-					createAccount(20, addressTest2, [])
-				];
+			runAccountsFilteredByAddressTest(paginationOptionsBalanceSorting);
 
-				// Act + Assert:
-				return runTestAndVerifyIds(dbAccounts, addressTest2, undefined, paginationOptionsBalanceSorting, [20]);
-			});
-
-			it('returns accounts filtered by mosaicId', () => {
-				// Arrange:
-				const dbAccounts = [
-					createAccount(10, addressTest1, [{ id: mosaicIdTest1, amount: Long.fromNumber(1) }]),
-					createAccount(20, addressTest2, [{ id: mosaicIdTest2, amount: Long.fromNumber(1) }])
-				];
-
-				// Act + Assert:
-				return runTestAndVerifyIds(dbAccounts, undefined, mosaicIdTest2, paginationOptionsBalanceSorting, [20]);
-			});
+			runAccountsFilteredByMosaicIdTest(paginationOptionsBalanceSorting);
 
 			it('returns all accounts if no accountAddress or mosaicId are provided', () => {
 				// Arrange:
