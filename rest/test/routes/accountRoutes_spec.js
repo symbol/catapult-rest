@@ -256,6 +256,14 @@ describe('account routes', () => {
 				// Act + Assert:
 				expect(() => mockServer.callRoute(route, req)).to.throw('mosaicId has an invalid format');
 			});
+
+			it('throws error if there is no mosaicId when sorting by balance', () => {
+				// Arrange:
+				const req = { params: { orderBy: 'balance' } };
+
+				// Act + Assert:
+				expect(() => mockServer.callRoute(route, req)).to.throw('mosaicId must be provided when sorting by balance');
+			});
 		});
 
 		describe('by accountId', () => {
