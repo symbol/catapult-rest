@@ -349,7 +349,7 @@ describe('receipts db', () => {
 			});
 
 			it('sort field', () => {
-				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments_2');
+				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments');
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
@@ -544,7 +544,7 @@ describe('receipts db', () => {
 					});
 
 					it('sort field', () => {
-						const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments_2');
+						const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments');
 						const options = {
 							pageSize: 10,
 							pageNumber: 1,

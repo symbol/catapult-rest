@@ -66,7 +66,7 @@ class ReceiptsDb {
 		}
 
 		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
-		return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, 'transactionStatements', options);
+		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'transactionStatements', options);
 	}
 
 	/**
@@ -90,7 +90,7 @@ class ReceiptsDb {
 			conditions.push({ 'statement.height': convertToLong(height) });
 
 		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
-		return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, `${artifact}ResolutionStatements`, options);
+		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, `${artifact}ResolutionStatements`, options);
 	}
 }
 
