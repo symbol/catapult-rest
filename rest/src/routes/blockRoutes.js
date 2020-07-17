@@ -26,6 +26,7 @@ const stateTreesCodec = require('../sockets/stateTreesCodec');
 const catapult = require('catapult-sdk');
 
 const { constants } = catapult;
+const { uint64 } = catapult.utils;
 const packetHeader = catapult.packet.header;
 const { StatePathPacketTypes } = catapult.packet;
 const { BinaryParser } = catapult.parser;
@@ -51,11 +52,11 @@ module.exports = {
 		});
 
 		server.get('/blocks/:height', (req, res, next) => {
-			const height = routeUtils.parseArgument(req.params, 'height', 'uint');
+			const height = routeUtils.parseArgument(req.params, 'height', 'uint64');
 
 			return dbFacade.runHeightDependentOperation(db, height, () => db.blockAtHeight(height))
 				.then(result => result.payload)
-				.then(routeUtils.createSender(routeResultTypes.block).sendOne(height, res, next));
+				.then(routeUtils.createSender(routeResultTypes.block).sendOne(uint64.toString(height), res, next));
 		});
 
 		server.get(

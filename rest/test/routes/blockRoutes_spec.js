@@ -163,10 +163,10 @@ describe('block routes', () => {
 			config: routeConfig
 		});
 		builder.addDefault({
-			valid: { object: { height: '3' }, parsed: [3], printable: '3' },
+			valid: { object: { height: '3' }, parsed: [[3, 0]], printable: '3' },
 			invalid: { object: { height: '10A' }, error: 'height has an invalid format' }
 		});
-		builder.addNotFoundInputTest({ object: { height: '11' }, parsed: [11], printable: '11' }, 'chain height is too small');
+		builder.addNotFoundInputTest({ object: { height: '11' }, parsed: [[11, 0]], printable: '11' }, 'chain height is too small');
 	});
 
 	describe('block with merkle tree', () => {
