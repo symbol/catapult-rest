@@ -126,7 +126,7 @@ describe('block routes', () => {
 					return mockServer.callRoute(route, req).then(() => {
 						// Assert:
 						expect(paginationParser.firstCall.args[0]).to.deep.equal(req.params);
-						expect(paginationParser.firstCall.args[2]).to.deep.equal({ id: 'objectId', height: 'uint64hex' });
+						expect(paginationParser.firstCall.args[2]).to.deep.equal({ id: 'objectId', height: 'uint64' });
 
 						expect(dbBlocksFake.calledOnce).to.equal(true);
 						expect(dbBlocksFake.firstCall.args[2]).to.deep.equal(pagingBag);
@@ -139,7 +139,7 @@ describe('block routes', () => {
 					const paginationParserSpy = sinon.spy(routeUtils, 'parsePaginationArguments');
 					const expectedAllowedSortFields = {
 						id: 'objectId',
-						height: 'uint64hex'
+						height: 'uint64'
 					};
 
 					// Act:
