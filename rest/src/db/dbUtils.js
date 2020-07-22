@@ -61,7 +61,7 @@ const dbUtils = {
 	 * Generates an offset condition depending on the offset type, and sorting options provided.
 	 * @param {object} options Sorting options, must contain `offset`, `offsetType`, `sortField`, and `sortDirection`.
 	 * @param {object} sortFieldDbRelation Determines the database path of the provided sort field.
-	 * @returns {object} Offset condition if offset was providedprovided, otherwise returns undefined.
+	 * @returns {object} Offset condition if offset was provided, otherwise returns undefined.
 	 */
 	buildOffsetCondition: (options, sortFieldDbRelation) => {
 		const offsetTypeToDbObject = {
