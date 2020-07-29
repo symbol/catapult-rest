@@ -2,15 +2,24 @@
 
 if [ "${DOCKER_IMAGE_NAME}" = "" ]
 then
-  echo "Docker deployment ignored env DOCKER_IMAGE_NAME has not been provided"
-  exit;
+  echo "Docker deployment error. Env DOCKER_IMAGE_NAME has not been provided"
+  exit 128
 fi
 
-if [ ! "${DOCKER_PASSWORD}" = "" ]
+if [ "${DOCKER_USERNAME}" = "" ]
 then
-  echo "Login into docker..."
-  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  echo "Docker deployment error. Env DOCKER_USERNAME has not been provided"
+  exit 128
 fi
+
+if [ "${DOCKER_PASSWORD}" = "" ]
+then
+  echo "Docker deployment error. Env DOCKER_PASSWORD has not been provided"
+  exit 128
+fi
+
+echo "Login into docker..."
+echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 cd rest
 CURRENT_VERSION=$(npm run version --silent)
