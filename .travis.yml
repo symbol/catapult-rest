@@ -38,7 +38,7 @@ jobs:
       env:
         - SUBPROJECT=rest
       script: /bin/sh docker.sh
-      if: branch = master
+      if: branch = master AND type != pull_request
     - stage: docker release deploy
       env:
         - SUBPROJECT=rest
