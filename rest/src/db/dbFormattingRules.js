@@ -27,7 +27,6 @@ const { convert, uint64 } = catapult.utils;
 
 const rawUint64ToUint64 = value => (value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value));
 
-
 module.exports = {
 	[ModelType.none]: value => value,
 	// `binary` should support both mongo binary buffers and intermediate js buffers
