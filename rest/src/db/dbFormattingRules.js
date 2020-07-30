@@ -35,10 +35,12 @@ module.exports = {
 	[ModelType.statusCode]: value => status.toString(value >>> 0),
 	[ModelType.string]: value => value.toString(),
 	// `uint16` adds support to uint16 arraybuffers in addition to basic uint16
-	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readInt16LE(0) : value),
+	[ModelType.uint8]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt8(0) : value),
+	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt16LE(0) : value),
+	[ModelType.uint32]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt32LE(0) : value),
 	[ModelType.uint64]: value => uint64.toString(rawUint64ToUint64(value)),
 	[ModelType.uint64HexIdentifier]: value => uint64.toHex(rawUint64ToUint64(value)),
-	[ModelType.int32]: value => value.valueOf(),
-	[ModelType.int64]: value => value.toString(),
+	[ModelType.int8]: value => (value instanceof Binary ? Buffer.from(value.buffer).readInt8(0) : value),
+	[ModelType.int16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readInt16LE(0) : value),
 	[ModelType.boolean]: value => true === value
 };

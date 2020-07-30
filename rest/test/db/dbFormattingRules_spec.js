@@ -23,7 +23,7 @@ const { convertToLong } = require('../../src/db/dbUtils');
 const test = require('../testUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
-const { Binary, Int32, Long } = require('mongodb');
+const { Binary } = require('mongodb');
 
 const { ModelType } = catapult.model;
 
@@ -94,6 +94,27 @@ describe('db formatting rules', () => {
 		expect(result).to.equal('catapult');
 	});
 
+	it('can format uint8 type', () => {
+		// Act:
+		const result = formattingRules[ModelType.uint8](255);
+
+		// Assert:
+		expect(result).to.equal(255);
+	});
+
+	it('can format uint8 type from Binary', () => {
+		// Arrange:
+		const buffer = Buffer.alloc(1, 0);
+		buffer.writeUInt8(255);
+		const object = new Binary(buffer);
+
+		// Act:
+		const result = formattingRules[ModelType.uint8](object);
+
+		// Assert:
+		expect(result).to.deep.equal(255);
+	});
+
 	it('can format uint16 type', () => {
 		// Act:
 		const result = formattingRules[ModelType.uint16](17434);
@@ -113,6 +134,27 @@ describe('db formatting rules', () => {
 
 		// Assert:
 		expect(result).to.deep.equal(17434);
+	});
+
+	it('can format uint32 type', () => {
+		// Act:
+		const result = formattingRules[ModelType.uint32](1234567890);
+
+		// Assert:
+		expect(result).to.equal(1234567890);
+	});
+
+	it('can format uint32 type from Binary', () => {
+		// Arrange:
+		const buffer = Buffer.alloc(4, 0);
+		buffer.writeUInt32LE(1234567890);
+		const object = new Binary(buffer);
+
+		// Act:
+		const result = formattingRules[ModelType.uint32](object);
+
+		// Assert:
+		expect(result).to.deep.equal(1234567890);
 	});
 
 	it('can format uint64 type from Long', () => {
@@ -165,26 +207,58 @@ describe('db formatting rules', () => {
 		expect(result).to.equal('000FDFFF00ABCDEF');
 	});
 
-	it('can format int32 type', () => {
-		// Arrange:
-		const object = Int32(1234567890);
+	describe('can format int8 type', () => {
+		const getOneByteBinaryBuffer = value => {
+			const buffer = Buffer.alloc(1, 0);
+			buffer.writeInt8(value);
+			return new Binary(buffer);
+		};
 
-		// Act:
-		const result = formattingRules[ModelType.int32](object);
+		const testCases = [
+			{ name: 'int8 value 127', value: 127, formated: 127 },
+			{ name: 'int8 value 0', value: 0, formated: 0 },
+			{ name: 'int8 value -128', value: -128, formated: -128 },
+			{ name: 'int8 binary 127', value: getOneByteBinaryBuffer(127), formated: 127 },
+			{ name: 'int8 binary 0', value: getOneByteBinaryBuffer(0), formated: 0 },
+			{ name: 'int8 binary -128', value: getOneByteBinaryBuffer(-128), formated: -128 }
+		];
 
-		// Assert:
-		expect(result).to.equal(1234567890);
+		testCases.forEach(testCase => {
+			it(testCase.name, () => {
+				// Arrange + Act:
+				const result = formattingRules[ModelType.int8](testCase.value);
+
+				// Assert:
+				expect(result).to.equal(testCase.formated);
+			});
+		});
 	});
 
-	it('can format int64 type', () => {
-		// Arrange:
-		const object = Long.fromString('9007199254740991000');
+	describe('can format int16 type', () => {
+		const getTwoBytesBinaryBuffer = value => {
+			const buffer = Buffer.alloc(2, 0);
+			buffer.writeInt16LE(value);
+			return new Binary(buffer);
+		};
 
-		// Act:
-		const result = formattingRules[ModelType.int64](object);
+		const testCases = [
+			{ name: 'int16 value 32767', value: 32767, formated: 32767 },
+			{ name: 'int16 value 0', value: 0, formated: 0 },
+			{ name: 'int16 value -32768', value: -32768, formated: -32768 },
+			{ name: 'int16 binary 32767', value: getTwoBytesBinaryBuffer(32767), formated: 32767 },
+			{ name: 'int16 binary 0', value: getTwoBytesBinaryBuffer(0), formated: 0 },
+			{ name: 'int16 binary -32768', value: getTwoBytesBinaryBuffer(-32768), formated: -32768 }
+		];
 
-		// Assert:
-		expect(result).to.equal('9007199254740991000');
+		testCases.forEach(testCase => {
+			it(testCase.name, () => {
+				// Arrange + Act:
+				const result = formattingRules[ModelType.int16](testCase.value);
+
+				// Assert:
+				expect(result).to.equal(testCase.formated);
+			});
+		});
 	});
 
 	describe('can format boolean type', () => {
