@@ -23,7 +23,7 @@ const { convertToLong } = require('../../src/db/dbUtils');
 const test = require('../testUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
-const { Binary } = require('mongodb');
+const { Binary, Int32 } = require('mongodb');
 
 const { ModelType } = catapult.model;
 
@@ -117,8 +117,14 @@ describe('db formatting rules', () => {
 
 	it('can format uint16 type', () => {
 		// Act:
-		const result = formattingRules[ModelType.uint16](17434);
+		const result = formattingRules[ModelType.uint16](new Int32(17434));
 
+		// Mira't aixo
+		const int32 = (new Int32(65536)).valueOf(); // el valueOf crec que no fa falta perque es crida implicitament - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/valueOf
+		const buffer = Buffer.alloc(4, 0);
+		buffer.writeInt32LE(int32);
+		console.log(buffer.readUInt16LE());
+		
 		// Assert:
 		expect(result).to.equal(17434);
 	});
