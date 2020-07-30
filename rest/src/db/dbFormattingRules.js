@@ -34,7 +34,7 @@ module.exports = {
 	[ModelType.objectId]: value => (undefined === value ? '' : value.toHexString().toUpperCase()),
 	[ModelType.statusCode]: value => status.toString(value >>> 0),
 	[ModelType.string]: value => value.toString(),
-	// `uint16` adds support to uint16 arraybuffers in addition to basic uint16
+	// `uint` and `int` formatters add support to uint16 arraybuffers in addition to basic uint16
 	[ModelType.uint8]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt8(0) : value),
 	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt16LE(0) : value),
 	[ModelType.uint32]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt32LE(0) : value),
