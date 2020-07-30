@@ -27,6 +27,7 @@ const { convert, uint64 } = catapult.utils;
 
 const rawUint64ToUint64 = value => (value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value));
 
+
 module.exports = {
 	[ModelType.none]: value => value,
 	// `binary` should support both mongo binary buffers and intermediate js buffers
@@ -37,5 +38,8 @@ module.exports = {
 	// `uint16` adds support to uint16 arraybuffers in addition to basic uint16
 	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readInt16LE(0) : value),
 	[ModelType.uint64]: value => uint64.toString(rawUint64ToUint64(value)),
-	[ModelType.uint64HexIdentifier]: value => uint64.toHex(rawUint64ToUint64(value))
+	[ModelType.uint64HexIdentifier]: value => uint64.toHex(rawUint64ToUint64(value)),
+	[ModelType.int32]: value => value.valueOf(),
+	[ModelType.int64]: value => value.toString(),
+	[ModelType.boolean]: value => true === value
 };

@@ -23,7 +23,7 @@ const { convertToLong } = require('../../src/db/dbUtils');
 const test = require('../testUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
-const { Binary } = require('mongodb');
+const { Binary, Int32, Long } = require('mongodb');
 
 const { ModelType } = catapult.model;
 
@@ -163,5 +163,44 @@ describe('db formatting rules', () => {
 
 		// Assert:
 		expect(result).to.equal('000FDFFF00ABCDEF');
+	});
+
+	it('can format int32 type', () => {
+		// Arrange:
+		const object = Int32(1234567890);
+
+		// Act:
+		const result = formattingRules[ModelType.int32](object);
+
+		// Assert:
+		expect(result).to.equal(1234567890);
+	});
+
+	it('can format int64 type', () => {
+		// Arrange:
+		const object = Long.fromString('9007199254740991000');
+
+		// Act:
+		const result = formattingRules[ModelType.int64](object);
+
+		// Assert:
+		expect(result).to.equal('9007199254740991000');
+	});
+
+	describe('can format boolean type', () => {
+		const testCases = [
+			{ name: 'true', value: true, formated: true },
+			{ name: 'false', value: false, formated: false }
+		];
+
+		testCases.forEach(testCase => {
+			it(testCase.name, () => {
+				// Arrange + Act:
+				const result = formattingRules[ModelType.boolean](testCase.value);
+
+				// Assert:
+				expect(result).to.equal(testCase.formated);
+			});
+		});
 	});
 });
