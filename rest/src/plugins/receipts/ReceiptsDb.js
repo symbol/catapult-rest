@@ -18,7 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { convertToLong } = require('../../db/dbUtils');
+const { convertToLong, buildOffsetCondition } = require('../../db/dbUtils');
 const catapult = require('catapult-sdk');
 
 const { convert, uint64 } = catapult.utils;
@@ -47,20 +47,26 @@ class ReceiptsDb {
 
 		const conditions = [];
 
-		if (options.offset)
-			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
+		const offsetCondition = buildOffsetCondition(options, sortingOptions);
+		if (offsetCondition)
+			conditions.push(offsetCondition);
 
-		if (filters.height)
+		if (undefined !== filters.height)
 			conditions.push({ 'statement.height': convertToLong(filters.height) });
-		if (filters.receiptType)
+
+		if (undefined !== filters.receiptType)
 			conditions.push({ 'statement.receipts.type': filters.receiptType });
-		if (filters.recipientAddress)
+
+		if (undefined !== filters.recipientAddress)
 			conditions.push({ 'statement.receipts.recipientAddress': Buffer.from(filters.recipientAddress) });
-		if (filters.senderAddress)
+
+		if (undefined !== filters.senderAddress)
 			conditions.push({ 'statement.receipts.senderAddress': Buffer.from(filters.senderAddress) });
-		if (filters.targetAddress)
+
+		if (undefined !== filters.targetAddress)
 			conditions.push({ 'statement.receipts.targetAddress': Buffer.from(filters.targetAddress) });
-		if (filters.artifactId) {
+
+		if (undefined !== filters.artifactId) {
 			const artifactIdType = isNamespaceId(filters.artifactId) ? 'namespaceId' : 'mosaicId';
 			conditions.push({ [`statement.receipts.${artifactIdType}`]: convertToLong(filters.artifactId) });
 		}
@@ -83,10 +89,11 @@ class ReceiptsDb {
 
 		const conditions = [];
 
-		if (options.offset)
-			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
+		const offsetCondition = buildOffsetCondition(options, sortingOptions);
+		if (offsetCondition)
+			conditions.push(offsetCondition);
 
-		if (height)
+		if (undefined !== height)
 			conditions.push({ 'statement.height': convertToLong(height) });
 
 		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };

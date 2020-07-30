@@ -212,54 +212,6 @@ describe('route utils', () => {
 		});
 	});
 
-	describe('parse paging arguments', () => {
-		it('succeeds when no arguments are provided', () => {
-			// Act:
-			const options = routeUtils.parsePagingArguments({});
-
-			// Assert:
-			expect(options).to.deep.equal({ id: undefined, pageSize: 0 });
-		});
-
-		it('succeeds when valid id is provided', () => {
-			// Act:
-			const options = routeUtils.parsePagingArguments({ id: '112233445566778899AABBCC' });
-
-			// Assert:
-			expect(options).to.deep.equal({ id: '112233445566778899AABBCC', pageSize: 0 });
-		});
-
-		it('succeeds when valid page size is provided', () => {
-			// Act:
-			const options = routeUtils.parsePagingArguments({ pageSize: '12' });
-
-			// Assert:
-			expect(options).to.deep.equal({ id: undefined, pageSize: 12 });
-		});
-
-		it('succeeds when valid id and page size are provided', () => {
-			// Act:
-			const options = routeUtils.parsePagingArguments({ id: '112233445566778899AABBCC', pageSize: '12' });
-
-			// Assert:
-			expect(options).to.deep.equal({ id: '112233445566778899AABBCC', pageSize: 12 });
-		});
-
-		it('fails when invalid id is provided', () => {
-			// Act:
-			invalidObjectIdStrings.forEach(str => {
-				expect(() => routeUtils.parsePagingArguments({ id: str, pageSize: '12' }), `id ${str}`)
-					.to.throw('id is not a valid object id');
-			});
-		});
-
-		it('fails when invalid page size is provided', () => {
-			// Act:
-			expect(() => routeUtils.parsePagingArguments({ id: '112233445566778899AABBCC', pageSize: '1Y2' }))
-				.to.throw('pageSize is not a valid unsigned integer');
-		});
-	});
-
 	describe('parse pagination arguments', () => {
 		const servicesConfigPageSize = {
 			min: 10,
@@ -419,7 +371,8 @@ describe('route utils', () => {
 				pageNumber: 1,
 				sortField: 'id',
 				sortDirection: 1,
-				offset
+				offset,
+				offsetType: 'objectId'
 			});
 		});
 
@@ -477,7 +430,8 @@ describe('route utils', () => {
 				pageNumber: 5,
 				sortField: 'signerPublicKey',
 				sortDirection: -1,
-				offset: convert.hexToUint8(offset)
+				offset: convert.hexToUint8(offset),
+				offsetType: 'publicKey'
 			});
 		});
 
@@ -646,7 +600,6 @@ describe('route utils', () => {
 					expect(response).to.deep.equal({ payload: page, type: 'foo', structure: 'page' });
 				});
 			});
-
 
 			it('sends error when object is not a page', () => {
 				// Act:

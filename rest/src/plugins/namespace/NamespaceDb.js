@@ -18,11 +18,8 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { convertToLong } = require('../../db/dbUtils');
+const { convertToLong, buildOffsetCondition } = require('../../db/dbUtils');
 const catapult = require('catapult-sdk');
-const MongoDb = require('mongodb');
-
-const { Long } = MongoDb;
 
 const createActiveConditions = () => {
 	const conditions = { $and: [{ 'meta.active': true }] };
@@ -54,19 +51,20 @@ class NamespaceDb {
 		const sortingOptions = { id: '_id' };
 		const conditions = [];
 
-		if (options.offset)
-			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
+		const offsetCondition = buildOffsetCondition(options, sortingOptions);
+		if (offsetCondition)
+			conditions.push(offsetCondition);
 
-		if (aliasType)
+		if (undefined !== aliasType)
 			conditions.push({ 'namespace.alias.type': aliasType });
 
-		if (level0)
-			conditions.push({ 'namespace.level0': new Long(level0[0], level0[1]) });
+		if (undefined !== level0)
+			conditions.push({ 'namespace.level0': convertToLong(level0) });
 
-		if (ownerAddress)
+		if (undefined !== ownerAddress)
 			conditions.push({ 'namespace.ownerAddress': Buffer.from(ownerAddress) });
 
-		if (registrationType)
+		if (undefined !== registrationType)
 			conditions.push({ 'namespace.registrationType': registrationType });
 
 		// Returning only active namespaces
@@ -82,12 +80,11 @@ class NamespaceDb {
 	 * @returns {Promise.<object>} Namespace.
 	 */
 	namespaceById(id) {
-		const namespaceId = new Long(id[0], id[1]);
 		const conditions = { $or: [] };
 
 		for (let level = 0; 3 > level; ++level) {
 			const conjunction = createActiveConditions();
-			conjunction.$and.push({ [`namespace.level${level}`]: namespaceId });
+			conjunction.$and.push({ [`namespace.level${level}`]: convertToLong(id) });
 			conjunction.$and.push({ 'namespace.depth': level + 1 });
 
 			conditions.$or.push(conjunction);

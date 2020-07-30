@@ -24,7 +24,6 @@ const errors = require('../server/errors');
 const catapult = require('catapult-sdk');
 const { NotFoundError } = require('restify-errors');
 
-
 const { convert } = catapult.utils;
 const { PacketType } = catapult.packet;
 
@@ -61,7 +60,7 @@ module.exports = {
 			}
 
 			const filters = {
-				height: params.height ? routeUtils.parseArgument(params, 'height', 'uint') : undefined,
+				height: params.height ? routeUtils.parseArgument(params, 'height', 'uint64') : undefined,
 				address: params.address ? routeUtils.parseArgument(params, 'address', 'address') : undefined,
 				signerPublicKey: params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined,
 				recipientAddress: params.recipientAddress ? routeUtils.parseArgument(params, 'recipientAddress', 'address') : undefined,

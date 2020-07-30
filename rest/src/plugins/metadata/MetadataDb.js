@@ -18,7 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { convertToLong } = require('../../db/dbUtils');
+const { convertToLong, buildOffsetCondition } = require('../../db/dbUtils');
 
 class MetadataDb {
 	/**
@@ -45,22 +45,23 @@ class MetadataDb {
 
 		const conditions = [];
 
-		if (options.offset)
-			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
+		const offsetCondition = buildOffsetCondition(options, sortingOptions);
+		if (offsetCondition)
+			conditions.push(offsetCondition);
 
-		if (sourceAddress)
+		if (undefined !== sourceAddress)
 			conditions.push({ 'metadataEntry.sourceAddress': Buffer.from(sourceAddress) });
 
-		if (targetAddress)
+		if (undefined !== targetAddress)
 			conditions.push({ 'metadataEntry.targetAddress': Buffer.from(targetAddress) });
 
-		if (scopedMetadataKey)
+		if (undefined !== scopedMetadataKey)
 			conditions.push({ 'metadataEntry.scopedMetadataKey': convertToLong(scopedMetadataKey) });
 
-		if (targetId)
+		if (undefined !== targetId)
 			conditions.push({ 'metadataEntry.targetId': convertToLong(targetId) });
 
-		if (metadataType)
+		if (undefined !== metadataType)
 			conditions.push({ 'metadataEntry.metadataType': metadataType });
 
 		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };

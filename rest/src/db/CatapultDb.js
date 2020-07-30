@@ -21,7 +21,7 @@
 /** @module db/CatapultDb */
 
 const connector = require('./connector');
-const { convertToLong } = require('./dbUtils');
+const { convertToLong, buildOffsetCondition } = require('./dbUtils');
 const catapult = require('catapult-sdk');
 const MongoDb = require('mongodb');
 
@@ -217,13 +217,14 @@ class CatapultDb {
 
 		const conditions = [];
 
-		if (options.offset)
-			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
+		const offsetCondition = buildOffsetCondition(options, sortingOptions);
+		if (offsetCondition)
+			conditions.push(offsetCondition);
 
-		if (signerPublicKey)
+		if (undefined !== signerPublicKey)
 			conditions.push({ 'block.signerPublicKey': Buffer.from(signerPublicKey) });
 
-		if (beneficiaryAddress)
+		if (undefined !== beneficiaryAddress)
 			conditions.push({ 'block.beneficiaryAddress': Buffer.from(beneficiaryAddress) });
 
 		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
@@ -264,7 +265,6 @@ class CatapultDb {
 				.then(blocks => Promise.resolve(blocks));
 		});
 	}
-
 
 	/**
 	 * Retrieves the fee multiplier for the last (higher on the chain) numBlocks blocks
@@ -373,16 +373,16 @@ class CatapultDb {
 		const sortingOptions = { id: '_id' };
 
 		const buildAccountConditions = () => {
-			if (filters.address)
+			if (undefined !== filters.address)
 				return { 'meta.addresses': Buffer.from(filters.address) };
 
 			const accountConditions = [];
-			if (filters.signerPublicKey) {
+			if (undefined !== filters.signerPublicKey) {
 				const signerPublicKeyCondition = { 'transaction.signerPublicKey': Buffer.from(filters.signerPublicKey) };
 				accountConditions.push(signerPublicKeyCondition);
 			}
 
-			if (filters.recipientAddress) {
+			if (undefined !== filters.recipientAddress) {
 				const recipientAddressCondition = { 'transaction.recipientAddress': Buffer.from(filters.recipientAddress) };
 				accountConditions.push(recipientAddressCondition);
 			}
@@ -396,10 +396,11 @@ class CatapultDb {
 		const buildConditions = () => {
 			const conditions = [];
 
-			if (options.offset)
-				conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
+			const offsetCondition = buildOffsetCondition(options, sortingOptions);
+			if (offsetCondition)
+				conditions.push(offsetCondition);
 
-			if (filters.height)
+			if (undefined !== filters.height)
 				conditions.push({ 'meta.height': convertToLong(filters.height) });
 
 			if (!filters.embedded)
@@ -475,7 +476,7 @@ class CatapultDb {
 		};
 
 		const collection = this.database.collection('transactions');
-		return collection.aggregate([conditions, grouping])
+		return collection.aggregate([conditions, grouping], { promoteLongs: false })
 			.sort({ _id: -1 })
 			.toArray()
 			.then(this.sanitizer.deleteIds);
@@ -495,13 +496,14 @@ class CatapultDb {
 		const sortingOptions = { id: '_id', balance: 'account.mosaics.amount' };
 		const conditions = [];
 
-		if (options.offset)
-			conditions.push({ [sortingOptions[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset } });
+		const offsetCondition = buildOffsetCondition(options, sortingOptions);
+		if (offsetCondition)
+			conditions.push(offsetCondition);
 
-		if (address)
+		if (undefined !== address)
 			conditions.push({ 'account.address': Buffer.from(address) });
 
-		if (mosaicId)
+		if (undefined !== mosaicId)
 			conditions.push({ 'account.mosaics.id': convertToLong(mosaicId) });
 
 		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };

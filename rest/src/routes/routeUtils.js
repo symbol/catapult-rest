@@ -137,28 +137,6 @@ const routeUtils = {
 	},
 
 	/**
-	 * Parses optional paging arguments and throws an invalid argument error if any is invalid.
-	 * @param {object} args Arguments to parse.
-	 * @returns {object} Parsed paging options.
-	 */
-	parsePagingArguments: args => {
-		const parsedOptions = { id: undefined, pageSize: 0 };
-		const parsers = {
-			id: { tryParse: str => (isObjectId(str) ? str : undefined), type: 'object id' },
-			pageSize: { tryParse: convert.tryParseUint, type: 'unsigned integer' }
-		};
-
-		Object.keys(parsedOptions).filter(key => args[key]).forEach(key => {
-			const parser = parsers[key];
-			parsedOptions[key] = parser.tryParse(args[key]);
-			if (!parsedOptions[key])
-				throw errors.createInvalidArgumentError(`${key} is not a valid ${parser.type}`);
-		});
-
-		return parsedOptions;
-	},
-
-	/**
 	 * Parses pagination arguments and throws an invalid argument error if any is invalid.
 	 * @param {object} args Arguments to parse.
 	 * @param {object} optionsPageSize Page size options.
@@ -195,8 +173,10 @@ const routeUtils = {
 		}
 		parsedArgs.pageNumber = 0 < parsedArgs.pageNumber ? parsedArgs.pageNumber : 1;
 
-		if (args.offset)
+		if (args.offset) {
 			parsedArgs.offset = routeUtils.parseArgument(args, 'offset', offsetParsers[parsedArgs.sortField]);
+			parsedArgs.offsetType = offsetParsers[parsedArgs.sortField];
+		}
 
 		return parsedArgs;
 	},
@@ -335,19 +315,21 @@ const routeUtils = {
 	 * @returns {Function} Restify response function to process merkle path requests.
 	 */
 	blockRouteMerkleProcessor: (db, blockMetaCountField, blockMetaTreeField) => (req, res, next) => {
-		const height = routeUtils.parseArgument(req.params, 'height', 'uint');
+		const height = routeUtils.parseArgument(req.params, 'height', 'uint64');
 		const hash = routeUtils.parseArgument(req.params, 'hash', 'hash256');
 
 		return dbFacade.runHeightDependentOperation(db, height, () => db.blockWithMerkleTreeAtHeight(height, blockMetaTreeField))
 			.then(result => {
 				if (!result.isRequestValid) {
-					res.send(errors.createNotFoundError(height));
+					res.send(errors.createNotFoundError(uint64.toString(height)));
 					return next();
 				}
 
 				const block = result.payload;
 				if (!block.meta[blockMetaCountField]) {
-					res.send(errors.createInvalidArgumentError(`hash '${req.params.hash}' not included in block height '${height}'`));
+					res.send(errors.createInvalidArgumentError(
+						`hash '${req.params.hash}' not included in block height '${uint64.toString(height)}'`
+					));
 					return next();
 				}
 
@@ -357,7 +339,9 @@ const routeUtils = {
 				};
 
 				if (0 > indexOfLeafWithHash(hash, merkleTree)) {
-					res.send(errors.createInvalidArgumentError(`hash '${req.params.hash}' not included in block height '${height}'`));
+					res.send(errors.createInvalidArgumentError(
+						`hash '${req.params.hash}' not included in block height '${uint64.toString(height)}'`
+					));
 					return next();
 				}
 
