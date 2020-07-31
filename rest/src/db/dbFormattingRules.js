@@ -20,12 +20,9 @@
 
 const { longToUint64 } = require('./dbUtils');
 const catapult = require('catapult-sdk');
-const { Binary } = require('mongodb');
 
 const { ModelType, status } = catapult.model;
 const { convert, uint64 } = catapult.utils;
-
-const rawUint64ToUint64 = value => (value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value));
 
 module.exports = {
 	[ModelType.none]: value => value,
@@ -34,13 +31,9 @@ module.exports = {
 	[ModelType.objectId]: value => (undefined === value ? '' : value.toHexString().toUpperCase()),
 	[ModelType.statusCode]: value => status.toString(value >>> 0),
 	[ModelType.string]: value => value.toString(),
-	// `uint` and `int` formatters add support to uint16 arraybuffers in addition to basic uint16
-	[ModelType.uint8]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt8(0) : value),
-	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt16LE(0) : value),
-	[ModelType.uint32]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt32LE(0) : value),
-	[ModelType.uint64]: value => uint64.toString(rawUint64ToUint64(value)),
-	[ModelType.uint64HexIdentifier]: value => uint64.toHex(rawUint64ToUint64(value)),
-	[ModelType.int8]: value => (value instanceof Binary ? Buffer.from(value.buffer).readInt8(0) : value),
-	[ModelType.int16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readInt16LE(0) : value),
-	[ModelType.boolean]: value => true === value
+	// `uint` and `int` formatters
+	[ModelType.uint]: value => convert.int32ToUint32(value),
+	[ModelType.uint64]: value => uint64.toString(longToUint64(value)),
+	[ModelType.uint64HexIdentifier]: value => uint64.toHex(longToUint64(value)),
+	[ModelType.int]: value => value
 };

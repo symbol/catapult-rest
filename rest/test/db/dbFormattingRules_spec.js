@@ -94,73 +94,33 @@ describe('db formatting rules', () => {
 		expect(result).to.equal('catapult');
 	});
 
-	it('can format uint8 type', () => {
-		// Act:
-		const result = formattingRules[ModelType.uint8](255);
+	describe('can format uint type', () => {
+		const testCases = [
+			{ name: 'uint value 0', value: 0, formated: 0 },
+			{ name: 'uint8 value 255', value: 255, formated: 255 },
+			{ name: 'uint16 value 65535', value: 65535, formated: 65535 },
+			{ name: 'uint32 value -1', value: -1, formated: 4294967295 }
+		];
 
-		// Assert:
-		expect(result).to.equal(255);
-	});
-
-	it('can format uint8 type from Binary', () => {
-		// Arrange:
-		const buffer = Buffer.alloc(1, 0);
-		buffer.writeUInt8(255);
-		const object = new Binary(buffer);
-
-		// Act:
-		const result = formattingRules[ModelType.uint8](object);
-
-		// Assert:
-		expect(result).to.deep.equal(255);
-	});
-
-	it('can format uint16 type', () => {
-		// Act:
-		const result = formattingRules[ModelType.uint16](new Int32(17434));
-
+		/*
 		// Mira't aixo
-		const int32 = (new Int32(65536)).valueOf(); // el valueOf crec que no fa falta perque es crida implicitament - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/valueOf
+		const int32 = (new Int32(65536)).valueOf();
+		// el valueOf crec que no fa falta perque es crida implicitament
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/valueOf
 		const buffer = Buffer.alloc(4, 0);
 		buffer.writeInt32LE(int32);
 		console.log(buffer.readUInt16LE());
-		
-		// Assert:
-		expect(result).to.equal(17434);
-	});
+		*/
 
-	it('can format uint16 type from Binary', () => {
-		// Arrange:
-		const buffer = Buffer.alloc(2, 0);
-		buffer.writeUInt16LE(17434);
-		const object = new Binary(buffer);
+		testCases.forEach(testCase => {
+			it(testCase.name, () => {
+				// Arrange + Act:
+				const result = formattingRules[ModelType.uint](testCase.value);
 
-		// Act:
-		const result = formattingRules[ModelType.uint16](object);
-
-		// Assert:
-		expect(result).to.deep.equal(17434);
-	});
-
-	it('can format uint32 type', () => {
-		// Act:
-		const result = formattingRules[ModelType.uint32](1234567890);
-
-		// Assert:
-		expect(result).to.equal(1234567890);
-	});
-
-	it('can format uint32 type from Binary', () => {
-		// Arrange:
-		const buffer = Buffer.alloc(4, 0);
-		buffer.writeUInt32LE(1234567890);
-		const object = new Binary(buffer);
-
-		// Act:
-		const result = formattingRules[ModelType.uint32](object);
-
-		// Assert:
-		expect(result).to.deep.equal(1234567890);
+				// Assert:
+				expect(result).to.equal(testCase.formated);
+			});
+		});
 	});
 
 	it('can format uint64 type from Long', () => {
@@ -174,20 +134,6 @@ describe('db formatting rules', () => {
 		expect(result).to.equal('8589934593');
 	});
 
-	it('can format uint64 type from Binary', () => {
-		// Arrange:
-		const buffer = Buffer.alloc(8, 0);
-		buffer.writeUInt32LE(0x00ABCDEF, 0);
-		buffer.writeUInt32LE(0x000FDFFF, 4);
-		const object = new Binary(buffer);
-
-		// Act:
-		const result = formattingRules[ModelType.uint64](object);
-
-		// Assert:
-		expect(result).to.equal('4468410971573743');
-	});
-
 	it('can format uint64HexIdentifier type from Long', () => {
 		// Arrange:
 		const object = convertToLong([1, 2]);
@@ -199,84 +145,17 @@ describe('db formatting rules', () => {
 		expect(result).to.equal('0000000200000001');
 	});
 
-	it('can format uint64HexIdentifier type from Binary', () => {
-		// Arrange:
-		const buffer = Buffer.alloc(8, 0);
-		buffer.writeUInt32LE(0x00ABCDEF, 0);
-		buffer.writeUInt32LE(0x000FDFFF, 4);
-		const object = new Binary(buffer);
-
-		// Act:
-		const result = formattingRules[ModelType.uint64HexIdentifier](object);
-
-		// Assert:
-		expect(result).to.equal('000FDFFF00ABCDEF');
-	});
-
-	describe('can format int8 type', () => {
-		const getOneByteBinaryBuffer = value => {
-			const buffer = Buffer.alloc(1, 0);
-			buffer.writeInt8(value);
-			return new Binary(buffer);
-		};
-
+	describe('can format int type', () => {
 		const testCases = [
-			{ name: 'int8 value 127', value: 127, formated: 127 },
-			{ name: 'int8 value 0', value: 0, formated: 0 },
-			{ name: 'int8 value -128', value: -128, formated: -128 },
-			{ name: 'int8 binary 127', value: getOneByteBinaryBuffer(127), formated: 127 },
-			{ name: 'int8 binary 0', value: getOneByteBinaryBuffer(0), formated: 0 },
-			{ name: 'int8 binary -128', value: getOneByteBinaryBuffer(-128), formated: -128 }
+			{ name: 'negative value', value: -1245, formated: -1245 },
+			{ name: '0', value: 0, formated: 0 },
+			{ name: 'positive value', value: 1245, formated: 1245 }
 		];
 
 		testCases.forEach(testCase => {
 			it(testCase.name, () => {
 				// Arrange + Act:
-				const result = formattingRules[ModelType.int8](testCase.value);
-
-				// Assert:
-				expect(result).to.equal(testCase.formated);
-			});
-		});
-	});
-
-	describe('can format int16 type', () => {
-		const getTwoBytesBinaryBuffer = value => {
-			const buffer = Buffer.alloc(2, 0);
-			buffer.writeInt16LE(value);
-			return new Binary(buffer);
-		};
-
-		const testCases = [
-			{ name: 'int16 value 32767', value: 32767, formated: 32767 },
-			{ name: 'int16 value 0', value: 0, formated: 0 },
-			{ name: 'int16 value -32768', value: -32768, formated: -32768 },
-			{ name: 'int16 binary 32767', value: getTwoBytesBinaryBuffer(32767), formated: 32767 },
-			{ name: 'int16 binary 0', value: getTwoBytesBinaryBuffer(0), formated: 0 },
-			{ name: 'int16 binary -32768', value: getTwoBytesBinaryBuffer(-32768), formated: -32768 }
-		];
-
-		testCases.forEach(testCase => {
-			it(testCase.name, () => {
-				// Arrange + Act:
-				const result = formattingRules[ModelType.int16](testCase.value);
-
-				// Assert:
-				expect(result).to.equal(testCase.formated);
-			});
-		});
-	});
-
-	describe('can format boolean type', () => {
-		const testCases = [
-			{ name: 'true', value: true, formated: true },
-			{ name: 'false', value: false, formated: false }
-		];
-
-		testCases.forEach(testCase => {
-			it(testCase.name, () => {
-				// Arrange + Act:
-				const result = formattingRules[ModelType.boolean](testCase.value);
+				const result = formattingRules[ModelType.int](testCase.value);
 
 				// Assert:
 				expect(result).to.equal(testCase.formated);
