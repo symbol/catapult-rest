@@ -211,7 +211,7 @@ const convert = {
 		if (2147483647 < input || -2147483648 > input)
 			throw Error(`input '${input}' is out of range`);
 
-		return input & 0xFFFFFFFF;
+		return (input & 0xFFFFFFFF) >>> 0;
 	}
 };
 

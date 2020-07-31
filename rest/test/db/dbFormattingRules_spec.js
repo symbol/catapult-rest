@@ -23,7 +23,7 @@ const { convertToLong } = require('../../src/db/dbUtils');
 const test = require('../testUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
-const { Binary, Int32 } = require('mongodb');
+const { Int32 } = require('mongodb');
 
 const { ModelType } = catapult.model;
 
@@ -96,21 +96,13 @@ describe('db formatting rules', () => {
 
 	describe('can format uint type', () => {
 		const testCases = [
-			{ name: 'uint value 0', value: 0, formated: 0 },
-			{ name: 'uint8 value 255', value: 255, formated: 255 },
-			{ name: 'uint16 value 65535', value: 65535, formated: 65535 },
-			{ name: 'uint32 value -1', value: -1, formated: 4294967295 }
+			{ name: 'uint value 0 (min)', value: new Int32(0), formated: 0 },
+			{ name: 'uint8 value 255', value: new Int32(255), formated: 255 },
+			{ name: 'uint16 value 65535', value: new Int32(65535), formated: 65535 },
+			{ name: 'uint32 value 4294967295 (max)', value: new Int32(-1), formated: 4294967295 },
+			{ name: 'uint32 value 2147483647', value: new Int32(2147483647), formated: 2147483647 },
+			{ name: 'uint32 value 2147483648', value: new Int32(-2147483648), formated: 2147483648 }
 		];
-
-		/*
-		// Mira't aixo
-		const int32 = (new Int32(65536)).valueOf();
-		// el valueOf crec que no fa falta perque es crida implicitament
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/valueOf
-		const buffer = Buffer.alloc(4, 0);
-		buffer.writeInt32LE(int32);
-		console.log(buffer.readUInt16LE());
-		*/
 
 		testCases.forEach(testCase => {
 			it(testCase.name, () => {
@@ -147,9 +139,12 @@ describe('db formatting rules', () => {
 
 	describe('can format int type', () => {
 		const testCases = [
-			{ name: 'negative value', value: -1245, formated: -1245 },
-			{ name: '0', value: 0, formated: 0 },
-			{ name: 'positive value', value: 1245, formated: 1245 }
+			{ name: 'int value 0', value: new Int32(0), formated: 0 },
+			{ name: 'int8 value 255', value: new Int32(255), formated: 255 },
+			{ name: 'int16 value 65535', value: new Int32(65535), formated: 65535 },
+			{ name: 'int32 value -1', value: new Int32(-1), formated: -1 },
+			{ name: 'int32 value -2147483648 (min)', value: new Int32(-2147483648), formated: -2147483648 },
+			{ name: 'int32 value 2147483647 (max)', value: new Int32(2147483647), formated: 2147483647 }
 		];
 
 		testCases.forEach(testCase => {

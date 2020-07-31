@@ -35,5 +35,5 @@ module.exports = {
 	[ModelType.uint]: value => convert.int32ToUint32(value),
 	[ModelType.uint64]: value => uint64.toString(longToUint64(value)),
 	[ModelType.uint64HexIdentifier]: value => uint64.toHex(longToUint64(value)),
-	[ModelType.int]: value => value
+	[ModelType.int]: value => value.valueOf()
 };
