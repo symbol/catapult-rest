@@ -81,7 +81,7 @@ const accountRestrictionTypeDescriptors = [
 	{
 		entityType: EntityType.accountRestrictionOperation,
 		schemaPrefix: 'operation',
-		valueType: ModelType.none,
+		valueType: ModelType.uint16,
 		flag: AccountRestrictionTypeFlags.operation
 	}
 ];

@@ -23,7 +23,7 @@ const { convertToLong } = require('../../src/db/dbUtils');
 const test = require('../testUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
-const { Int32 } = require('mongodb');
+const { Binary, Int32 } = require('mongodb');
 
 const { ModelType } = catapult.model;
 
@@ -113,6 +113,27 @@ describe('db formatting rules', () => {
 				expect(result).to.equal(testCase.formated);
 			});
 		});
+	});
+
+	it('can format uint16 type', () => {
+		// Act:
+		const result = formattingRules[ModelType.uint16](17434);
+
+		// Assert:
+		expect(result).to.equal(17434);
+	});
+
+	it('can format uint16 type from Binary', () => {
+		// Arrange:
+		const buffer = Buffer.alloc(2, 0);
+		buffer.writeUInt16LE(17434);
+		const object = new Binary(buffer);
+
+		// Act:
+		const result = formattingRules[ModelType.uint16](object);
+
+		// Assert:
+		expect(result).to.deep.equal(17434);
 	});
 
 	it('can format uint64 type from Long', () => {

@@ -34,10 +34,11 @@ describe('model type enumeration', () => {
 			statusCode: 6,
 			string: 7,
 			uint: 8,
-			uint64: 9,
-			uint64HexIdentifier: 10,
-			int: 11,
-			max: 11
+			uint16: 9,
+			uint64: 10,
+			uint64HexIdentifier: 11,
+			int: 12,
+			max: 12
 		});
 	});
 });
