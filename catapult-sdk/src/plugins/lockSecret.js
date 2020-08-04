@@ -40,6 +40,8 @@ const lockSecretPlugin = {
 			mosaicId: ModelType.uint64HexIdentifier,
 			amount: ModelType.uint64,
 			endHeight: ModelType.uint64,
+			status: ModelType.int,
+			hashAlgorithm: ModelType.int,
 			secret: ModelType.binary,
 			recipientAddress: ModelType.binary,
 			compositeHash: ModelType.binary

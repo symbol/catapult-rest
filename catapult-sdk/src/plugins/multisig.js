@@ -42,6 +42,8 @@ const multisigPlugin = {
 		});
 		builder.addSchema('multisigEntry.multisig', {
 			accountAddress: ModelType.binary,
+			minApproval: ModelType.int,
+			minRemoval: ModelType.int,
 			multisigAddresses: { type: ModelType.array, schemaName: ModelType.binary },
 			cosignatoryAddresses: { type: ModelType.array, schemaName: ModelType.binary }
 		});

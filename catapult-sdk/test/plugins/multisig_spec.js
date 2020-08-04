@@ -59,9 +59,9 @@ describe('multisig plugin', () => {
 			expect(Object.keys(modelSchema.multisigEntry).length).to.equal(1);
 			expect(modelSchema.multisigEntry).to.contain.all.keys(['multisig']);
 
-			expect(Object.keys(modelSchema['multisigEntry.multisig']).length).to.equal(3);
+			expect(Object.keys(modelSchema['multisigEntry.multisig']).length).to.equal(5);
 			expect(modelSchema['multisigEntry.multisig'])
-				.to.contain.all.keys(['accountAddress', 'multisigAddresses', 'cosignatoryAddresses']);
+				.to.contain.all.keys(['accountAddress', 'minApproval', 'minRemoval', 'multisigAddresses', 'cosignatoryAddresses']);
 
 			// - multisig graph
 			expect(Object.keys(modelSchema.multisigGraph).length).to.equal(1);

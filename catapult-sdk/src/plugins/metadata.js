@@ -63,6 +63,8 @@ const metadataPlugin = {
 			targetAddress: ModelType.binary,
 			scopedMetadataKey: ModelType.uint64HexIdentifier,
 			targetId: ModelType.uint64HexIdentifier,
+			metadataType: ModelType.int,
+			valueSize: ModelType.int,
 			value: ModelType.binary
 		});
 	},

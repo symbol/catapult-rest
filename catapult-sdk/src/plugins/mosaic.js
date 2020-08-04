@@ -48,6 +48,9 @@ const mosaicPlugin = {
 			supply: ModelType.uint64,
 			startHeight: ModelType.uint64,
 			ownerAddress: ModelType.binary,
+			revision: ModelType.int,
+			flags: ModelType.int,
+			divisibility: ModelType.int,
 			duration: ModelType.uint64
 		});
 	},

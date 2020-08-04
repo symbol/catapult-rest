@@ -51,8 +51,9 @@ describe('lock secret plugin', () => {
 			assertSchema(modelSchema.secretLockInfo, 2, 'id', 'lock');
 
 			// - secret lock infos
-			assertSchema(modelSchema['secretLockInfo.lock'], 7,
-				'ownerAddress', 'mosaicId', 'amount', 'endHeight', 'secret', 'recipientAddress', 'compositeHash');
+			assertSchema(modelSchema['secretLockInfo.lock'], 9,
+				'ownerAddress', 'mosaicId', 'amount', 'endHeight', 'secret',
+				'status', 'hashAlgorithm', 'recipientAddress', 'compositeHash');
 
 			// - secret lock transactions
 			const transactionSchemaSize = Object.keys(modelSchema.transaction).length;
