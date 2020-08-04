@@ -32,11 +32,12 @@ const formatBody = (modelFormatter, body) => {
 		if ('page' === structure)
 			return formatPage(modelFormatter[type], payload);
 
-		if (wsTopic)
+		if (wsTopic) {
 			return {
 				topic: wsTopic,
 				data: modelFormatter[type].format(payload)
 			};
+		}
 
 		return modelFormatter[type].format(payload);
 	};
