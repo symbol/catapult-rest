@@ -67,12 +67,12 @@ describe('namespace plugin', () => {
 			);
 
 			// - alias address
-			expect(Object.keys(modelSchema.aliasAddress).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
-			expect(modelSchema.aliasAddress).to.contain.all.keys(['namespaceId', 'address']);
+			expect(Object.keys(modelSchema.aliasAddress).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
+			expect(modelSchema.aliasAddress).to.contain.all.keys(['namespaceId', 'address', 'aliasAction']);
 
 			// - alias mosaic
-			expect(Object.keys(modelSchema.aliasMosaic).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
-			expect(modelSchema.aliasMosaic).to.contain.all.keys(['namespaceId', 'mosaicId']);
+			expect(Object.keys(modelSchema.aliasMosaic).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
+			expect(modelSchema.aliasMosaic).to.contain.all.keys(['namespaceId', 'mosaicId', 'aliasAction']);
 
 			// - namespaces
 			expect(Object.keys(modelSchema.namespaces).length).to.equal(1);
@@ -83,36 +83,34 @@ describe('namespace plugin', () => {
 			expect(modelSchema.namespaceDescriptor).to.contain.all.keys(['id', 'meta', 'namespace']);
 
 			// - namespaceDescriptor.meta
-			expect(Object.keys(modelSchema['namespaceDescriptor.meta']).length).to.equal(0);
+			expect(Object.keys(modelSchema['namespaceDescriptor.meta']).length).to.equal(2);
+			expect(modelSchema['namespaceDescriptor.meta']).to.contain.all.keys(['active', 'index']);
 
 			// - namespaceDescriptor.namespace
-			expect(Object.keys(modelSchema['namespaceDescriptor.namespace']).length).to.equal(8);
+			expect(Object.keys(modelSchema['namespaceDescriptor.namespace']).length).to.equal(10);
 			expect(modelSchema['namespaceDescriptor.namespace']).to.contain.all.keys([
-				'level0', 'level1', 'level2', 'alias', 'parentId', 'ownerAddress', 'startHeight', 'endHeight'
+				'registrationType', 'depth', 'level0', 'level1', 'level2', 'alias', 'parentId', 'ownerAddress', 'startHeight', 'endHeight'
 			]);
 
 			// - namespaceDescriptor.alias.mosaic
-			expect(Object.keys(modelSchema['namespaceDescriptor.alias.mosaic']).length).to.equal(1);
-			expect(modelSchema['namespaceDescriptor.alias.mosaic']).to.contain.all.keys([
-				'mosaicId'
-			]);
+			expect(Object.keys(modelSchema['namespaceDescriptor.alias.mosaic']).length).to.equal(2);
+			expect(modelSchema['namespaceDescriptor.alias.mosaic']).to.contain.all.keys(['type', 'mosaicId']);
 
 			// - namespaceDescriptor.alias.address
-			expect(Object.keys(modelSchema['namespaceDescriptor.alias.address']).length).to.equal(1);
-			expect(modelSchema['namespaceDescriptor.alias.address']).to.contain.all.keys([
-				'address'
-			]);
+			expect(Object.keys(modelSchema['namespaceDescriptor.alias.address']).length).to.equal(2);
+			expect(modelSchema['namespaceDescriptor.alias.address']).to.contain.all.keys(['type', 'address']);
 
 			// - namespaceDescriptor.alias.empty
-			expect(Object.keys(modelSchema['namespaceDescriptor.alias.empty']).length).to.equal(0);
+			expect(Object.keys(modelSchema['namespaceDescriptor.alias.empty']).length).to.equal(1);
+			expect(modelSchema['namespaceDescriptor.alias.empty']).to.contain.all.keys(['type']);
 
 			// - namespaceNameTuple
 			expect(Object.keys(modelSchema.namespaceNameTuple).length).to.equal(3);
 			expect(modelSchema.namespaceNameTuple).to.contain.all.keys(['id', 'name', 'parentId']);
 
 			// - register namespace
-			expect(Object.keys(modelSchema.registerNamespace).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
-			expect(modelSchema.registerNamespace).to.contain.all.keys(['id', 'parentId', 'duration', 'name']);
+			expect(Object.keys(modelSchema.registerNamespace).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
+			expect(modelSchema.registerNamespace).to.contain.all.keys(['id', 'registrationType', 'parentId', 'duration', 'name']);
 
 			// - mosaic names
 			expect(Object.keys(modelSchema.mosaicNames).length).to.equal(1);
