@@ -158,6 +158,20 @@ describe('db formatting rules', () => {
 		expect(result).to.equal('0000000200000001');
 	});
 
+	it('can format uint64HexIdentifier type from Binary', () => {
+		// Arrange:
+		const buffer = Buffer.alloc(8, 0);
+		buffer.writeUInt32LE(0x00ABCDEF, 0);
+		buffer.writeUInt32LE(0x000FDFFF, 4);
+		const object = new Binary(buffer);
+
+		// Act:
+		const result = formattingRules[ModelType.uint64HexIdentifier](object);
+
+		// Assert:
+		expect(result).to.equal('000FDFFF00ABCDEF');
+	});
+
 	describe('can format int type', () => {
 		const testCases = [
 			{ name: 'int value 0', value: new Int32(0), formated: 0 },

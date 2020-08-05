@@ -41,9 +41,10 @@ module.exports = {
 	[ModelType.statusCode]: value => status.toString(value >>> 0),
 	[ModelType.string]: value => value.toString(),
 	[ModelType.uint]: value => convert.int32ToUint32(value),
-	// uint16 required solely because accountRestrictions->restrictionAdditions array has ints formatted as binary
+	// `uint16` required solely because accountRestrictions->restrictionAdditions array has uint16 provided as binary
 	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readInt16LE(0) : value),
 	[ModelType.uint64]: value => uint64.toString(longToUint64(value)),
-	[ModelType.uint64HexIdentifier]: value => uint64.toHex(longToUint64(value)),
+	// `uint64HexIdentifier` requires branching accountRestrictions->restrictionAdditions provides uint64 as binary
+	[ModelType.uint64HexIdentifier]: value => uint64.toHex(value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value)),
 	[ModelType.int]: value => value.valueOf()
 };
