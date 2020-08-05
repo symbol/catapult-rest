@@ -192,4 +192,21 @@ describe('db formatting rules', () => {
 			});
 		});
 	});
+
+	describe('can format boolean type', () => {
+		const testCases = [
+			{ name: 'boolean true', value: true, formated: true },
+			{ name: 'boolean false', value: false, formated: false }
+		];
+
+		testCases.forEach(testCase => {
+			it(testCase.name, () => {
+				// Arrange + Act:
+				const result = formattingRules[ModelType.boolean](testCase.value);
+
+				// Assert:
+				expect(result).to.equal(testCase.formated);
+			});
+		});
+	});
 });

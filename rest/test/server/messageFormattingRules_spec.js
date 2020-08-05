@@ -129,4 +129,15 @@ describe('message formatting rules', () => {
 		// Assert:
 		expect(result).to.equal('0000000200000001');
 	});
+
+	it('can format boolean type', () => {
+		// Arrange:
+		const object = true;
+
+		// Act:
+		const result = formattingRules[ModelType.boolean](object);
+
+		// Assert:
+		expect(result).to.deep.equal(true);
+	});
 });
