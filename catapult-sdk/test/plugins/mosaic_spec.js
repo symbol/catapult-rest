@@ -52,12 +52,14 @@ describe('mosaic plugin', () => {
 			);
 
 			// - mosaic definition
-			expect(Object.keys(modelSchema.mosaicDefinition).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
-			expect(modelSchema.mosaicDefinition).to.contain.all.keys(['id', 'duration']);
+			expect(Object.keys(modelSchema.mosaicDefinition).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
+			expect(modelSchema.mosaicDefinition).to.contain.all.keys(
+				['id', 'duration', 'nonce', 'flags', 'divisibility']
+			);
 
 			// - mosaic supply change
-			expect(Object.keys(modelSchema.mosaicSupplyChange).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
-			expect(modelSchema.mosaicSupplyChange).to.contain.all.keys(['mosaicId', 'delta']);
+			expect(Object.keys(modelSchema.mosaicSupplyChange).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
+			expect(modelSchema.mosaicSupplyChange).to.contain.all.keys(['mosaicId', 'delta', 'action']);
 
 			// - mosaic descriptor
 			expect(Object.keys(modelSchema.mosaicDescriptor).length).to.equal(2);

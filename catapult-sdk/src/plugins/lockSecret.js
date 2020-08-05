@@ -52,12 +52,14 @@ const lockSecretPlugin = {
 			secret: ModelType.binary,
 			mosaicId: ModelType.uint64HexIdentifier,
 			amount: ModelType.uint64,
-			duration: ModelType.uint64
+			duration: ModelType.uint64,
+			hashAlgorithm: ModelType.int
 		});
 		builder.addTransactionSupport(EntityType.secretProof, {
 			secret: ModelType.binary,
 			recipientAddress: ModelType.binary,
-			proof: ModelType.binary
+			proof: ModelType.binary,
+			hashAlgorithm: ModelType.int
 		});
 	},
 

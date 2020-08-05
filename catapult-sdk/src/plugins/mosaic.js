@@ -30,12 +30,16 @@ const mosaicPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.mosaicDefinition, {
 			id: ModelType.uint64HexIdentifier,
-			duration: ModelType.uint64
+			duration: ModelType.uint64,
+			nonce: ModelType.int,
+			flags: ModelType.int,
+			divisibility: ModelType.int
 		});
 
 		builder.addTransactionSupport(EntityType.mosaicSupplyChange, {
 			mosaicId: ModelType.uint64HexIdentifier,
-			delta: ModelType.uint64
+			delta: ModelType.uint64,
+			action: ModelType.int
 		});
 
 		builder.addSchema('mosaicDescriptor', {

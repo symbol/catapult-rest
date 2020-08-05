@@ -33,6 +33,8 @@ const constants = { sizes };
 const multisigPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.modifyMultisigAccount, {
+			minRemovalDelta: ModelType.int,
+			minApprovalDelta: ModelType.int,
 			addressAdditions: { type: ModelType.array, schemaName: ModelType.binary },
 			addressDeletions: { type: ModelType.array, schemaName: ModelType.binary }
 		});
