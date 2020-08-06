@@ -95,15 +95,7 @@ class MessageChannelBuilder {
 				const hash = parser.buffer(catapult.constants.sizes.hash256);
 				const deadline = parser.uint64();
 				const code = parser.uint32();
-
-				// removing the markerChart from topic
-				const address = topic.subarray(1);
-				emit({
-					type: 'transactionStatus',
-					payload: {
-						hash, address, code, deadline
-					}
-				});
+				emit({ type: 'transactionStatus', payload: { hash, code, deadline } });
 			}
 		};
 	}
