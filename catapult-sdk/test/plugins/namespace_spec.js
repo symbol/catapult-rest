@@ -140,10 +140,11 @@ describe('namespace plugin', () => {
 					[ModelType.uint64]: () => 'uint64',
 					[ModelType.uint64HexIdentifier]: () => 'uint64HexIdentifier',
 					[ModelType.objectId]: () => 'objectId',
-					[ModelType.string]: () => 'string'
+					[ModelType.string]: () => 'string',
+					[ModelType.int]: () => 'int'
 				};
 				const namespaceDescriptorNamespace = {
-					type: null,
+					registrationType: null,
 					depth: null,
 					level0: null,
 					level1: null,
@@ -169,7 +170,7 @@ describe('namespace plugin', () => {
 				// Assert
 				expect(Object.keys(formattedEntity).length).to.equal(10);
 				expect(formattedEntity).to.contain.all.keys([
-					'type', 'depth', 'level0', 'level1', 'level2', 'alias',
+					'registrationType', 'depth', 'level0', 'level1', 'level2', 'alias',
 					'parentId', 'ownerAddress', 'startHeight', 'endHeight'
 				]);
 				return formattedEntity.alias;
@@ -188,7 +189,7 @@ describe('namespace plugin', () => {
 				// Assert:
 				expect(formattedAlias).to.contain.all.keys(['type', 'mosaicId']);
 				expect(formattedAlias).deep.equal({
-					type: 'none',
+					type: 'int',
 					mosaicId: 'uint64HexIdentifier'
 				});
 			});
@@ -206,7 +207,7 @@ describe('namespace plugin', () => {
 				// Assert:
 				expect(formattedAlias).to.contain.all.keys(['type', 'address']);
 				expect(formattedAlias).deep.equal({
-					type: 'none',
+					type: 'int',
 					address: 'binary'
 				});
 			});
@@ -223,7 +224,7 @@ describe('namespace plugin', () => {
 				// Assert:
 				expect(formattedAlias).to.contain.all.keys(['type']);
 				expect(formattedAlias).deep.equal({
-					type: 'none'
+					type: 'int'
 				});
 			});
 		});
