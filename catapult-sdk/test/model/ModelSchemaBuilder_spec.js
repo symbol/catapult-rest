@@ -111,24 +111,24 @@ describe('model schema builder', () => {
 			expect(modelSchema).to.not.contain.any.keys(Object.keys(EntityType));
 		});
 
-		const extractPropertiesWithType = (object, matches, type, key = '') => {
+		const extractPropertiesWithType = (object, matches, propertyType, key = '') => {
 			const properties = Object.keys(object);
 			properties.forEach(property => {
-				if (ModelType[type] === (object[property].type || object[property]))
+				if (ModelType[propertyType] === (object[property].type || object[property]))
 					matches.push(`${key}${property}`);
 				else if ('string' !== typeof object[property])
-					extractPropertiesWithType(object[property], matches, type, `${key}${property}.`);
+					extractPropertiesWithType(object[property], matches, propertyType, `${key}${property}.`);
 			});
 		};
 
-		const extractSchemaPropertiesWithType = type => {
+		const extractSchemaPropertiesWithType = propertyType => {
 			// Arrange:
 			const builder = new ModelSchemaBuilder();
 			const modelSchema = builder.build();
 
 			// Act:
 			const matchingProperties = [];
-			extractPropertiesWithType(modelSchema, matchingProperties, type);
+			extractPropertiesWithType(modelSchema, matchingProperties, propertyType);
 			return matchingProperties;
 		};
 
@@ -309,6 +309,40 @@ describe('model schema builder', () => {
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
 				'transactionStatus.code'
+			]);
+		});
+
+		it('exposes correct int properties', () => {
+			// Act:
+			const matchingProperties = extractSchemaPropertiesWithType('int');
+
+			// Assert:
+			expect(matchingProperties).to.deep.equal([
+				'blockHeader.size',
+				'blockHeader.version',
+				'blockHeader.network',
+				'blockHeader.type',
+				'blockHeader.feeMultiplier',
+				'blockHeaderMetadata.numTransactions',
+				'blockHeaderMetadata.numStatements',
+
+				'transaction.size',
+				'transaction.version',
+				'transaction.network',
+				'transaction.type',
+				'transactionMetadata.index',
+
+				'account.accountType',
+				'activityBucket.beneficiaryCount',
+
+				'nodeInfo.version',
+				'nodeInfo.roles',
+				'nodeInfo.port',
+				'nodeInfo.networkIdentifier',
+
+				'storageInfo.numBlocks',
+				'storageInfo.numTransactions',
+				'storageInfo.numAccounts'
 			]);
 		});
 
