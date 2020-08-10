@@ -51,16 +51,14 @@ const createPolicyBasedAddressFilter = (markerByte, emptyAddressHandler) => topi
 };
 
 const handlers = {
-	transaction: channelName => (codec, emit) => (topic, binaryTransaction, hash, merkleComponentHash, height) => {
+	transaction: (codec, emit) => (topic, binaryTransaction, hash, merkleComponentHash, height) => {
 		const transaction = codec.deserialize(parserFromData(binaryTransaction));
-		const meta = {
-			hash, merkleComponentHash, height: uint64.fromBytes(height), channelName
-		};
+		const meta = { hash, merkleComponentHash, height: uint64.fromBytes(height) };
 		emit({ type: 'transactionWithMetadata', payload: { transaction, meta } });
 	},
 
-	transactionHash: channelName => (codec, emit) => (topic, hash) => {
-		emit({ type: 'transactionWithMetadata', payload: { meta: { hash, channelName } } });
+	transactionHash: (codec, emit) => (topic, hash) => {
+		emit({ type: 'transactionWithMetadata', payload: { meta: { hash } } });
 	}
 };
 
@@ -121,7 +119,7 @@ class MessageChannelBuilder {
 			if (!(handler in handlers))
 				throw Error(`cannot register channel '${name}' with unknown handler '${handler}'`);
 
-			channelHandler = handlers[handler](name);
+			channelHandler = handlers[handler];
 		}
 
 		this.descriptors[name] = { filter: this.createAddressFilter(markerChar), handler: channelHandler };

@@ -87,7 +87,7 @@ describe('message channel builder', () => {
 		it('forwards to emit callback', action);
 	};
 
-	const assertTransactionHandlerEmit = (channelName, createHandler) => {
+	const assertTransactionHandlerEmit = createHandler => {
 		// Arrange:
 		const emitted = [];
 		const codec = createMockCodec(33);
@@ -113,14 +113,13 @@ describe('message channel builder', () => {
 				meta: {
 					hash: 44,
 					merkleComponentHash: 55,
-					height: [66, 0],
-					channelName
+					height: [66, 0]
 				}
 			}
 		});
 	};
 
-	const assertTransactionHashHandlerEmit = (channelName, createHandler) => {
+	const assertTransactionHashHandlerEmit = createHandler => {
 		// Arrange:
 		const emitted = [];
 		const codec = createMockCodec(35);
@@ -135,7 +134,7 @@ describe('message channel builder', () => {
 		expect(codec.collected.length).to.equal(0);
 
 		expect(emitted.length).to.equal(1);
-		expect(emitted[0]).to.deep.equal({ type: 'transactionWithMetadata', payload: { meta: { hash: 44, channelName } } });
+		expect(emitted[0]).to.deep.equal({ type: 'transactionWithMetadata', payload: { meta: { hash: 44 } } });
 	};
 
 	describe('default channels', () => {
@@ -200,7 +199,7 @@ describe('message channel builder', () => {
 			describe('filter', () => { addAddressFilterTests(0x61, builder => builder.build().confirmedAdded.filter); });
 			describe('handler', () => {
 				wrapHandlerEmitTest(() =>
-					assertTransactionHandlerEmit('confirmedAdded', builder => builder.build().confirmedAdded.handler));
+					assertTransactionHandlerEmit(builder => builder.build().confirmedAdded.handler));
 			});
 		});
 
@@ -208,7 +207,7 @@ describe('message channel builder', () => {
 			describe('filter', () => { addAddressFilterTests(0x75, builder => builder.build().unconfirmedAdded.filter); });
 			describe('handler', () => {
 				wrapHandlerEmitTest(() =>
-					assertTransactionHandlerEmit('unconfirmedAdded', builder => builder.build().unconfirmedAdded.handler));
+					assertTransactionHandlerEmit(builder => builder.build().unconfirmedAdded.handler));
 			});
 		});
 
@@ -216,7 +215,7 @@ describe('message channel builder', () => {
 			describe('filter', () => { addAddressFilterTests(0x72, builder => builder.build().unconfirmedRemoved.filter); });
 			describe('handler', () => {
 				wrapHandlerEmitTest(() =>
-					assertTransactionHashHandlerEmit('unconfirmedRemoved', builder => builder.build().unconfirmedRemoved.handler));
+					assertTransactionHashHandlerEmit(builder => builder.build().unconfirmedRemoved.handler));
 			});
 		});
 
@@ -264,7 +263,7 @@ describe('message channel builder', () => {
 			};
 			describe('filter', () => { addAddressFilterTests(0x7A, builder => createChannelInfo(builder).filter); });
 			describe('handler', () => {
-				wrapHandlerEmitTest(() => assertTransactionHandlerEmit('foo', builder => createChannelInfo(builder).handler));
+				wrapHandlerEmitTest(() => assertTransactionHandlerEmit(builder => createChannelInfo(builder).handler));
 			});
 		});
 
@@ -275,7 +274,7 @@ describe('message channel builder', () => {
 			};
 			describe('filter', () => { addAddressFilterTests(0x7A, builder => createChannelInfo(builder).filter); });
 			describe('handler', () => {
-				wrapHandlerEmitTest(() => assertTransactionHashHandlerEmit('foo', builder => createChannelInfo(builder).handler));
+				wrapHandlerEmitTest(() => assertTransactionHashHandlerEmit(builder => createChannelInfo(builder).handler));
 			});
 		});
 
