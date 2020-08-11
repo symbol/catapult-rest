@@ -29,18 +29,6 @@ describe('message channel builder', () => {
 		decoded: Buffer.from('6823BB7C3C089D996585466380EDBDC19D4959184893E38C', 'hex')
 	};
 
-	const createMockCodec = value => {
-		const mock = {
-			// only some message handlers require codec, objects passed to codec.deserialize() are collected in following array
-			collected: [],
-			deserialize: (parser, options) => {
-				mock.collected.push({ parser, options });
-				return value;
-			}
-		};
-		return mock;
-	};
-
 	const addAddressFilterTests = (markerByte, createFilter) => {
 		it('rejects marker without topic param', () => {
 			// Arrange:
@@ -84,60 +72,6 @@ describe('message channel builder', () => {
 		});
 	};
 
-	const wrapHandlerEmitTest = action => {
-		it('forwards to emit callback', action);
-	};
-
-	const assertTransactionHandlerEmit = createHandler => {
-		// Arrange:
-		const emitted = [];
-		const codec = createMockCodec(33);
-		const handler = createHandler(new MessageChannelBuilder());
-		const transactionBuffer = Buffer.of(0xEF, 0xCD, 0xAB);
-
-		// Act:
-		const height = Buffer.of(66, 0, 0, 0, 0, 0, 0, 0);
-		handler(codec, eventData => emitted.push(eventData))(22, transactionBuffer, 44, 55, height, 77, 88, 99);
-
-		// Assert:
-		// - 22 is a "topic" so it's not forwarded
-		// - trailing params (77, 88, 99) should be ignored
-		expect(codec.collected.length).to.equal(1);
-		expect(codec.collected[0].parser.buffers.current()).to.equal(transactionBuffer);
-		expect(codec.collected[0].options).to.equal(undefined);
-
-		expect(emitted.length).to.equal(1);
-		expect(emitted[0]).to.deep.equal({
-			type: 'transactionWithMetadata',
-			payload: {
-				transaction: 33,
-				meta: {
-					hash: 44,
-					merkleComponentHash: 55,
-					height: [66, 0]
-				}
-			}
-		});
-	};
-
-	const assertTransactionHashHandlerEmit = createHandler => {
-		// Arrange:
-		const emitted = [];
-		const codec = createMockCodec(35);
-		const handler = createHandler(new MessageChannelBuilder());
-
-		// Act:
-		handler(codec, eventData => emitted.push(eventData))(22, 44, 77, 88, 99);
-
-		// Assert:
-		// - 22 is a "topic" so it's not forwarded
-		// - trailing params (77, 88, 99) should be ignored
-		expect(codec.collected.length).to.equal(0);
-
-		expect(emitted.length).to.equal(1);
-		expect(emitted[0]).to.deep.equal({ type: 'transactionWithMetadata', payload: { meta: { hash: 44 } } });
-	};
-
 	describe('default channels', () => {
 		it('are all present', () => {
 			// Act:
@@ -171,27 +105,9 @@ describe('message channel builder', () => {
 			});
 
 			describe('handler', () => {
-				wrapHandlerEmitTest(() => {
-					// Arrange:
-					const emitted = [];
-					const codec = createMockCodec(34);
-					const { handler } = new MessageChannelBuilder().build().block;
-					const blockBuffer = Buffer.of(0xAB, 0xCD, 0xEF);
-
-					// Act:
-					handler(codec, eventData => emitted.push(eventData))(12, blockBuffer, 56, 78, 99, 88);
-
-					// Assert:
-					// - 12 is a "topic" so it's not forwarded
-					// - trailing params (99, 88) should be ignored
-					expect(codec.collected.length).to.equal(1);
-					expect(codec.collected[0].parser.buffers.current()).to.equal(blockBuffer);
-
-					expect(emitted.length).to.equal(1);
-					expect(emitted[0]).to.deep.equal({
-						type: 'blockHeaderWithMetadata',
-						payload: { block: 34, meta: { hash: 56, generationHash: 78 } }
-					});
+				it('is set to block type', () => {
+					const messageChannelBuilder = new MessageChannelBuilder();
+					expect(messageChannelBuilder.descriptors.block.handler).to.equal(ServerMessageHandler.block);
 				});
 			});
 		});
@@ -199,58 +115,39 @@ describe('message channel builder', () => {
 		describe('confirmedAdded', () => {
 			describe('filter', () => { addAddressFilterTests(0x61, builder => builder.build().confirmedAdded.filter); });
 			describe('handler', () => {
-				wrapHandlerEmitTest(() =>
-					assertTransactionHandlerEmit(builder => builder.build().confirmedAdded.handler));
+				it('is set to transaction type', () => {
+					const messageChannelBuilder = new MessageChannelBuilder();
+					expect(messageChannelBuilder.descriptors.confirmedAdded.handler).to.equal(ServerMessageHandler.transaction);
+				});
 			});
 		});
 
 		describe('unconfirmedAdded', () => {
 			describe('filter', () => { addAddressFilterTests(0x75, builder => builder.build().unconfirmedAdded.filter); });
 			describe('handler', () => {
-				wrapHandlerEmitTest(() =>
-					assertTransactionHandlerEmit(builder => builder.build().unconfirmedAdded.handler));
+				it('is set to transaction type', () => {
+					const messageChannelBuilder = new MessageChannelBuilder();
+					expect(messageChannelBuilder.descriptors.unconfirmedAdded.handler).to.equal(ServerMessageHandler.transaction);
+				});
 			});
 		});
 
 		describe('unconfirmedRemoved', () => {
 			describe('filter', () => { addAddressFilterTests(0x72, builder => builder.build().unconfirmedRemoved.filter); });
 			describe('handler', () => {
-				wrapHandlerEmitTest(() =>
-					assertTransactionHashHandlerEmit(builder => builder.build().unconfirmedRemoved.handler));
+				it('is set to transaction type', () => {
+					const messageChannelBuilder = new MessageChannelBuilder();
+					expect(messageChannelBuilder.descriptors.unconfirmedRemoved.handler).to.equal(ServerMessageHandler.transactionHash);
+				});
 			});
 		});
 
 		describe('status', () => {
 			describe('filter', () => { addAddressFilterTests(0x73, builder => builder.build().status.filter); });
 			describe('handler', () => {
-				wrapHandlerEmitTest(() => {
-					// Arrange:
-					const emitted = [];
-					const codec = createMockCodec(35);
-					const { handler } = new MessageChannelBuilder().build().status;
-
-					// Act:
-					const buffer = Buffer.concat([
-						Buffer.alloc(test.constants.sizes.hash256, 41), // hash
-						Buffer.of(66, 0, 0, 0, 0, 0, 0, 0), // deadline
-						Buffer.of(55, 0, 0, 0) // status
-					]);
-					handler(codec, eventData => emitted.push(eventData))(22, buffer, 99);
-
-					// Assert:
-					// - 22 is a "topic" so it's not forwarded
-					// - trailing param 99 should be ignored
-					expect(codec.collected.length).to.equal(0);
-
-					expect(emitted.length).to.equal(1);
-					expect(emitted[0]).to.deep.equal({
-						type: 'transactionStatus',
-						payload: {
-							hash: Buffer.alloc(test.constants.sizes.hash256, 41),
-							code: 55,
-							deadline: [66, 0]
-						}
-					});
+				it('is set to transaction type', () => {
+					const messageChannelBuilder = new MessageChannelBuilder();
+					expect(messageChannelBuilder.descriptors.status.handler).to.equal(ServerMessageHandler.transactionStatus);
 				});
 			});
 		});
@@ -264,7 +161,11 @@ describe('message channel builder', () => {
 			};
 			describe('filter', () => { addAddressFilterTests(0x7A, builder => createChannelInfo(builder).filter); });
 			describe('handler', () => {
-				wrapHandlerEmitTest(() => assertTransactionHandlerEmit(builder => createChannelInfo(builder).handler));
+				it('is set to transaction type', () => {
+					const messageChannelBuilder = new MessageChannelBuilder();
+					createChannelInfo(messageChannelBuilder);
+					expect(messageChannelBuilder.descriptors.foo.handler).to.equal(ServerMessageHandler.transaction);
+				});
 			});
 		});
 
@@ -275,7 +176,11 @@ describe('message channel builder', () => {
 			};
 			describe('filter', () => { addAddressFilterTests(0x7A, builder => createChannelInfo(builder).filter); });
 			describe('handler', () => {
-				wrapHandlerEmitTest(() => assertTransactionHashHandlerEmit(builder => createChannelInfo(builder).handler));
+				it('is set to transaction hash type', () => {
+					const messageChannelBuilder = new MessageChannelBuilder();
+					createChannelInfo(messageChannelBuilder);
+					expect(messageChannelBuilder.descriptors.foo.handler).to.equal(ServerMessageHandler.transactionHash);
+				});
 			});
 		});
 
@@ -289,10 +194,16 @@ describe('message channel builder', () => {
 			};
 			describe('filter', () => { addAddressFilterTests(0x7A, builder => createChannelInfo(builder).filter); });
 			describe('handler', () => {
-				wrapHandlerEmitTest(() => {
+				it('forwards to emit callback', () => {
 					// Arrange:
 					const emitted = [];
-					const codec = createMockCodec(40);
+					const codec = {
+						collected: [],
+						deserialize: (parser, options) => {
+							codec.collected.push({ parser, options });
+							return 40;
+						}
+					};
 					const { handler } = createChannelInfo(new MessageChannelBuilder());
 
 					// Act:
