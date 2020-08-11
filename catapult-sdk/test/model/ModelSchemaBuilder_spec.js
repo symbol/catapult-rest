@@ -112,9 +112,13 @@ describe('model schema builder', () => {
 		});
 
 		const extractPropertiesWithType = (object, matches, propertyType, key = '') => {
-			const properties = Object.keys(object);
-			properties.forEach(property => {
-				if (ModelType[propertyType] === (object[property].type || object[property]))
+			const getTypeIfNotBasicType = obj => {
+				const objKeys = Object.keys(obj);
+				return 2 === objKeys.length && objKeys.includes('type') && objKeys.includes('schemaName') ? obj.type : undefined;
+			};
+
+			Object.keys(object).forEach(property => {
+				if (ModelType[propertyType] === (getTypeIfNotBasicType(object[property]) || object[property]))
 					matches.push(`${key}${property}`);
 				else if ('string' !== typeof object[property])
 					extractPropertiesWithType(object[property], matches, propertyType, `${key}${property}.`);
