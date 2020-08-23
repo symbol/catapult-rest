@@ -114,6 +114,7 @@ class ModelSchemaBuilder {
 			// region transactionStatus
 
 			transactionStatus: {
+				group: ModelType.string,
 				hash: ModelType.binary,
 				code: ModelType.statusCode,
 				deadline: ModelType.uint64,
