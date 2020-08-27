@@ -35,6 +35,11 @@ const ServerMessageHandler = Object.freeze({
 		emit({ type: 'blockHeaderWithMetadata', payload: { block, meta: { hash, generationHash } } });
 	},
 
+	finalizedBlock: (codec, emit) => (topic, binaryBlock) => {
+		const finalizedBlock = codec.deserialize(parserFromData(binaryBlock));
+		emit({ type: 'finalizedBlock', payload: finalizedBlock });
+	},
+
 	transaction: (codec, emit) => (topic, binaryTransaction, hash, merkleComponentHash, height) => {
 		const transaction = codec.deserialize(parserFromData(binaryTransaction));
 		const meta = { hash, merkleComponentHash, height: uint64.fromBytes(height) };

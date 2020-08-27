@@ -57,6 +57,28 @@ describe('server message handlers', () => {
 		});
 	});
 
+	it('finalized block handler', () => {
+		// Arrange:
+		const emitted = [];
+		const codec = createMockCodec({ height: 33, hash: 44, finalizationPoint: 55 });
+		const blockBuffer = Buffer.of(0xAB, 0xCD, 0xEF);
+
+		// Act:
+		ServerMessageHandler.finalizedBlock(codec, eventData => emitted.push(eventData))(12, blockBuffer, 99, 88);
+
+		// Assert:
+		// - 12 is a "topic" so it's not forwarded
+		// - trailing params (99, 88) should be ignored
+		expect(codec.collected.length).to.equal(1);
+		expect(codec.collected[0].parser.buffers.current()).to.equal(blockBuffer);
+
+		expect(emitted.length).to.equal(1);
+		expect(emitted[0]).to.deep.equal({
+			type: 'finalizedBlock',
+			payload: { height: 33, hash: 44, finalizationPoint: 55 }
+		});
+	});
+
 	it('transaction handler', () => {
 		// Arrange:
 		const emitted = [];
