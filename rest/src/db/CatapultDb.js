@@ -41,15 +41,6 @@ const createSanitizer = () => ({
 		return dbObject;
 	},
 
-	copyAndDeleteIds: dbObjects => {
-		dbObjects.forEach(dbObject => {
-			Object.assign(dbObject.meta, { id: dbObject._id });
-			delete dbObject._id;
-		});
-
-		return dbObjects;
-	},
-
 	deleteId: dbObject => {
 		if (dbObject)
 			delete dbObject._id;
@@ -83,18 +74,6 @@ const createSanitizer = () => ({
 });
 
 const mapToPromise = dbObject => Promise.resolve(null === dbObject ? undefined : dbObject);
-
-const buildBlocksFromOptions = (height, numBlocks, chainHeight) => {
-	const one = convertToLong(1);
-	const startHeight = height.isZero() ? chainHeight.subtract(numBlocks).add(one) : height;
-
-	// In all cases endHeight is actually max height + 1.
-	const calculatedEndHeight = startHeight.add(numBlocks);
-	const chainEndHeight = chainHeight.add(one);
-
-	const endHeight = calculatedEndHeight.lessThan(chainEndHeight) ? calculatedEndHeight : chainEndHeight;
-	return { startHeight, endHeight, numBlocks: endHeight.subtract(startHeight).toNumber() };
-};
 
 const pickTopImportance = wrappedAccount => {
 	const { account } = wrappedAccount;
@@ -227,9 +206,11 @@ class CatapultDb {
 		if (undefined !== beneficiaryAddress)
 			conditions.push({ 'block.beneficiaryAddress': Buffer.from(beneficiaryAddress) });
 
-		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
+		const removeFields = ['meta.transactionMerkleTree', 'meta.statementMerkleTree'];
 
-		return this.queryPagedDocuments(conditions, [], sortConditions, 'blocks', options);
+		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
+
+		return this.queryPagedDocuments(conditions, removeFields, sortConditions, 'blocks', options);
 	}
 
 	blockAtHeight(height) {
@@ -247,23 +228,6 @@ class CatapultDb {
 			.forEach(merkleTree => { excludedMerkleTrees[`meta.${merkleTree}`] = 0; });
 		return this.queryDocument('blocks', { 'block.height': convertToLong(height) }, excludedMerkleTrees)
 			.then(this.sanitizer.deleteId);
-	}
-
-	blocksFrom(height, numBlocks) {
-		if (0 === numBlocks)
-			return Promise.resolve([]);
-
-		return this.chainStatisticCurrent().then(chainStatistic => {
-			const blockCollection = this.database.collection('blocks');
-			const options = buildBlocksFromOptions(convertToLong(height), convertToLong(numBlocks), chainStatistic.height);
-
-			return blockCollection.find({ 'block.height': { $gte: options.startHeight, $lt: options.endHeight } })
-				.project({ 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 })
-				.sort({ 'block.height': -1 })
-				.toArray()
-				.then(this.sanitizer.deleteIds)
-				.then(blocks => Promise.resolve(blocks));
-		});
 	}
 
 	/**
@@ -301,63 +265,41 @@ class CatapultDb {
 	 * metadata - which is comprised of: `totalEntries`, `pageNumber`, and `pageSize`.
 	 */
 	queryPagedDocuments(queryConditions, removedFields, sortConditions, collectionName, options) {
-		const conditions = [];
-		if (queryConditions.length)
-			conditions.push(1 === queryConditions.length ? { $match: queryConditions[0] } : { $match: { $and: queryConditions } });
+		const conditions = Object.assign({}, ...queryConditions);
 		return this.queryPagedDocumentsWithConditions(conditions, removedFields, sortConditions, collectionName, options);
 	}
 
 	queryPagedDocumentsWithConditions(builtConditions, removedFields, sortConditions, collectionName, options) {
-		builtConditions.push(sortConditions);
-
 		const { pageSize } = options;
 		const pageIndex = options.pageNumber - 1;
 
-		const facet = [
-			{ $skip: pageSize * pageIndex },
-			{ $limit: pageSize }
-		];
+		const projection = {};
+		removedFields.forEach(field => { projection[field] = 0; });
 
-		// rename _id to id
-		facet.push({ $set: { id: '$_id' } });
-		removedFields.push('_id');
-
-		if (0 < Object.keys(removedFields).length)
-			facet.push({ $unset: removedFields });
-
-		builtConditions.push({
-			$facet: {
-				data: facet,
-				pagination: [
-					{ $count: 'totalEntries' },
-					{
-						$set: {
-							pageNumber: options.pageNumber,
-							pageSize
-						}
+		return Promise.all([
+			this.database.collection(collectionName)
+				.find(builtConditions)
+				.project(projection)
+				.sort(sortConditions)
+				.skip(pageSize * pageIndex)
+				.limit(pageSize)
+				.toArray()
+				.then(this.sanitizer.renameIds)
+				.then(result => ({
+					data: result,
+					pagination: {
+						pageNumber: options.pageNumber,
+						pageSize
 					}
-				]
-			}
+				})),
+			this.database.collection(collectionName).find().count()
+		]).then(results => {
+			const page = results[0];
+			const count = results[1];
+			page.pagination.totalEntries = count;
+			page.pagination.totalPages = Math.ceil(count / pageSize);
+			return page;
 		});
-
-		return this.database.collection(collectionName)
-			.aggregate(builtConditions, { promoteLongs: false })
-			.toArray()
-			.then(result => {
-				const formattedResult = result[0];
-
-				// when query is empty, mongodb does not fill the pagination info
-				if (!formattedResult.pagination.length)
-					formattedResult.pagination = { totalEntries: 0, pageNumber: options.pageNumber, pageSize };
-				else
-					formattedResult.pagination = formattedResult.pagination[0];
-
-				formattedResult.pagination.totalPages = Math.ceil(
-					formattedResult.pagination.totalEntries / formattedResult.pagination.pageSize
-				);
-
-				return formattedResult;
-			});
 	}
 
 	/**
@@ -417,7 +359,7 @@ class CatapultDb {
 		};
 
 		const removedFields = ['meta.addresses'];
-		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
+		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		const conditions = buildConditions();
 
 		return this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options);
@@ -506,7 +448,7 @@ class CatapultDb {
 		if (undefined !== mosaicId)
 			conditions.push({ 'account.mosaics.id': convertToLong(mosaicId) });
 
-		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
+		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 
 		let queryPromise;
 		if ('balance' === options.sortField) {

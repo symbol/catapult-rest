@@ -70,7 +70,7 @@ class NamespaceDb {
 		// Returning only active namespaces
 		conditions.push({ 'meta.active': true });
 
-		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
+		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'namespaces', options);
 	}
 

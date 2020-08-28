@@ -71,7 +71,7 @@ class ReceiptsDb {
 			conditions.push({ [`statement.receipts.${artifactIdType}`]: convertToLong(filters.artifactId) });
 		}
 
-		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
+		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'transactionStatements', options);
 	}
 
@@ -96,7 +96,7 @@ class ReceiptsDb {
 		if (undefined !== height)
 			conditions.push({ 'statement.height': convertToLong(height) });
 
-		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
+		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, `${artifact}ResolutionStatements`, options);
 	}
 }

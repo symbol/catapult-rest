@@ -338,7 +338,7 @@ describe('catapult db', () => {
 					db => db.blocks(undefined, undefined, options),
 					() => {
 						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
-						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2].$sort)[0]).to.equal('block.height');
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2])[0]).to.equal('block.height');
 						queryPagedDocumentsSpy.restore();
 					}
 				);
@@ -502,137 +502,6 @@ describe('catapult db', () => {
 				block => expect(block).to.deep.equal(stripBlockFields(seedBlock, ['statementMerkleTree']))
 			);
 		});
-	});
-
-	describe('blocks from height', () => {
-		const createBlocks = (height, numBlocks) => {
-			const blocks = [];
-			// the blocks are created in descending height order
-			// in order to make later comparisons easier using .slice()
-			for (let i = 0; i < numBlocks; ++i)
-				blocks.push(test.db.createDbBlock(height + numBlocks - 1 - i));
-
-			return blocks;
-		};
-
-		const createDbEntities = numBlocks => ({
-			chainStatistic: test.db.createChainStatistic(Default_Height + numBlocks - 1, 0, 0),
-			blocks: createBlocks(Default_Height, numBlocks)
-		});
-
-		it('returns empty array for unknown height', () =>
-			// Assert:
-			runDbTest(
-				createDbEntities(1),
-				db => db.blocksFrom(Long.fromNumber(Default_Height + 1), 10),
-				blocks => expect(blocks).to.deep.equal([])
-			));
-
-		const assertBlocks = (actualBlocks, dbEntities, startHeight, numBlocks) => {
-			// Assert: actual blocks should contain `numBlocks` blocks from `startHeight`.
-			// dbEntities.blocks are sorted in descending order, so:
-			// 1. inside the expected list find the index of element with height `startHeight`,
-			// 2. go back numBlocks elements to find element with largest height.
-			const endElement = dbEntities.blocks.findIndex(entity => entity.block.height.toNumber() === startHeight) + 1;
-			const startElement = endElement - numBlocks;
-			expect(actualBlocks.length).to.equal(numBlocks);
-			expect(actualBlocks).to.deep.equal(dbEntities.blocks.slice(startElement, endElement).map(block =>
-				stripExtraneousBlockInformation(block)));
-		};
-
-		it('returns at most available blocks', () => {
-			// Arrange:
-			const dbEntities = createDbEntities(5);
-
-			// Assert:
-			return runDbTest(
-				dbEntities,
-				db => db.blocksFrom(Default_Height + 2, 10),
-				blocks => assertBlocks(blocks, dbEntities, Default_Height + 2, 3)
-			);
-		});
-
-		it('respects requested number of blocks', () => {
-			// Arrange:
-			const dbEntities = createDbEntities(10);
-
-			// Assert:
-			return runDbTest(
-				dbEntities,
-				db => db.blocksFrom(Default_Height + 4, 3),
-				blocks => assertBlocks(blocks, dbEntities, Default_Height + 4, 3)
-			);
-		});
-
-		it('returns empty array when requesting 0 blocks', () =>
-			// Arrange:
-			runDbTest(
-				createDbEntities(10),
-				db => db.blocksFrom(Default_Height + 4, 0),
-				blocks => expect(blocks).to.deep.equal([])
-			));
-
-		it('returns top blocks when requesting from "0" height', () => {
-			// Arrange:
-			const dbEntities = createDbEntities(34);
-
-			// Assert:
-			return runDbTest(
-				dbEntities,
-				db => db.blocksFrom(0, 10),
-				blocks => assertBlocks(blocks, dbEntities, Default_Height + 24, 10)
-			);
-		});
-
-		it('returns top blocks when requesting from "0" height even if more blocks are in the database', () => {
-			// Arrange: set height to 4
-			const dbEntities = {
-				chainStatistic: test.db.createChainStatistic(4, 0, 0),
-				blocks: createBlocks(1, 10)
-			};
-
-			// Assert:
-			return runDbTest(
-				dbEntities,
-				db => db.blocksFrom(0, 10),
-				blocks => assertBlocks(blocks, dbEntities, 1, 4)
-			);
-		});
-
-		it('returns last block when requesting from "0" height with alignment 1', () => {
-			// Arrange: set height to 134
-			const dbEntities = {
-				chainStatistic: test.db.createChainStatistic(134, 0, 0),
-				blocks: createBlocks(120, 15)
-			};
-
-			// Assert:
-			return runDbTest(
-				dbEntities,
-				db => db.blocksFrom(0, 1),
-				blocks => assertBlocks(blocks, dbEntities, 134, 1)
-			);
-		});
-
-		it('returns blocks sorted in descending order', () =>
-			// Arrange: try to insert in random order
-			runDbTest(
-				{
-					chainStatistic: test.db.createChainStatistic(Default_Height + 2, 0, 0),
-					blocks: [
-						test.db.createDbBlock(Default_Height + 2),
-						test.db.createDbBlock(Default_Height),
-						test.db.createDbBlock(Default_Height + 1)
-					]
-				},
-				db => db.blocksFrom(Default_Height, 5),
-				// Assert: blocks are returned in proper order - descending by height
-				blocks => {
-					expect(blocks.length).to.equal(3);
-					for (let i = 0; 3 > i; ++i)
-						expect(blocks[i].block.height).to.deep.equal(Long.fromNumber(Default_Height + 2 - i));
-				}
-			));
 	});
 
 	describe('latest blocks fee multiplier', () => {

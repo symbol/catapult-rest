@@ -47,7 +47,7 @@ class LockHashDb {
 		if (offsetCondition)
 			conditions.push(offsetCondition);
 
-		const sortConditions = { $sort: { [sortingOptions[options.sortField]]: options.sortDirection } };
+		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'hashLocks', options);
 	}
 
