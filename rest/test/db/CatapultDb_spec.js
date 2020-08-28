@@ -929,7 +929,7 @@ describe('catapult db', () => {
 
 			it('no conditions', () => {
 				const queryPagedDocumentsWithConditionsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocumentsWithConditions');
-				const conditions = [];
+				const conditions = {};
 
 				// Act + Assert:
 				return runDbTest(
@@ -945,7 +945,7 @@ describe('catapult db', () => {
 
 			it('single condition', () => {
 				const queryPagedDocumentsWithConditionsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocumentsWithConditions');
-				const conditions = [{ height: 10 }];
+				const conditions = { height: 10 };
 
 				// Act + Assert:
 				return runDbTest(
@@ -963,7 +963,7 @@ describe('catapult db', () => {
 
 			it('multiple conditions', () => {
 				const queryPagedDocumentsWithConditionsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocumentsWithConditions');
-				const conditions = [{ height: 10 }, { type: 100 }];
+				const conditions = { height: 10, type: 100 };
 
 				// Act + Assert:
 				return runDbTest(
@@ -997,7 +997,7 @@ describe('catapult db', () => {
 		describe('can return empty result', () => {
 			it('empty db', () => {
 				// Arrange
-				const conditions = [];
+				const conditions = {};
 
 				// Act + Assert:
 				return runDbTest(
@@ -1018,7 +1018,7 @@ describe('catapult db', () => {
 					{ _id: createObjectId(10), account: { addressHeight: 10 } },
 					{ _id: createObjectId(30), account: { addressHeight: 30 } }
 				];
-				const conditions = [{ $match: { 'account.addressHeight': 20 } }];
+				const conditions = { $match: { 'account.addressHeight': 20 } };
 
 				// Act + Assert:
 				return runDbTest(
@@ -1043,7 +1043,7 @@ describe('catapult db', () => {
 			]);
 
 			it('no conditions', () => {
-				const conditions = [];
+				const conditions = {};
 
 				// Act + Assert:
 				return runDbTest(

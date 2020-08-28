@@ -194,17 +194,17 @@ class CatapultDb {
 			height: 'block.height'
 		};
 
-		const conditions = [];
+		let conditions = {};
 
 		const offsetCondition = buildOffsetCondition(options, sortingOptions);
 		if (offsetCondition)
-			conditions.push(offsetCondition);
+			conditions = Object.assign(conditions, offsetCondition);
 
 		if (undefined !== signerPublicKey)
-			conditions.push({ 'block.signerPublicKey': Buffer.from(signerPublicKey) });
+			conditions['block.signerPublicKey'] = Buffer.from(signerPublicKey);
 
 		if (undefined !== beneficiaryAddress)
-			conditions.push({ 'block.beneficiaryAddress': Buffer.from(beneficiaryAddress) });
+			conditions['block.beneficiaryAddress'] = Buffer.from(beneficiaryAddress);
 
 		const removeFields = ['meta.transactionMerkleTree', 'meta.statementMerkleTree'];
 
@@ -265,11 +265,6 @@ class CatapultDb {
 	 * metadata - which is comprised of: `totalEntries`, `pageNumber`, and `pageSize`.
 	 */
 	queryPagedDocuments(queryConditions, removedFields, sortConditions, collectionName, options) {
-		const conditions = Object.assign({}, ...queryConditions);
-		return this.queryPagedDocumentsWithConditions(conditions, removedFields, sortConditions, collectionName, options);
-	}
-
-	queryPagedDocumentsWithConditions(builtConditions, removedFields, sortConditions, collectionName, options) {
 		const { pageSize } = options;
 		const pageIndex = options.pageNumber - 1;
 
@@ -278,7 +273,7 @@ class CatapultDb {
 
 		return Promise.all([
 			this.database.collection(collectionName)
-				.find(builtConditions)
+				.find(queryConditions)
 				.project(projection)
 				.sort(sortConditions)
 				.skip(pageSize * pageIndex)
@@ -318,42 +313,35 @@ class CatapultDb {
 			if (undefined !== filters.address)
 				return { 'meta.addresses': Buffer.from(filters.address) };
 
-			const accountConditions = [];
-			if (undefined !== filters.signerPublicKey) {
-				const signerPublicKeyCondition = { 'transaction.signerPublicKey': Buffer.from(filters.signerPublicKey) };
-				accountConditions.push(signerPublicKeyCondition);
-			}
+			const accountConditions = {};
+			if (undefined !== filters.signerPublicKey)
+				accountConditions['transaction.signerPublicKey'] = Buffer.from(filters.signerPublicKey);
 
-			if (undefined !== filters.recipientAddress) {
-				const recipientAddressCondition = { 'transaction.recipientAddress': Buffer.from(filters.recipientAddress) };
-				accountConditions.push(recipientAddressCondition);
-			}
+			if (undefined !== filters.recipientAddress)
+				accountConditions['transaction.recipientAddress'] = Buffer.from(filters.recipientAddress);
 
-			if (Object.keys(accountConditions).length)
-				return 1 < Object.keys(accountConditions).length ? { $and: accountConditions } : accountConditions[0];
-
-			return undefined;
+			return accountConditions;
 		};
 
 		const buildConditions = () => {
-			const conditions = [];
+			let conditions = {};
 
 			const offsetCondition = buildOffsetCondition(options, sortingOptions);
 			if (offsetCondition)
-				conditions.push(offsetCondition);
+				conditions = Object.assign(conditions, offsetCondition);
 
 			if (undefined !== filters.height)
-				conditions.push({ 'meta.height': convertToLong(filters.height) });
+				conditions['meta.height'] = convertToLong(filters.height);
 
 			if (!filters.embedded)
-				conditions.push({ 'meta.aggregateId': { $exists: false } });
+				conditions['meta.aggregateId'] = { $exists: false };
 
 			if (undefined !== filters.transactionTypes)
-				conditions.push({ 'transaction.type': { $in: filters.transactionTypes } });
+				conditions['transaction.type'] = { $in: filters.transactionTypes };
 
 			const accountConditions = buildAccountConditions();
 			if (accountConditions)
-				conditions.push(accountConditions);
+				conditions = Object.assign(conditions, accountConditions);
 
 			return conditions;
 		};
@@ -436,34 +424,45 @@ class CatapultDb {
 	 */
 	accounts(address, mosaicId, options) {
 		const sortingOptions = { id: '_id', balance: 'account.mosaics.amount' };
-		const conditions = [];
+		let conditions = {};
 
 		const offsetCondition = buildOffsetCondition(options, sortingOptions);
 		if (offsetCondition)
-			conditions.push(offsetCondition);
+			conditions = Object.assign(conditions, offsetCondition);
 
 		if (undefined !== address)
-			conditions.push({ 'account.address': Buffer.from(address) });
+			conditions['account.address'] = Buffer.from(address);
 
 		if (undefined !== mosaicId)
-			conditions.push({ 'account.mosaics.id': convertToLong(mosaicId) });
+			conditions['account.mosaics.id'] = convertToLong(mosaicId);
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 
 		let queryPromise;
 		if ('balance' === options.sortField) {
-			const builtConditions = [{ $unwind: '$account.mosaics' }];
-			if (conditions.length)
-				builtConditions.push(1 === conditions.length ? { $match: conditions[0] } : { $match: { $and: conditions } });
+			const { pageSize } = options;
+			const pageIndex = options.pageNumber - 1;
+
+			const builtConditions = [];
+			if (conditions.length) {
+				const arrayConditions = [];
+				Object.keys(conditions).forEach(key => { arrayConditions.push({ [key]: conditions[key] }); });
+				builtConditions.push(1 === arrayConditions.length ? { $match: arrayConditions[0] } : { $match: { $and: arrayConditions } });
+			}
 
 			// fetch result sorted by specific mosaic amount, this unwinds mosaics and only returns matching mosaics (incomplete response)
-			queryPromise = this.queryPagedDocumentsWithConditions(builtConditions, [], sortConditions, 'accounts', options)
-				.then(accountsPage => {
-					const accountIds = accountsPage.data.map(account => account.id);
-					conditions.push({ _id: { $in: accountIds } });
+			queryPromise = this.database.collection('accounts')
+				.aggregate(builtConditions, { promoteLongs: false })
+				.skip(pageSize * pageIndex)
+				.limit(pageSize)
+				.unwind('$account.mosaics')
+				.toArray()
+				.then(accounts => {
+					const accountIds = accounts.map(account => account._id);
+					const newConditions = { _id: { $in: accountIds } };
 
 					// repeat the response with the found and sorted account ids, so that the result can be complete with all the mosaics
-					return this.queryPagedDocuments(conditions, [], sortConditions, 'accounts', options)
+					return this.queryPagedDocuments(newConditions, [], sortConditions, 'accounts', options)
 						.then(fullAccountsPage => {
 							// $in results do not preserve query order
 							fullAccountsPage.data.sort((account1, account2) =>

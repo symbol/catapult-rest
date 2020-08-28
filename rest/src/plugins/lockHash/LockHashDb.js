@@ -41,11 +41,11 @@ class LockHashDb {
 	hashLocks(addresses, options) {
 		const sortingOptions = { id: '_id' };
 		const buffers = addresses.map(address => Buffer.from(address));
-		const conditions = [{ 'lock.ownerAddress': { $in: buffers } }];
+		let conditions = { 'lock.ownerAddress': { $in: buffers } };
 
 		const offsetCondition = buildOffsetCondition(options, sortingOptions);
 		if (offsetCondition)
-			conditions.push(offsetCondition);
+			conditions = Object.assign(conditions, offsetCondition);
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'hashLocks', options);
