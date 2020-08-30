@@ -287,7 +287,7 @@ class CatapultDb {
 						pageSize
 					}
 				})),
-			this.database.collection(collectionName).find().count()
+			this.database.collection(collectionName).find(queryConditions).count()
 		]).then(results => {
 			const page = results[0];
 			const count = results[1];
@@ -443,26 +443,21 @@ class CatapultDb {
 			const { pageSize } = options;
 			const pageIndex = options.pageNumber - 1;
 
-			const builtConditions = [];
-			if (conditions.length) {
-				const arrayConditions = [];
-				Object.keys(conditions).forEach(key => { arrayConditions.push({ [key]: conditions[key] }); });
-				builtConditions.push(1 === arrayConditions.length ? { $match: arrayConditions[0] } : { $match: { $and: arrayConditions } });
-			}
-
 			// fetch result sorted by specific mosaic amount, this unwinds mosaics and only returns matching mosaics (incomplete response)
 			queryPromise = this.database.collection('accounts')
-				.aggregate(builtConditions, { promoteLongs: false })
+				.aggregate([], { promoteLongs: false })
 				.skip(pageSize * pageIndex)
 				.limit(pageSize)
 				.unwind('$account.mosaics')
+				.match(conditions)
+				.sort(sortConditions)
 				.toArray()
 				.then(accounts => {
 					const accountIds = accounts.map(account => account._id);
 					const newConditions = { _id: { $in: accountIds } };
 
 					// repeat the response with the found and sorted account ids, so that the result can be complete with all the mosaics
-					return this.queryPagedDocuments(newConditions, [], sortConditions, 'accounts', options)
+					return this.queryPagedDocuments(newConditions, [], {}, 'accounts', options)
 						.then(fullAccountsPage => {
 							// $in results do not preserve query order
 							fullAccountsPage.data.sort((account1, account2) =>
