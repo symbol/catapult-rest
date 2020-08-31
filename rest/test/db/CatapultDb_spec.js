@@ -928,9 +928,7 @@ describe('catapult db', () => {
 					db => db.queryPagedDocuments(conditions, [], sortConditions, 'accounts', options),
 					page => {
 						expect(page.data).to.deep.equal([]);
-						expect(page.pagination).to.deep.equal({
-							totalEntries: 0, pageNumber: 1, pageSize: options.pageSize, totalPages: 0
-						});
+						expect(page.pagination).to.deep.equal({ pageNumber: 1, pageSize: options.pageSize });
 					}
 				);
 			});
@@ -949,9 +947,7 @@ describe('catapult db', () => {
 					db => db.queryPagedDocuments(conditions, [], sortConditions, 'accounts', options),
 					page => {
 						expect(page.data).to.deep.equal([]);
-						expect(page.pagination).to.deep.equal({
-							totalEntries: 0, pageNumber: 1, pageSize: options.pageSize, totalPages: 0
-						});
+						expect(page.pagination).to.deep.equal({ pageNumber: 1, pageSize: options.pageSize });
 					}
 				);
 			});
@@ -1190,9 +1186,7 @@ describe('catapult db', () => {
 						db => db.queryPagedDocuments({}, [], { id: 1 }, 'blocks', { pageSize, pageNumber: 1 }),
 						page => {
 							expect(page.data.length).to.equal(25);
-							expect(page.pagination).to.deep.equal({
-								totalEntries: 25 + 10, pageNumber: 1, pageSize: 25, totalPages: 2
-							});
+							expect(page.pagination).to.deep.equal({ pageNumber: 1, pageSize: 25 });
 						}
 					);
 				});
@@ -1206,9 +1200,7 @@ describe('catapult db', () => {
 						db => db.queryPagedDocuments({}, [], { id: 1 }, 'blocks', { pageSize, pageNumber: 1 }),
 						page => {
 							expect(page.data.length).to.equal(10);
-							expect(page.pagination).to.deep.equal({
-								totalEntries: 10, pageNumber: 1, pageSize: 25, totalPages: 1
-							});
+							expect(page.pagination).to.deep.equal({ pageNumber: 1, pageSize: 25 });
 						}
 					);
 				});
@@ -1229,9 +1221,7 @@ describe('catapult db', () => {
 							),
 							page => {
 								expect(page.data.length).to.equal(expectedNumberOfElements);
-								expect(page.pagination).to.deep.equal({
-									totalEntries: 12, pageNumber, pageSize: 10, totalPages: 2
-								});
+								expect(page.pagination).to.deep.equal({ pageNumber, pageSize: 10 });
 							}
 						));
 				};

@@ -262,7 +262,7 @@ class CatapultDb {
 	 * @param {string} collectionName Name of the collection to be queried.
 	 * @param {object} options Pagination options, must contain `pageSize` and `pageNumber` (starting at 1).
 	 * @returns {Promise.<object>} Page result, contains the attributes `data` with the actual results, and `paging` with pagination
-	 * metadata - which is comprised of: `totalEntries`, `pageNumber`, and `pageSize`.
+	 * metadata - which is comprised of: `pageNumber`, and `pageSize`.
 	 */
 	queryPagedDocuments(queryConditions, removedFields, sortConditions, collectionName, options) {
 		const { pageSize } = options;
@@ -271,30 +271,21 @@ class CatapultDb {
 		const projection = {};
 		removedFields.forEach(field => { projection[field] = 0; });
 
-		return Promise.all([
-			this.database.collection(collectionName)
-				.find(queryConditions)
-				.project(projection)
-				.sort(sortConditions)
-				.skip(pageSize * pageIndex)
-				.limit(pageSize)
-				.toArray()
-				.then(this.sanitizer.renameIds)
-				.then(result => ({
-					data: result,
-					pagination: {
-						pageNumber: options.pageNumber,
-						pageSize
-					}
-				})),
-			this.database.collection(collectionName).find(queryConditions).count()
-		]).then(results => {
-			const page = results[0];
-			const count = results[1];
-			page.pagination.totalEntries = count;
-			page.pagination.totalPages = Math.ceil(count / pageSize);
-			return page;
-		});
+		return this.database.collection(collectionName)
+			.find(queryConditions)
+			.project(projection)
+			.sort(sortConditions)
+			.skip(pageSize * pageIndex)
+			.limit(pageSize)
+			.toArray()
+			.then(this.sanitizer.renameIds)
+			.then(result => ({
+				data: result,
+				pagination: {
+					pageNumber: options.pageNumber,
+					pageSize
+				}
+			}));
 	}
 
 	/**

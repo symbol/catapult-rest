@@ -3,9 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The changelog format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [v1.2.2] - 1-Sept-2020
+## [v1.3.0] - 1-Sept-2020
 ### Fixed
 - Greatly improved paginated endpoints performance.
+
+### Changed
+- Removed `totalEntries` and `totalPages` from paginated results.
 
 ## [v1.2.1] - 21-Aug-2020
 ### Changed
