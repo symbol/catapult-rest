@@ -76,7 +76,8 @@ class ModelSchemaBuilder {
 				merklePath: { type: ModelType.array, schemaName: 'merkleProofInfoPathNode' }
 			},
 			merkleProofInfoPathNode: {
-				hash: ModelType.binary
+				hash: ModelType.binary,
+				position: ModelType.string
 			},
 
 			// endregion

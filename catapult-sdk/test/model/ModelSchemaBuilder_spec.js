@@ -300,6 +300,7 @@ describe('model schema builder', () => {
 
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
+				'merkleProofInfoPathNode.position',
 				'transactionStatus.group',
 				'nodeInfo.friendlyName',
 				'nodeInfo.host'
