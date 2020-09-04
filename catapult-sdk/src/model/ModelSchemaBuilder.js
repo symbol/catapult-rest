@@ -207,6 +207,11 @@ class ModelSchemaBuilder {
 				communicationTimestamps: { type: ModelType.object, schemaName: 'communicationTimestamps' }
 			},
 			serverInfo: {
+				serverInfo: { type: ModelType.object, schemaName: 'serverInfoData' }
+			},
+			serverInfoData: {
+				restVersion: ModelType.string,
+				sdkVersion: ModelType.string
 			},
 			stateTree: {
 				tree: { type: ModelType.array, schemaName: ModelType.binary }

@@ -98,6 +98,7 @@ describe('model schema builder', () => {
 				'communicationTimestamps',
 				'nodeTime',
 				'serverInfo',
+				'serverInfoData',
 				'stateTree',
 				'storageInfo'
 			]);
@@ -169,7 +170,8 @@ describe('model schema builder', () => {
 				'chainStatistic.current',
 
 				'nodeHealth.status',
-				'nodeTime.communicationTimestamps'
+				'nodeTime.communicationTimestamps',
+				'serverInfo.serverInfo'
 			]);
 		});
 
@@ -307,7 +309,9 @@ describe('model schema builder', () => {
 				'nodeHealthStatus.apiNode',
 				'nodeHealthStatus.db',
 				'nodeInfo.friendlyName',
-				'nodeInfo.host'
+				'nodeInfo.host',
+				'serverInfoData.restVersion',
+				'serverInfoData.sdkVersion'
 			]);
 		});
 

@@ -5,7 +5,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [v1.3.1] - 5-Sept-2020
 ### Fixed
-- Fixed empty node health endpoint.
+- Fixed empty node health and server endpoints.
 
 ## [v1.3.0] - 1-Sept-2020
 ### Added
