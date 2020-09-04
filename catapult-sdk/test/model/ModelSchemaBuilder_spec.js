@@ -93,6 +93,7 @@ describe('model schema builder', () => {
 				'chainStatistic',
 				'chainStatisticCurrent',
 				'nodeHealth',
+				'nodeHealthStatus',
 				'nodeInfo',
 				'communicationTimestamps',
 				'nodeTime',
@@ -167,6 +168,7 @@ describe('model schema builder', () => {
 
 				'chainStatistic.current',
 
+				'nodeHealth.status',
 				'nodeTime.communicationTimestamps'
 			]);
 		});
@@ -302,6 +304,8 @@ describe('model schema builder', () => {
 			expect(matchingProperties).to.deep.equal([
 				'merkleProofInfoPathNode.position',
 				'transactionStatus.group',
+				'nodeHealthStatus.apiNode',
+				'nodeHealthStatus.db',
 				'nodeInfo.friendlyName',
 				'nodeInfo.host'
 			]);
