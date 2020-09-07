@@ -147,9 +147,30 @@ describe('catapult db', () => {
 			// Assert:
 			runDbTest(
 				{ chainStatistic: test.db.createChainStatistic(1357, 2468, 3579) },
-				db => db.chainStatistic(),
-				chainStatistic => expect(chainStatistic).to.deep.equal(test.db.createChainStatistic(1357, 2468, 3579))
+				db => db.chainStatisticCurrent(),
+				chainStatistic => expect(chainStatistic).to.deep.equal(test.db.createChainStatistic(1357, 2468, 3579).current)
 			));
+	});
+
+	describe('latest finalized block', () => {
+		const createFinalizationBlock = (height, finalizationPoint) => ({
+			height: Long.fromNumber(height),
+			hash: new Binary(test.random.hash()),
+			finalizationPoint: Long.fromNumber(finalizationPoint)
+		});
+
+		it('can retrieve latest finalized block info', () => {
+			const finalizedBlocks = [
+				createFinalizationBlock(1, 5),
+				createFinalizationBlock(2, 8),
+				createFinalizationBlock(3, 2)
+			];
+			return runDbTest(
+				{ finalizedBlocks },
+				db => db.latestFinalizedBlock(),
+				latestfinalizedBlock => expect(latestfinalizedBlock).to.deep.equal(finalizedBlocks[1])
+			);
+		});
 	});
 
 	const stripBlockFields = (block, fields) => {

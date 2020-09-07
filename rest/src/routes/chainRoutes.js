@@ -23,8 +23,16 @@ const routeResultTypes = require('./routeResultTypes');
 module.exports = {
 	register: (server, db) => {
 		server.get('/chain/info', (req, res, next) =>
-			db.chainStatisticCurrent().then(chainStatistic => {
-				res.send({ payload: chainStatistic, type: routeResultTypes.chainInfo });
+			Promise.all([
+				db.chainStatisticCurrent(),
+				db.latestFinalizedBlock()
+			]).then(dbResults => {
+				const chainInfoResult = dbResults[0];
+				chainInfoResult.latestFinalizedBlock = dbResults[1];
+				res.send({
+					payload: chainInfoResult,
+					type: routeResultTypes.chainInfo
+				});
 				next();
 			}));
 	}

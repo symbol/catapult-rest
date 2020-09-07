@@ -178,9 +178,7 @@ class CatapultDb {
 
 	latestFinalizedBlock() {
 		return this.database.collection('finalizedBlocks')
-			.findOne(conditions, { _id: 0 })
-			.limit(1)
-			.sort({ 'block.finalizationPoint': -1 })
+			.findOne({}, { sort: [['finalizationPoint', -1]], projection: { _id: 0 } })
 			.then(mapToPromise);
 	}
 

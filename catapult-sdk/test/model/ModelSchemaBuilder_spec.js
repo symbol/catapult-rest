@@ -74,6 +74,7 @@ describe('model schema builder', () => {
 				'blockHeaderWithMetadata',
 				'merkleProofInfo',
 				'merkleProofInfoPathNode',
+				'finalizedBlock',
 
 				'transaction',
 				'transactionMetadata',
@@ -90,8 +91,7 @@ describe('model schema builder', () => {
 				'accountLinkPublicKey.voting',
 				'votingPublicKey',
 
-				'chainStatistic',
-				'chainStatisticCurrent',
+				'chainInfo',
 				'nodeHealth',
 				'nodeHealthStatus',
 				'nodeInfo',
@@ -167,7 +167,7 @@ describe('model schema builder', () => {
 				'supplementalPublicKey.vrf',
 				'supplementalPublicKey.voting',
 
-				'chainStatistic.current',
+				'chainInfo.latestFinalizedBlock',
 
 				'nodeHealth.status',
 				'nodeTime.communicationTimestamps',
@@ -217,6 +217,7 @@ describe('model schema builder', () => {
 				'blockHeaderMetadata.generationHash',
 				'blockHeaderMetadata.stateHashSubCacheMerkleRoots.schemaName',
 				'merkleProofInfoPathNode.hash',
+				'finalizedBlock.hash',
 
 				'transaction.signature',
 				'transaction.signerPublicKey',
@@ -247,6 +248,8 @@ describe('model schema builder', () => {
 				'blockHeader.timestamp',
 				'blockHeader.difficulty',
 				'blockHeaderMetadata.totalFee',
+				'finalizedBlock.height',
+				'finalizedBlock.finalizationPoint',
 
 				'transaction.deadline',
 				'transaction.maxFee',
@@ -264,9 +267,9 @@ describe('model schema builder', () => {
 				'activityBucket.rawScore',
 				'mosaic.amount',
 
-				'chainStatisticCurrent.height',
-				'chainStatisticCurrent.scoreLow',
-				'chainStatisticCurrent.scoreHigh',
+				'chainInfo.height',
+				'chainInfo.scoreLow',
+				'chainInfo.scoreHigh',
 
 				'communicationTimestamps.receiveTimestamp',
 				'communicationTimestamps.sendTimestamp'
