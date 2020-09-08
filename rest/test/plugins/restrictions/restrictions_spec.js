@@ -40,8 +40,7 @@ describe('restrictions plugin', () => {
 			// Assert:
 			test.assert.assertRoutes(routes, [
 				'/restrictions/account/:address',
-				'/restrictions/mosaic/:mosaicId',
-				'/restrictions/mosaic/:mosaicId/address/:targetAddress'
+				'/restrictions/mosaic'
 			]);
 		});
 
@@ -55,8 +54,7 @@ describe('restrictions plugin', () => {
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/restrictions/mosaic',
-				'/restrictions/mosaic/:mosaicId'
+				'/restrictions/account'
 			]);
 		});
 	});
