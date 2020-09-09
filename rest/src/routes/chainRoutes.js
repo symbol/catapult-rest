@@ -28,7 +28,7 @@ module.exports = {
 				db.latestFinalizedBlock()
 			]).then(dbResults => {
 				const chainInfoResult = dbResults[0];
-				chainInfoResult.latestFinalizedBlock = dbResults[1];
+				chainInfoResult.latestFinalizedBlock = dbResults[1].block;
 				res.send({
 					payload: chainInfoResult,
 					type: routeResultTypes.chainInfo

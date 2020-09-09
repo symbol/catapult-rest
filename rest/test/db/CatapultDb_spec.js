@@ -154,9 +154,11 @@ describe('catapult db', () => {
 
 	describe('latest finalized block', () => {
 		const createFinalizationBlock = (height, finalizationPoint) => ({
-			height: Long.fromNumber(height),
-			hash: new Binary(test.random.hash()),
-			finalizationPoint: Long.fromNumber(finalizationPoint)
+			block: {
+				height: Long.fromNumber(height),
+				hash: new Binary(test.random.hash()),
+				finalizationPoint: Long.fromNumber(finalizationPoint)
+			}
 		});
 
 		it('can retrieve latest finalized block info', () => {
