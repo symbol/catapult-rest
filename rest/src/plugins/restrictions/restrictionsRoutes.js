@@ -45,12 +45,5 @@ module.exports = {
 			return db.mosaicRestrictions(mosaicId, entryType, targetAddress, options)
 				.then(result => routeUtils.createSender(routeResultTypes.mosaicRestrictions).sendPage(res, next)(result));
 		});
-
-		server.post('/restrictions/account', (req, res, next) => {
-			const addresses = routeUtils.parseArgumentAsArray(req.params, 'addresses', 'address');
-
-			return db.accountRestrictionsByAddresses(addresses)
-				.then(accountRestrictionsSender.sendArray('addresses', res, next));
-		});
 	}
 };
