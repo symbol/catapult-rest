@@ -83,7 +83,8 @@ class ModelSchemaBuilder {
 			finalizedBlock: {
 				height: ModelType.uint64,
 				hash: ModelType.binary,
-				finalizationPoint: ModelType.uint64
+				finalizationEpoch: ModelType.uint,
+				finalizationPoint: ModelType.uint
 			},
 
 			// endregion

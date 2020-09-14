@@ -249,7 +249,6 @@ describe('model schema builder', () => {
 				'blockHeader.difficulty',
 				'blockHeaderMetadata.totalFee',
 				'finalizedBlock.height',
-				'finalizedBlock.finalizationPoint',
 
 				'transaction.deadline',
 				'transaction.maxFee',
@@ -359,6 +358,17 @@ describe('model schema builder', () => {
 				'storageInfo.numBlocks',
 				'storageInfo.numTransactions',
 				'storageInfo.numAccounts'
+			]);
+		});
+
+		it('exposes correct uint properties', () => {
+			// Act:
+			const matchingProperties = extractSchemaPropertiesWithType('uint');
+
+			// Assert:
+			expect(matchingProperties).to.deep.equal([
+				'finalizedBlock.finalizationEpoch',
+				'finalizedBlock.finalizationPoint'
 			]);
 		});
 

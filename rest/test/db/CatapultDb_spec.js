@@ -157,7 +157,8 @@ describe('catapult db', () => {
 			block: {
 				height: Long.fromNumber(height),
 				hash: new Binary(test.random.hash()),
-				finalizationPoint: Long.fromNumber(finalizationPoint)
+				finalizationEpoch: 777,
+				finalizationPoint: finalizationPoint
 			}
 		});
 

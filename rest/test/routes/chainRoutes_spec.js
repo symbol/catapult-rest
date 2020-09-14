@@ -39,7 +39,8 @@ describe('chain routes', () => {
 			const finalizedBlockData = {
 				height: Long.fromNumber(222),
 				hash: new Binary(test.random.hash()),
-				finalizationPoint: Long.fromNumber(111)
+				finalizationEpoch: 777,
+				finalizationPoint: 111
 			};
 			const latestFinalizedBlockFake = sinon.fake(() => Promise.resolve(latestFinalizedBlockFake));
 

@@ -27,6 +27,7 @@ const modelSchema = new ModelSchemaBuilder().build();
 const formattingRules = {
 	[ModelType.none]: () => 'none',
 	[ModelType.binary]: () => 'binary',
+	[ModelType.uint]: () => 'uint',
 	[ModelType.uint64]: () => 'uint64',
 	[ModelType.uint64HexIdentifier]: () => 'uint64HexIdentifier',
 	[ModelType.objectId]: () => 'objectId',
@@ -218,6 +219,7 @@ describe('model formatter builder', () => {
 				latestFinalizedBlock: {
 					height: 0,
 					hash: 0,
+					finalizationEpoch: 0,
 					finalizationPoint: 0
 				}
 			});
@@ -230,7 +232,8 @@ describe('model formatter builder', () => {
 				latestFinalizedBlock: {
 					height: 'uint64',
 					hash: 'binary',
-					finalizationPoint: 'uint64'
+					finalizationEpoch: 'uint',
+					finalizationPoint: 'uint'
 				}
 			});
 		});
