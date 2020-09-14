@@ -20,7 +20,6 @@
 
 const catapult = require('catapult-sdk');
 
-const { BinaryParser } = catapult.parser;
 const { uint64 } = catapult.utils;
 
 const parserFromData = binaryData => {
@@ -36,8 +35,18 @@ const ServerMessageHandler = Object.freeze({
 	},
 
 	finalizedBlock: (codec, emit) => (topic, binaryBlock) => {
-		const finalizedBlock = codec.deserialize(parserFromData(binaryBlock));
-		emit({ type: 'finalizedBlock', payload: finalizedBlock });
+		const parser = parserFromData(binaryBlock);
+
+		const finalizationEpoch = parser.uint32();
+		const finalizationPoint = parser.uint32();
+		const height = parser.uint64();
+		const hash = parser.buffer(catapult.constants.sizes.hash256);
+		emit({
+			type: 'finalizedBlock',
+			payload: {
+				finalizationEpoch, finalizationPoint, height, hash
+			}
+		});
 	},
 
 	transaction: (codec, emit) => (topic, binaryTransaction, hash, merkleComponentHash, height) => {
@@ -51,8 +60,7 @@ const ServerMessageHandler = Object.freeze({
 	},
 
 	transactionStatus: (codec, emit) => (topic, buffer) => {
-		const parser = new BinaryParser();
-		parser.push(buffer);
+		const parser = parserFromData(buffer);
 
 		const hash = parser.buffer(catapult.constants.sizes.hash256);
 		const deadline = parser.uint64();
