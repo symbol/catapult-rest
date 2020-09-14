@@ -4,6 +4,7 @@ in-between the listed versions_
 
 | catapult-rest | catapult-server | Notes                                                              |
 |---------------|-----------------|--------------------------------------------------------------------|
+| v2.0.0        | (pending)       | Finalization support                                               |
 | v1.1.3        | v9.6.2          | Address resized (25 -> 24 bytes)<br>Updated REST version numbering |
 | v1.0.20.50    | v9.5.1          | VRF support                                                        |
 | v1.0.20.31    | v9.4.1          | TLS support                                                        |
