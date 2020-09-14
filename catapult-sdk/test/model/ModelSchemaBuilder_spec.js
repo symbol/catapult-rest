@@ -347,8 +347,6 @@ describe('model schema builder', () => {
 
 				'account.accountType',
 				'activityBucket.beneficiaryCount',
-				'votingPublicKey.startEpoch',
-				'votingPublicKey.endEpoch',
 
 				'nodeInfo.version',
 				'nodeInfo.roles',
@@ -368,7 +366,9 @@ describe('model schema builder', () => {
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
 				'finalizedBlock.finalizationEpoch',
-				'finalizedBlock.finalizationPoint'
+				'finalizedBlock.finalizationPoint',
+				'votingPublicKey.startEpoch',
+				'votingPublicKey.endEpoch'
 			]);
 		});
 

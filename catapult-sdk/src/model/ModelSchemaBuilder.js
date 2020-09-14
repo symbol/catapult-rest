@@ -173,8 +173,8 @@ class ModelSchemaBuilder {
 			},
 			votingPublicKey: {
 				publicKey: ModelType.binary,
-				startEpoch: ModelType.int,
-				endEpoch: ModelType.int
+				startEpoch: ModelType.uint,
+				endEpoch: ModelType.uint
 			},
 
 			// endregion
