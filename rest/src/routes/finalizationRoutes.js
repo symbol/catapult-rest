@@ -44,7 +44,7 @@ module.exports = {
 					if (!payload)
 						return next(new NotFoundError());
 					res.send({ payload, type: routeResultTypes.finalizationProof, formatter: 'ws' });
-					next();
+					return next();
 				});
 
 		server.get('/finalization/proof/epoch/:epoch', (req, res, next) => {
