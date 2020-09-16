@@ -22,25 +22,27 @@ const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 const finalizationProofCodec = require('../sockets/finalizationProofCodec');
 const catapult = require('catapult-sdk');
+const { NotFoundError } = require('restify-errors');
 
 const packetHeader = catapult.packet.header;
 const { PacketType } = catapult.packet;
 const { BinaryParser } = catapult.parser;
+const { uint64 } = catapult.utils;
 
 module.exports = {
 	register: (server, db, services) => {
 		const { connections } = services;
 		const { timeout } = services.config.apiNode;
 
-		const sendRequestAndResponse = requestPacket =>
+		const sendRequestAndResponse = (requestPacket, res, next) =>
 			connections.singleUse()
-				.then(connection => connection.pushPull(packetBuffer, timeout))
+				.then(connection => connection.pushPull(requestPacket, timeout))
 				.then(packet => {
 					const binaryParser = new BinaryParser();
 					binaryParser.push(packet.payload);
 					const payload = finalizationProofCodec.deserialize(binaryParser);
 					if (!payload)
-						console.log("NOT FOUND");	// FIXME
+						return next(new NotFoundError());
 					res.send({ payload, type: routeResultTypes.finalizationProof, formatter: 'ws' });
 					next();
 				});
@@ -48,27 +50,24 @@ module.exports = {
 		server.get('/finalization/proof/epoch/:epoch', (req, res, next) => {
 			const epoch = routeUtils.parseArgument(req.params, 'epoch', 'uint');
 
-			// prepare request packet
 			const uint32Size = 4;
 			const headerBuffer = packetHeader.createBuffer(PacketType.finalizationProofAtEpoch, packetHeader.size + uint32Size);
 			const epochBuffer = Buffer.alloc(uint32Size);
 			epochBuffer.writeUInt32LE(epoch);
 			const packetBuffer = Buffer.concat([headerBuffer, epochBuffer]);
 
-			return sendRequestAndResponse(packetBuffer);
+			return sendRequestAndResponse(packetBuffer, res, next);
 		});
 
 		server.get('/finalization/proof/height/:height', (req, res, next) => {
 			const height = routeUtils.parseArgument(req.params, 'height', 'uint64');
 
-			// prepare request packet
 			const uint64Size = 8;
 			const headerBuffer = packetHeader.createBuffer(PacketType.finalizationProofAtHeight, packetHeader.size + uint64Size);
-			const heightBuffer = Buffer.alloc(uint64Size);
-			heightBuffer.writeUInt32LE(height);	// FIXME
+			const heightBuffer = Buffer.from(uint64.toBytes());
 			const packetBuffer = Buffer.concat([headerBuffer, heightBuffer]);
 
-			return sendRequestAndResponse(packetBuffer);
+			return sendRequestAndResponse(packetBuffer, res, next);
 		});
 	}
 };
