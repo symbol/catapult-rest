@@ -59,10 +59,10 @@ const finalizationProofCodec = {
 				signatures: []
 			};
 
-			for (let i=0; i < hashCount; i++)
+			for (let i = 0; i < hashCount; i++)
 				messageGroup.hashes.push(parser.buffer(sizes.hash256));
 
-			for (let i=0; i < signatureCount; i++) {
+			for (let i = 0; i < signatureCount; i++) {
 				const signature = {
 					root: {
 						parentPublicKey: parser.buffer(sizes.signerPublicKey),
@@ -76,7 +76,7 @@ const finalizationProofCodec = {
 						parentPublicKey: parser.buffer(sizes.signerPublicKey),
 						signature: parser.buffer(sizes.signature)
 					}
-				}
+				};
 				messageGroup.signatures.push(signature);
 			}
 
