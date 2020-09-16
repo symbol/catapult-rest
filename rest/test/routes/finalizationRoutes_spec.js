@@ -62,7 +62,7 @@ describe('finalization routes', () => {
 		};
 
 		describe('finalization proof', () => {
-			describe('by epock', () => {
+			describe('by epoch', () => {
 				const endpointUnderTest = '/finalization/proof/epoch/:epoch';
 
 				it('parses params and creates correct request packet', () => {
@@ -157,18 +157,19 @@ describe('finalization routes', () => {
 					const mockServer = new MockServer();
 					const { packetSize, packetPayload } = createFinalizationProofResultPacket();
 					const resultPacket = {
-						type: 0x133,
+						type: 0x134,
 						size: packetSize,
 						payload: packetPayload
 					};
 
 					const assertSentPacket = packet => {
-						// 0c 00 00 00 size => 12b
-						// 33 01 00 00 type => 307
-						// 0b 00 00 00 epoch => 11
+						// 10 00 00 00 size => 16b
+						// 34 01 00 00 type => 308
+						// 00 04 00 00 00 00 00 00 height => 1024
 
 						expect(packet).to.deep.equal(Buffer.from([
-							0x0c, 0x00, 0x00, 0x00, 0x33, 0x01, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00
+							0x10, 0x00, 0x00, 0x00, 0x34, 0x01, 0x00, 0x00,
+							0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 						]));
 					};
 
@@ -176,7 +177,7 @@ describe('finalization routes', () => {
 
 					// Act:
 					const route = mockServer.getRoute(endpointUnderTest).get();
-					return mockServer.callRoute(route, { params: { height: '11' } }).then(() => {
+					return mockServer.callRoute(route, { params: { height: '1024' } }).then(() => {
 						// Assert:
 						expect(mockServer.next.calledOnce).to.equal(true);
 					});
@@ -187,7 +188,7 @@ describe('finalization routes', () => {
 					const mockServer = new MockServer();
 					const { packetSize, packetPayload } = createFinalizationProofResultPacket();
 					const resultPacket = {
-						type: 0x133,
+						type: 0x134,
 						size: packetSize,
 						payload: packetPayload
 					};
@@ -196,7 +197,7 @@ describe('finalization routes', () => {
 
 					// Act:
 					const route = mockServer.getRoute(endpointUnderTest).get();
-					return mockServer.callRoute(route, { params: { epoch: '11' } }).then(() => {
+					return mockServer.callRoute(route, { params: { height: '1024' } }).then(() => {
 						// Assert:
 						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 							payload: {
@@ -219,7 +220,7 @@ describe('finalization routes', () => {
 					const mockServer = new MockServer();
 					const { packetSize } = createFinalizationProofResultPacket();
 					const resultPacket = {
-						type: 0x133,
+						type: 0x134,
 						size: packetSize,
 						payload: Buffer.from([])
 					};
@@ -228,7 +229,7 @@ describe('finalization routes', () => {
 
 					// Act:
 					const route = mockServer.getRoute(endpointUnderTest).get();
-					return mockServer.callRoute(route, { params: { epoch: '11' } }).then(() => {
+					return mockServer.callRoute(route, { params: { height: '1024' } }).then(() => {
 						// Assert:
 						expect(mockServer.next.calledOnce).to.equal(true);
 						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(404);
