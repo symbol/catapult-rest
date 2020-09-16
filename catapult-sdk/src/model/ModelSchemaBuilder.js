@@ -104,7 +104,7 @@ class ModelSchemaBuilder {
 			bmTreeSignature: {
 				root: { type: ModelType.object, schemaName: 'parentPublicKeySignaturePair' },
 				top: { type: ModelType.object, schemaName: 'parentPublicKeySignaturePair' },
-				bottom: { type: ModelType.object, schemaName: 'parentPublicKeySignaturePair' },
+				bottom: { type: ModelType.object, schemaName: 'parentPublicKeySignaturePair' }
 			},
 			parentPublicKeySignaturePair: {
 				parentPublicKey: ModelType.binary,
