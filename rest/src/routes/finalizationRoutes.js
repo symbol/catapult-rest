@@ -64,7 +64,7 @@ module.exports = {
 
 			const uint64Size = 8;
 			const headerBuffer = packetHeader.createBuffer(PacketType.finalizationProofAtHeight, packetHeader.size + uint64Size);
-			const heightBuffer = Buffer.from(uint64.toBytes());
+			const heightBuffer = Buffer.from(uint64.toBytes(height));
 			const packetBuffer = Buffer.concat([headerBuffer, heightBuffer]);
 
 			return sendRequestAndResponse(packetBuffer, res, next);
