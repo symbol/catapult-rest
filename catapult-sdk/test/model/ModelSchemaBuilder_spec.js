@@ -387,7 +387,7 @@ describe('model schema builder', () => {
 				'finalizationProof.version',
 				'finalizationProof.finalizationEpoch',
 				'finalizationProof.finalizationPoint',
-				'messageGroup.finalizationStage',
+				'messageGroup.stage',
 				'votingPublicKey.startEpoch',
 				'votingPublicKey.endEpoch'
 			]);

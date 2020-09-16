@@ -96,7 +96,7 @@ class ModelSchemaBuilder {
 				messageGroups: { type: ModelType.array, schemaName: 'messageGroup' }
 			},
 			messageGroup: {
-				finalizationStage: ModelType.uint,
+				stage: ModelType.uint,
 				height: ModelType.uint64,
 				hashes: { type: ModelType.array, schemaName: ModelType.binary },
 				signatures: { type: ModelType.array, schemaName: 'bmTreeSignature' }

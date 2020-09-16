@@ -53,7 +53,7 @@ const finalizationProofCodec = {
 			const hashCount = parser.uint32();
 			const signatureCount = parser.uint32();
 			const messageGroup = {
-				finalizationStage: parser.uint32(),
+				stage: parser.uint32(),
 				height: parser.uint64(),
 				hashes: [],
 				signatures: []
