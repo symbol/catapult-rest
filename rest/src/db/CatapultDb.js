@@ -344,11 +344,16 @@ class CatapultDb {
 			if (undefined !== filters.transferMosaicId)
 				conditions['transaction.mosaics.id'] = convertToLong(filters.transferMosaicId);
 
-			if (undefined !== filters.fromTransferAmount)
-				conditions['transaction.mosaics.amount'] = { $gte: convertToLong(filters.fromTransferAmount) };
+			if (undefined !== filters.fromTransferAmount || undefined !== filters.toTransferAmount) {
+				const amountPath = 'transaction.mosaics.amount';
+				conditions[amountPath] = {};
 
-			if (undefined !== filters.toTransferAmount)
-				conditions['transaction.mosaics.amount'] = { $lte: convertToLong(filters.toTransferAmount) };
+				if (undefined !== filters.fromTransferAmount)
+					conditions[amountPath].$gte = convertToLong(filters.fromTransferAmount);
+
+				if (undefined !== filters.toTransferAmount)
+					conditions[amountPath].$lte = convertToLong(filters.toTransferAmount);
+			}
 
 			const accountConditions = buildAccountConditions();
 			if (accountConditions)
