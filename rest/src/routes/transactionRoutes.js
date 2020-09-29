@@ -59,6 +59,12 @@ module.exports = {
 				);
 			}
 
+			if ((params.fromTransferAmount || params.toTransferAmount) && !params.transferMosaicId) {
+				throw errors.createInvalidArgumentError(
+					'can\'t filter by transfer amount if `transferMosaicId` is not provided'
+				);
+			}
+
 			const filters = {
 				height: params.height ? routeUtils.parseArgument(params, 'height', 'uint64') : undefined,
 				fromHeight: params.fromHeight ? routeUtils.parseArgument(params, 'fromHeight', 'uint64') : undefined,
@@ -68,7 +74,12 @@ module.exports = {
 				recipientAddress: params.recipientAddress ? routeUtils.parseArgument(params, 'recipientAddress', 'address') : undefined,
 				transactionTypes: params.type ? routeUtils.parseArgumentAsArray(params, 'type', 'uint') : undefined,
 				embedded: params.embedded ? routeUtils.parseArgument(params, 'embedded', 'boolean') : undefined,
-				transferMosaicId: params.transferMosaicId ? routeUtils.parseArgument(params, 'transferMosaicId', 'uint64') : undefined
+
+				/** transfer transaction specific filters */
+				transferMosaicId: params.transferMosaicId ? routeUtils.parseArgument(params, 'transferMosaicId', 'uint64') : undefined,
+				fromTransferAmount: params.fromTransferAmount
+					? routeUtils.parseArgument(params, 'fromTransferAmount', 'uint64') : undefined,
+				toTransferAmount: params.toTransferAmount ? routeUtils.parseArgument(params, 'toTransferAmount', 'uint64') : undefined
 			};
 
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });

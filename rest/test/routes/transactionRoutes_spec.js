@@ -344,6 +344,18 @@ describe('transaction routes', () => {
 					});
 				});
 
+				describe('does not allow filtering by fromTransferAmount if transferMosaicId is not provided', () => {
+					expect(false).to.equal(true);
+				});
+
+				describe('does not allow filtering by toTransferAmount if transferMosaicId is not provided', () => {
+					expect(false).to.equal(true);
+				});
+
+				describe('allows filtering by fromTransferAmount and toTransferAmount even if their provided values are 0', () => {
+					expect(false).to.equal(true);
+				});
+
 				describe('checks correct group is provided', () => {
 					const runValidGroupTest = group => {
 						it(group, () =>
