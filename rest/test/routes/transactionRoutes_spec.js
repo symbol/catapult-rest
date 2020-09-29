@@ -241,7 +241,9 @@ describe('transaction routes', () => {
 								signerPublicKey: undefined,
 								embedded: undefined,
 								transactionTypes: undefined,
-								transferMosaicId: undefined
+								transferMosaicId: undefined,
+								fromTransferAmount: undefined,
+								toTransferAmount: undefined
 							};
 
 							expectedResult[filter] = value;
@@ -273,17 +275,37 @@ describe('transaction routes', () => {
 
 						// Act + Assert
 						return mockServer.callRoute(route, req).then(() => {
-							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
-								address: undefined,
-								height: undefined,
-								fromHeight: undefined,
-								toHeight: undefined,
-								recipientAddress: undefined,
-								signerPublicKey: undefined,
-								embedded: undefined,
-								transactionTypes: [1, 5, 25],
-								transferMosaicId: undefined
-							});
+							expect(dbTransactionsFake.firstCall.args[1].transactionTypes).to.deep.equal([1, 5, 25]);
+						});
+					});
+
+					it('fromTransferAmount', () => {
+						const req = {
+							params: {
+								group: TransactionGroups.confirmed,
+								transferMosaicId: '100',
+								fromTransferAmount: '12345'
+							}
+						};
+
+						// Act + Assert
+						return mockServer.callRoute(route, req).then(() => {
+							expect(dbTransactionsFake.firstCall.args[1].fromTransferAmount).to.deep.equal([12345, 0]);
+						});
+					});
+
+					it('toTransferAmount', () => {
+						const req = {
+							params: {
+								group: TransactionGroups.confirmed,
+								transferMosaicId: '100',
+								toTransferAmount: '12345'
+							}
+						};
+
+						// Act + Assert
+						return mockServer.callRoute(route, req).then(() => {
+							expect(dbTransactionsFake.firstCall.args[1].toTransferAmount).to.deep.equal([12345, 0]);
 						});
 					});
 				});
@@ -331,7 +353,9 @@ describe('transaction routes', () => {
 						};
 
 						// Act + Assert
-						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+						mockServer.callRoute(route, req);
+						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(409);
+						expect(mockServer.next.firstCall.args[0].message).to.equal(errorMessage);
 					});
 
 					it('address and recipient address', () => {
@@ -340,20 +364,63 @@ describe('transaction routes', () => {
 						};
 
 						// Act + Assert
-						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+						mockServer.callRoute(route, req);
+						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(409);
+						expect(mockServer.next.firstCall.args[0].message).to.equal(errorMessage);
 					});
 				});
 
-				describe('does not allow filtering by fromTransferAmount if transferMosaicId is not provided', () => {
-					expect(false).to.equal(true);
+				describe('does not allow filtering by transfer amount if transfer mosaic id is not provided', () => {
+					const errorMessage = 'can\'t filter by transfer amount if `transferMosaicId` is not provided';
+
+					it('does not allow filtering by fromTransferAmount if transferMosaicId is not provided', () => {
+						const req = {
+							params: {
+								group: TransactionGroups.confirmed,
+								fromTransferAmount: '12345'
+							}
+						};
+
+						// Act + Assert
+						mockServer.callRoute(route, req);
+						expect(mockServer.next.calledOnce).to.equal(true);
+						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(409);
+						expect(mockServer.next.firstCall.args[0].message).to.equal(errorMessage);
+					});
+
+					it('does not allow filtering by toTransferAmount if transferMosaicId is not provided', () => {
+						const req = {
+							params: {
+								group: TransactionGroups.confirmed,
+								toTransferAmount: '12345'
+							}
+						};
+
+						// Act + Assert
+						mockServer.callRoute(route, req);
+						expect(mockServer.next.calledOnce).to.equal(true);
+						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(409);
+						expect(mockServer.next.firstCall.args[0].message).to.equal(errorMessage);
+					});
 				});
 
-				describe('does not allow filtering by toTransferAmount if transferMosaicId is not provided', () => {
-					expect(false).to.equal(true);
-				});
+				describe('allows filtering by fromTransferAmount and toTransferAmount', () => {
+					it('even if their provided values are 0', () => {
+						const req = {
+							params: {
+								group: TransactionGroups.confirmed,
+								transferMosaicId: '100',
+								fromTransferAmount: '0',
+								toTransferAmount: '0'
+							}
+						};
 
-				describe('allows filtering by fromTransferAmount and toTransferAmount even if their provided values are 0', () => {
-					expect(false).to.equal(true);
+						// Act + Assert
+						return mockServer.callRoute(route, req).then(() => {
+							expect(dbTransactionsFake.firstCall.args[1].fromTransferAmount).to.deep.equal([0, 0]);
+							expect(dbTransactionsFake.firstCall.args[1].toTransferAmount).to.deep.equal([0, 0]);
+						});
+					});
 				});
 
 				describe('checks correct group is provided', () => {
@@ -370,7 +437,9 @@ describe('transaction routes', () => {
 									signerPublicKey: undefined,
 									embedded: undefined,
 									transactionTypes: undefined,
-									transferMosaicId: undefined
+									transferMosaicId: undefined,
+									fromTransferAmount: undefined,
+									toTransferAmount: undefined
 								});
 							}));
 					};

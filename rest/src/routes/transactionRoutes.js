@@ -22,7 +22,7 @@ const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 const errors = require('../server/errors');
 const catapult = require('catapult-sdk');
-const { NotFoundError } = require('restify-errors');
+const { NotFoundError, InvalidArgumentError } = require('restify-errors');
 
 const { convert } = catapult.utils;
 const { PacketType } = catapult.packet;
@@ -54,16 +54,13 @@ module.exports = {
 				return next(new NotFoundError());
 
 			if (params.address && (params.signerPublicKey || params.recipientAddress)) {
-				throw errors.createInvalidArgumentError(
+				return next(new InvalidArgumentError(
 					'can\'t filter by address if signerPublicKey or recipientAddress are already provided'
-				);
+				));
 			}
 
-			if ((params.fromTransferAmount || params.toTransferAmount) && !params.transferMosaicId) {
-				throw errors.createInvalidArgumentError(
-					'can\'t filter by transfer amount if `transferMosaicId` is not provided'
-				);
-			}
+			if ((params.fromTransferAmount || params.toTransferAmount) && !params.transferMosaicId)
+				return next(new InvalidArgumentError('can\'t filter by transfer amount if `transferMosaicId` is not provided'));
 
 			const filters = {
 				height: params.height ? routeUtils.parseArgument(params, 'height', 'uint64') : undefined,
