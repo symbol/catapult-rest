@@ -99,8 +99,8 @@ describe('model formatter builder', () => {
 				transaction: {
 					signature: 'binary',
 					signerPublicKey: 'binary',
-					version: 'int',
-					network: 'int',
+					version: 'uint8',
+					network: 'uint8',
 					type: 'int',
 
 					maxFee: 'uint64',
@@ -159,8 +159,8 @@ describe('model formatter builder', () => {
 				block: {
 					signature: 'binary',
 					signerPublicKey: 'binary',
-					version: 'int',
-					network: 'int',
+					version: 'uint8',
+					network: 'uint8',
 					type: 'int',
 
 					height: 'uint64',
@@ -205,7 +205,7 @@ describe('model formatter builder', () => {
 					addressHeight: 'uint64',
 					publicKey: 'binary',
 					publicKeyHeight: 'uint64',
-					accountType: 'int',
+					accountType: 'uint8',
 					importance: 'uint64',
 					importanceHeight: 'uint64',
 					mosaics: [
