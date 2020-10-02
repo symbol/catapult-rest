@@ -84,20 +84,20 @@ class ModelSchemaBuilder {
 			finalizedBlock: {
 				height: ModelType.uint64,
 				hash: ModelType.binary,
-				finalizationEpoch: ModelType.uint,
-				finalizationPoint: ModelType.uint
+				finalizationEpoch: ModelType.uint32,
+				finalizationPoint: ModelType.uint32
 			},
 
 			finalizationProof: {
-				version: ModelType.uint,
-				finalizationEpoch: ModelType.uint,
-				finalizationPoint: ModelType.uint,
+				version: ModelType.uint32,
+				finalizationEpoch: ModelType.uint32,
+				finalizationPoint: ModelType.uint32,
 				height: ModelType.uint64,
 				hash: ModelType.binary,
 				messageGroups: { type: ModelType.array, schemaName: 'messageGroup' }
 			},
 			messageGroup: {
-				stage: ModelType.uint,
+				stage: ModelType.uint32,
 				height: ModelType.uint64,
 				hashes: { type: ModelType.array, schemaName: ModelType.binary },
 				signatures: { type: ModelType.array, schemaName: 'bmTreeSignature' }
@@ -198,8 +198,8 @@ class ModelSchemaBuilder {
 			},
 			votingPublicKey: {
 				publicKey: ModelType.binary,
-				startEpoch: ModelType.uint,
-				endEpoch: ModelType.uint
+				startEpoch: ModelType.uint32,
+				endEpoch: ModelType.uint32
 			},
 
 			// endregion

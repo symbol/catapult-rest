@@ -94,25 +94,12 @@ describe('db formatting rules', () => {
 		expect(result).to.equal('catapult');
 	});
 
-	describe('can format uint type', () => {
-		const testCases = [
-			{ name: 'uint value 0 (min)', value: new Int32(0), formated: 0 },
-			{ name: 'uint8 value 255', value: new Int32(255), formated: 255 },
-			{ name: 'uint16 value 65535', value: new Int32(65535), formated: 65535 },
-			{ name: 'uint32 value 4294967295 (max)', value: new Int32(-1), formated: 4294967295 },
-			{ name: 'uint32 value 2147483647', value: new Int32(2147483647), formated: 2147483647 },
-			{ name: 'uint32 value 2147483648', value: new Int32(-2147483648), formated: 2147483648 }
-		];
+	it('can format uint8 type', () => {
+		// Arrange + Act:
+		const result = formattingRules[ModelType.uint8](new Int32(128));
 
-		testCases.forEach(testCase => {
-			it(testCase.name, () => {
-				// Arrange + Act:
-				const result = formattingRules[ModelType.uint](testCase.value);
-
-				// Assert:
-				expect(result).to.equal(testCase.formated);
-			});
-		});
+		// Assert:
+		expect(result).to.equal(128);
 	});
 
 	it('can format uint16 type', () => {
@@ -134,6 +121,30 @@ describe('db formatting rules', () => {
 
 		// Assert:
 		expect(result).to.deep.equal(17434);
+	});
+
+	it('uint32 value 4294967295 (max)', () => {
+		// Arrange + Act:
+		const result = formattingRules[ModelType.uint32](new Int32(-1));
+
+		// Assert:
+		expect(result).to.equal(4294967295);
+	});
+
+	it('uint32 value 2147483647', () => {
+		// Arrange + Act:
+		const result = formattingRules[ModelType.uint32](new Int32(2147483647));
+
+		// Assert:
+		expect(result).to.equal(2147483647);
+	});
+
+	it('uint32 value 2147483648', () => {
+		// Arrange + Act:
+		const result = formattingRules[ModelType.uint32](new Int32(-2147483648));
+
+		// Assert:
+		expect(result).to.equal(2147483648);
 	});
 
 	it('can format uint64 type from Long', () => {

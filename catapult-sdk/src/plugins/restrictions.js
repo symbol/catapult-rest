@@ -169,7 +169,7 @@ const restrictionsPlugin = {
 		});
 		builder.addSchema('mosaicRestrictions.entry', {
 			compositeHash: ModelType.binary,
-			entryType: ModelType.uint,
+			entryType: ModelType.uint32,
 			mosaicId: ModelType.uint64HexIdentifier,
 			targetAddress: ModelType.binary,
 			restrictions: { type: ModelType.array, schemaName: 'mosaicRestrictions.entry.restrictions' }

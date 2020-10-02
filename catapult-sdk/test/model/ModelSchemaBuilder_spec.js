@@ -377,9 +377,9 @@ describe('model schema builder', () => {
 			]);
 		});
 
-		it('exposes correct uint properties', () => {
+		it('exposes correct uint32 properties', () => {
 			// Act:
-			const matchingProperties = extractSchemaPropertiesWithType('uint');
+			const matchingProperties = extractSchemaPropertiesWithType('uint32');
 
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
