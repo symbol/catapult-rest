@@ -94,93 +94,111 @@ describe('db formatting rules', () => {
 		expect(result).to.equal('catapult');
 	});
 
-	it('can format uint8 type', () => {
-		// Arrange + Act:
-		const result = formattingRules[ModelType.uint8](new Int32(128));
+	describe('can format uint8 type', () => {
+		const testCases = [
+			{ name: 'value 0', value: new Int32(0), formated: 0 },
+			{ name: 'value 128', value: new Int32(128), formated: 128 },
+			{ name: 'value 255 (max)', value: new Int32(255), formated: 255 }
+		];
 
-		// Assert:
-		expect(result).to.equal(128);
+		testCases.forEach(testCase => {
+			it(testCase.name, () => {
+				// Arrange + Act:
+				const result = formattingRules[ModelType.uint8](testCase.value);
+
+				// Assert:
+				expect(result).to.equal(testCase.formated);
+			});
+		});
 	});
 
-	it('can format uint16 type', () => {
-		// Act:
-		const result = formattingRules[ModelType.uint16](17434);
+	describe('can format uint16 type', () => {
+		const testCases = [
+			{ name: 'value 0', value: new Int32(0), formated: 0 },
+			{ name: 'value 17434', value: new Int32(17434), formated: 17434 },
+			{ name: 'value 32768', value: new Int32(32768), formated: 32768 },
+			{ name: 'value 65535 (max)', value: new Int32(65535), formated: 65535 }
+		];
 
-		// Assert:
-		expect(result).to.equal(17434);
+		testCases.forEach(testCase => {
+			it(testCase.name, () => {
+				// Arrange + Act:
+				const result = formattingRules[ModelType.uint16](testCase.value);
+
+				// Assert:
+				expect(result).to.equal(testCase.formated);
+			});
+		});
+
+		it('can format uint16 type from Binary', () => {
+			// Arrange:
+			const buffer = Buffer.alloc(2, 0);
+			buffer.writeUInt16LE(17434);
+			const object = new Binary(buffer);
+
+			// Act:
+			const result = formattingRules[ModelType.uint16](object);
+
+			// Assert:
+			expect(result).to.deep.equal(17434);
+		});
 	});
 
-	it('can format uint16 type from Binary', () => {
-		// Arrange:
-		const buffer = Buffer.alloc(2, 0);
-		buffer.writeUInt16LE(17434);
-		const object = new Binary(buffer);
+	describe('can format uint32 type', () => {
+		const testCases = [
+			{ name: 'uint32 value 0', value: new Int32(0), formated: 0 },
+			{ name: 'uint32 value 2147483647', value: new Int32(2147483647), formated: 2147483647 },
+			{ name: 'uint32 value 2147483648', value: new Int32(-2147483648), formated: 2147483648 },
+			{ name: 'uint32 value 4294967295 (max)', value: new Int32(-1), formated: 4294967295 }
+		];
 
-		// Act:
-		const result = formattingRules[ModelType.uint16](object);
+		testCases.forEach(testCase => {
+			it(testCase.name, () => {
+				// Arrange + Act:
+				const result = formattingRules[ModelType.uint32](testCase.value);
 
-		// Assert:
-		expect(result).to.deep.equal(17434);
+				// Assert:
+				expect(result).to.equal(testCase.formated);
+			});
+		});
 	});
 
-	it('uint32 value 4294967295 (max)', () => {
-		// Arrange + Act:
-		const result = formattingRules[ModelType.uint32](new Int32(-1));
+	describe('can format uint64 type', () => {
+		it('can format uint64 type from Long', () => {
+			// Arrange:
+			const object = convertToLong([1, 2]);
 
-		// Assert:
-		expect(result).to.equal(4294967295);
-	});
+			// Act:
+			const result = formattingRules[ModelType.uint64](object);
 
-	it('uint32 value 2147483647', () => {
-		// Arrange + Act:
-		const result = formattingRules[ModelType.uint32](new Int32(2147483647));
+			// Assert:
+			expect(result).to.equal('8589934593');
+		});
 
-		// Assert:
-		expect(result).to.equal(2147483647);
-	});
+		it('can format uint64HexIdentifier type from Long', () => {
+			// Arrange:
+			const object = convertToLong([1, 2]);
 
-	it('uint32 value 2147483648', () => {
-		// Arrange + Act:
-		const result = formattingRules[ModelType.uint32](new Int32(-2147483648));
+			// Act:
+			const result = formattingRules[ModelType.uint64HexIdentifier](object);
 
-		// Assert:
-		expect(result).to.equal(2147483648);
-	});
+			// Assert:
+			expect(result).to.equal('0000000200000001');
+		});
 
-	it('can format uint64 type from Long', () => {
-		// Arrange:
-		const object = convertToLong([1, 2]);
+		it('can format uint64HexIdentifier type from Binary', () => {
+			// Arrange:
+			const buffer = Buffer.alloc(8, 0);
+			buffer.writeUInt32LE(0x00ABCDEF, 0);
+			buffer.writeUInt32LE(0x000FDFFF, 4);
+			const object = new Binary(buffer);
 
-		// Act:
-		const result = formattingRules[ModelType.uint64](object);
+			// Act:
+			const result = formattingRules[ModelType.uint64HexIdentifier](object);
 
-		// Assert:
-		expect(result).to.equal('8589934593');
-	});
-
-	it('can format uint64HexIdentifier type from Long', () => {
-		// Arrange:
-		const object = convertToLong([1, 2]);
-
-		// Act:
-		const result = formattingRules[ModelType.uint64HexIdentifier](object);
-
-		// Assert:
-		expect(result).to.equal('0000000200000001');
-	});
-
-	it('can format uint64HexIdentifier type from Binary', () => {
-		// Arrange:
-		const buffer = Buffer.alloc(8, 0);
-		buffer.writeUInt32LE(0x00ABCDEF, 0);
-		buffer.writeUInt32LE(0x000FDFFF, 4);
-		const object = new Binary(buffer);
-
-		// Act:
-		const result = formattingRules[ModelType.uint64HexIdentifier](object);
-
-		// Assert:
-		expect(result).to.equal('000FDFFF00ABCDEF');
+			// Assert:
+			expect(result).to.equal('000FDFFF00ABCDEF');
+		});
 	});
 
 	describe('can format int type', () => {
