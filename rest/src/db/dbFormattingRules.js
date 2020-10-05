@@ -40,7 +40,7 @@ module.exports = {
 	[ModelType.objectId]: value => (undefined === value ? '' : value.toHexString().toUpperCase()),
 	[ModelType.statusCode]: value => status.toString(value >>> 0),
 	[ModelType.string]: value => value.toString(),
-	[ModelType.uint8]: value => convert.int32ToUint32(value),
+	[ModelType.uint8]: value => value,
 	// `uint16` required solely because accountRestrictions->restrictionAdditions array has uint16 provided as binary
 	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readInt16LE(0) : value),
 	[ModelType.uint32]: value => convert.int32ToUint32(value),

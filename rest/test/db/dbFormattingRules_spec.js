@@ -23,7 +23,7 @@ const { convertToLong } = require('../../src/db/dbUtils');
 const test = require('../testUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
-const { Binary, Int32 } = require('mongodb');
+const { Binary } = require('mongodb');
 
 const { ModelType } = catapult.model;
 
@@ -96,9 +96,9 @@ describe('db formatting rules', () => {
 
 	describe('can format uint8 type', () => {
 		const testCases = [
-			{ name: 'value 0', value: new Int32(0), formated: 0 },
-			{ name: 'value 128', value: new Int32(128), formated: 128 },
-			{ name: 'value 255 (max)', value: new Int32(255), formated: 255 }
+			{ name: 'value 0', value: 0, formated: 0 },
+			{ name: 'value 128', value: 128, formated: 128 },
+			{ name: 'value 255 (max)', value: 255, formated: 255 }
 		];
 
 		testCases.forEach(testCase => {
@@ -114,10 +114,10 @@ describe('db formatting rules', () => {
 
 	describe('can format uint16 type', () => {
 		const testCases = [
-			{ name: 'value 0', value: new Int32(0), formated: 0 },
-			{ name: 'value 17434', value: new Int32(17434), formated: 17434 },
-			{ name: 'value 32768', value: new Int32(32768), formated: 32768 },
-			{ name: 'value 65535 (max)', value: new Int32(65535), formated: 65535 }
+			{ name: 'value 0', value: 0, formated: 0 },
+			{ name: 'value 17434', value: 17434, formated: 17434 },
+			{ name: 'value 32768', value: 32768, formated: 32768 },
+			{ name: 'value 65535 (max)', value: 65535, formated: 65535 }
 		];
 
 		testCases.forEach(testCase => {
@@ -146,10 +146,10 @@ describe('db formatting rules', () => {
 
 	describe('can format uint32 type', () => {
 		const testCases = [
-			{ name: 'uint32 value 0', value: new Int32(0), formated: 0 },
-			{ name: 'uint32 value 2147483647', value: new Int32(2147483647), formated: 2147483647 },
-			{ name: 'uint32 value 2147483648', value: new Int32(-2147483648), formated: 2147483648 },
-			{ name: 'uint32 value 4294967295 (max)', value: new Int32(-1), formated: 4294967295 }
+			{ name: 'value 0', value: 0, formated: 0 },
+			{ name: 'value 2147483647', value: 2147483647, formated: 2147483647 },
+			{ name: 'value -2147483648', value: -2147483648, formated: 2147483648 },
+			{ name: 'value 4294967295 (max)', value: -1, formated: 4294967295 }
 		];
 
 		testCases.forEach(testCase => {
@@ -203,12 +203,12 @@ describe('db formatting rules', () => {
 
 	describe('can format int type', () => {
 		const testCases = [
-			{ name: 'int value 0', value: new Int32(0), formated: 0 },
-			{ name: 'int8 value 255', value: new Int32(255), formated: 255 },
-			{ name: 'int16 value 65535', value: new Int32(65535), formated: 65535 },
-			{ name: 'int32 value -1', value: new Int32(-1), formated: -1 },
-			{ name: 'int32 value -2147483648 (min)', value: new Int32(-2147483648), formated: -2147483648 },
-			{ name: 'int32 value 2147483647 (max)', value: new Int32(2147483647), formated: 2147483647 }
+			{ name: 'value 0', value: 0, formated: 0 },
+			{ name: 'value 255', value: 255, formated: 255 },
+			{ name: 'value 65535', value: 65535, formated: 65535 },
+			{ name: 'value -1', value: -1, formated: -1 },
+			{ name: 'value -2147483648 (min)', value: -2147483648, formated: -2147483648 },
+			{ name: 'value 2147483647 (max)', value: 2147483647, formated: 2147483647 }
 		];
 
 		testCases.forEach(testCase => {
