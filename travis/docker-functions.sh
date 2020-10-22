@@ -10,6 +10,7 @@ docker_build(){
   validate_env_variable "DOCKER_IMAGE_NAME" "$FUNCNAME"
   validate_env_variable "VERSION" "$FUNCNAME"
 
+
   echo "Creating image ${DOCKER_IMAGE_NAME}:${VERSION}"
   docker build -t "${DOCKER_IMAGE_NAME}:${VERSION}" .
 
@@ -23,11 +24,12 @@ docker_build(){
 
       if [ "$OPERATION" = "publish" ]
       then
+          TIMESTAMP="$(date +%Y%m%d%H%M)"
           docker tag "${DOCKER_IMAGE_NAME}:${VERSION}" "${DOCKER_IMAGE_NAME}:${VERSION}-alpha"
-          docker tag "${DOCKER_IMAGE_NAME}:${VERSION}" "${DOCKER_IMAGE_NAME}:${VERSION}-alpha-$(date +%Y%m%d%H%M)"
-          echo "Docker pushing alpha"
+          docker tag "${DOCKER_IMAGE_NAME}:${VERSION}" "${DOCKER_IMAGE_NAME}:${VERSION}-alpha-${TIMESTAMP}"
+          echo "Docker pushing alpha ${TIMESTAMP}"
           docker push "${DOCKER_IMAGE_NAME}:${VERSION}-alpha"
-          docker push "${DOCKER_IMAGE_NAME}:${VERSION}-alpha-$(date +%Y%m%d%H%M)"
+          docker push "${DOCKER_IMAGE_NAME}:${VERSION}-alpha-${TIMESTAMP}"
       fi
 
       if [ "$OPERATION" = "release" ]
