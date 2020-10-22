@@ -31,12 +31,12 @@ jobs:
     - stage: publish
       name: docker publish alpha
       script: /bin/bash travis/docker-functions.sh docker_build_version_file publish
-      if: branch = env(DEV_BRANCH) AND type != pull_request
+      if: branch = env(DEV_BRANCH) AND type = push
     - stage: release
       name: docker publish release
       script: /bin/bash travis/docker-functions.sh docker_build_version_file release
-      if: branch = env(RELEASE_BRANCH) AND type != pull_request AND commit_message = env(RELEASE_MESSAGE)
+      if: branch = env(RELEASE_BRANCH) AND type = api AND commit_message = env(RELEASE_MESSAGE)
     - stage: post release
       name: tag and version upgrade
       script: /bin/bash travis/travis-functions.sh post_release_version_file
-      if: branch = env(RELEASE_BRANCH) AND type != pull_request AND commit_message = env(RELEASE_MESSAGE)
+      if: branch = env(RELEASE_BRANCH) AND type = api AND commit_message = env(RELEASE_MESSAGE)
