@@ -14,7 +14,7 @@ Catapult REST gateway combines HTTP and WebSockets to perform read and write act
 
 ## Installation
 
-1. Validate you are able to run Bootstrap by following the [requirements](https://github.com/nemtech/symbol-bootstrap#requirements)
+1. Validate you are able to run Bootstrap by following the [requirements](https://github.com/nemtech/symbol-bootstrap#requirements).
 
 2. Install the project dependencies:
 
