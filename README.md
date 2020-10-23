@@ -44,7 +44,7 @@ yarn start
 
 If everything goes well, you should see catapult-rest running by opening ``http://localhost:3000/node/info`` in a new browser tab.
 
-Alternatively, you can run bootstrap in `detached` mode to avoid opening a new tab. 
+Alternatively, you can run bootstrap in `detached` mode to avoid opening a new terminal. 
 
 ```
 cd rest
