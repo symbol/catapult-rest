@@ -1,4 +1,4 @@
-    # catapult-rest
+# catapult-rest
 
 [![Build Status](https://api.travis-ci.com/nemtech/catapult-rest.svg?branch=main)](https://travis-ci.com/nemtech/catapult-rest)
 [![Coverage Status](https://coveralls.io/repos/github/nemtech/catapult-rest/badge.svg?branch=main)](https://coveralls.io/github/nemtech/catapult-rest?branch=main)
