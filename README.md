@@ -36,7 +36,7 @@ Mongo DB (27017), Server (7900) and Broker (7902) ports are open to localhost.
 
 4. Run catapult-rest:
 
-In another tab:
+In another terminal:
 
 ```
 yarn start
