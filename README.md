@@ -22,7 +22,7 @@ Catapult REST gateway combines HTTP and WebSockets to perform read and write act
 ./yarn_setup.sh
 ```
 
-3. Run a Symbol private network using Bootstrap
+3. Run a Symbol private network using Bootstrap:
 
 ```
 cd rest
