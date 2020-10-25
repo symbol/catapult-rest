@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -43,8 +44,8 @@ class ModelSchemaBuilder {
 			// region block
 			blockHeader: {
 				size: ModelType.int,
-				version: ModelType.int,
-				network: ModelType.int,
+				version: ModelType.uint8,
+				network: ModelType.uint8,
 				type: ModelType.int,
 				height: ModelType.uint64,
 				timestamp: ModelType.uint64,
@@ -57,7 +58,7 @@ class ModelSchemaBuilder {
 				receiptsHash: ModelType.binary,
 				stateHash: ModelType.binary,
 				beneficiaryAddress: ModelType.binary,
-				feeMultiplier: ModelType.int
+				feeMultiplier: ModelType.uint32
 			},
 			blockHeaderMetadata: {
 				hash: ModelType.binary,
@@ -84,20 +85,20 @@ class ModelSchemaBuilder {
 			finalizedBlock: {
 				height: ModelType.uint64,
 				hash: ModelType.binary,
-				finalizationEpoch: ModelType.uint,
-				finalizationPoint: ModelType.uint
+				finalizationEpoch: ModelType.uint32,
+				finalizationPoint: ModelType.uint32
 			},
 
 			finalizationProof: {
-				version: ModelType.uint,
-				finalizationEpoch: ModelType.uint,
-				finalizationPoint: ModelType.uint,
+				version: ModelType.uint32,
+				finalizationEpoch: ModelType.uint32,
+				finalizationPoint: ModelType.uint32,
 				height: ModelType.uint64,
 				hash: ModelType.binary,
 				messageGroups: { type: ModelType.array, schemaName: 'messageGroup' }
 			},
 			messageGroup: {
-				stage: ModelType.uint,
+				stage: ModelType.uint32,
 				height: ModelType.uint64,
 				hashes: { type: ModelType.array, schemaName: ModelType.binary },
 				signatures: { type: ModelType.array, schemaName: 'bmTreeSignature' }
@@ -118,8 +119,8 @@ class ModelSchemaBuilder {
 
 			transaction: {
 				size: ModelType.int,
-				version: ModelType.int,
-				network: ModelType.int,
+				version: ModelType.uint8,
+				network: ModelType.uint8,
 				type: ModelType.int,
 				deadline: ModelType.uint64,
 				maxFee: ModelType.uint64
@@ -167,7 +168,7 @@ class ModelSchemaBuilder {
 				addressHeight: ModelType.uint64,
 				publicKey: ModelType.binary,
 				publicKeyHeight: ModelType.uint64,
-				accountType: ModelType.int,
+				accountType: ModelType.uint8,
 				supplementalPublicKeys: { type: ModelType.object, schemaName: 'supplementalPublicKey' },
 				importance: ModelType.uint64,
 				importanceHeight: ModelType.uint64,
@@ -183,7 +184,7 @@ class ModelSchemaBuilder {
 			activityBucket: {
 				startHeight: ModelType.uint64,
 				totalFeesPaid: ModelType.uint64,
-				beneficiaryCount: ModelType.int,
+				beneficiaryCount: ModelType.uint32,
 				rawScore: ModelType.uint64
 			},
 			mosaic: {
@@ -198,8 +199,8 @@ class ModelSchemaBuilder {
 			},
 			votingPublicKey: {
 				publicKey: ModelType.binary,
-				startEpoch: ModelType.uint,
-				endEpoch: ModelType.uint
+				startEpoch: ModelType.uint32,
+				endEpoch: ModelType.uint32
 			},
 
 			// endregion
@@ -220,7 +221,7 @@ class ModelSchemaBuilder {
 				db: ModelType.string
 			},
 			nodeInfo: {
-				version: ModelType.int,
+				version: ModelType.uint8,
 				roles: ModelType.int,
 				port: ModelType.int,
 				networkIdentifier: ModelType.int,

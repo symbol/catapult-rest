@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -33,13 +34,14 @@ describe('model type enumeration', () => {
 			objectId: 5,
 			statusCode: 6,
 			string: 7,
-			uint: 8,
+			uint8: 8,
 			uint16: 9,
-			uint64: 10,
-			uint64HexIdentifier: 11,
-			int: 12,
-			boolean: 13,
-			max: 13
+			uint32: 10,
+			uint64: 11,
+			uint64HexIdentifier: 12,
+			int: 13,
+			boolean: 14,
+			max: 14
 		});
 	});
 });

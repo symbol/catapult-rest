@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -31,15 +32,15 @@ const mosaicPlugin = {
 		builder.addTransactionSupport(EntityType.mosaicDefinition, {
 			id: ModelType.uint64HexIdentifier,
 			duration: ModelType.uint64,
-			nonce: ModelType.int,
-			flags: ModelType.int,
-			divisibility: ModelType.int
+			nonce: ModelType.uint32,
+			flags: ModelType.uint8,
+			divisibility: ModelType.uint8
 		});
 
 		builder.addTransactionSupport(EntityType.mosaicSupplyChange, {
 			mosaicId: ModelType.uint64HexIdentifier,
 			delta: ModelType.uint64,
-			action: ModelType.int
+			action: ModelType.uint8
 		});
 
 		builder.addSchema('mosaicDescriptor', {
@@ -53,8 +54,8 @@ const mosaicPlugin = {
 			startHeight: ModelType.uint64,
 			ownerAddress: ModelType.binary,
 			revision: ModelType.int,
-			flags: ModelType.int,
-			divisibility: ModelType.int,
+			flags: ModelType.uint8,
+			divisibility: ModelType.uint8,
 			duration: ModelType.uint64
 		});
 	},

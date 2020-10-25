@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -75,12 +76,12 @@ describe('message formatting rules', () => {
 		expect(result).to.equal('catapult');
 	});
 
-	it('can format uint type', () => {
+	it('can format uint8 type', () => {
 		// Arrange:
 		const object = 12345678;
 
 		// Act:
-		const result = formattingRules[ModelType.uint](object);
+		const result = formattingRules[ModelType.uint8](object);
 
 		// Assert:
 		expect(result).to.deep.equal(12345678);
@@ -95,6 +96,17 @@ describe('message formatting rules', () => {
 
 		// Assert:
 		expect(result).to.deep.equal(56);
+	});
+
+	it('can format uint32 type', () => {
+		// Arrange:
+		const object = 12345678;
+
+		// Act:
+		const result = formattingRules[ModelType.uint32](object);
+
+		// Assert:
+		expect(result).to.deep.equal(12345678);
 	});
 
 	it('can format uint64 type', () => {

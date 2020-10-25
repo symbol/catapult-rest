@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -33,24 +34,24 @@ const accountLinkPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.accountLink, {
 			linkedPublicKey: ModelType.binary,
-			linkAction: ModelType.int
+			linkAction: ModelType.uint8
 		});
 
 		builder.addTransactionSupport(EntityType.nodeKeyLink, {
 			linkedPublicKey: ModelType.binary,
-			linkAction: ModelType.int
+			linkAction: ModelType.uint8
 		});
 
 		builder.addTransactionSupport(EntityType.votingKeyLink, {
 			linkedPublicKey: ModelType.binary,
-			startEpoch: ModelType.uint,
-			endEpoch: ModelType.uint,
-			linkAction: ModelType.int
+			startEpoch: ModelType.uint32,
+			endEpoch: ModelType.uint32,
+			linkAction: ModelType.uint8
 		});
 
 		builder.addTransactionSupport(EntityType.vrfKeyLink, {
 			linkedPublicKey: ModelType.binary,
-			linkAction: ModelType.int
+			linkAction: ModelType.uint8
 		});
 	},
 

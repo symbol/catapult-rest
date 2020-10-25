@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -34,14 +35,18 @@ class LockSecretDb {
 	/**
 	 * Retrieves secret infos for given accounts filtered and paginated.
 	 * @param {array<{Uint8Array}>} addresses Account addresses.
+	 * @param {Uint8Array} secret Secret hash.
 	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
 	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<array>} Secret lock infos for all accounts.
 	 */
-	secretLocks(addresses, options) {
+	secretLocks(addresses, secret, options) {
 		const sortingOptions = { id: '_id' };
 		const buffers = addresses.map(address => Buffer.from(address));
 		let conditions = { 'lock.ownerAddress': { $in: buffers } };
+
+		if (undefined !== secret)
+			conditions['lock.secret'] = Buffer.from(secret);
 
 		const offsetCondition = buildOffsetCondition(options, sortingOptions);
 		if (offsetCondition)
@@ -49,16 +54,6 @@ class LockSecretDb {
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'secretLocks', options);
-	}
-
-	/**
-	 * Retrieves secret info for given secret.
-	 * @param {Uint8Array} secret Secret hash.
-	 * @returns {Promise.<object>} Secret lock info for a secret.
-	 */
-	secretLockBySecret(secret) {
-		return this.catapultDb.queryDocument('secretLocks', { 'lock.secret': Buffer.from(secret) })
-			.then(this.catapultDb.sanitizer.renameId);
 	}
 
 	// endregion

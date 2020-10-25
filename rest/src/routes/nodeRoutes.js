@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -19,16 +20,21 @@
  */
 
 const routeResultTypes = require('./routeResultTypes');
-const { version: sdkVersion } = require('../../../catapult-sdk/package.json');
-const { version: restVersion } = require('../../package.json');
 const nodeInfoCodec = require('../sockets/nodeInfoCodec');
 const nodePeersCodec = require('../sockets/nodePeersCodec');
 const nodeTimeCodec = require('../sockets/nodeTimeCodec');
 const catapult = require('catapult-sdk');
+const fs = require('fs');
+const path = require('path');
 
 const packetHeader = catapult.packet.header;
 const { PacketType } = catapult.packet;
 const { BinaryParser } = catapult.parser;
+
+// ATM, both rest and rest sdk share the same version. In the future,
+// we will have an open api and sdk dependencies with their given versions.
+const restVersion = fs.readFileSync(path.resolve(__dirname, '../../../version.txt'), 'UTF-8').trim();
+const sdkVersion = restVersion;
 
 const buildResponse = (packet, codec, resultType) => {
 	const binaryParser = new BinaryParser();

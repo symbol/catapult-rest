@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -28,8 +29,9 @@ module.exports = {
 	[ModelType.binary]: value => convert.uint8ToHex(value),
 	[ModelType.statusCode]: status.toString,
 	[ModelType.string]: value => value.toString(),
-	[ModelType.uint]: value => value,
+	[ModelType.uint8]: value => value,
 	[ModelType.uint16]: value => value,
+	[ModelType.uint32]: value => value,
 	[ModelType.uint64]: value => uint64.toString(value),
 	[ModelType.uint64HexIdentifier]: value => uint64.toHex(value),
 	[ModelType.int]: value => value,

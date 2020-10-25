@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -22,7 +23,7 @@ const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 const errors = require('../server/errors');
 const catapult = require('catapult-sdk');
-const { NotFoundError } = require('restify-errors');
+const { NotFoundError, InvalidArgumentError } = require('restify-errors');
 
 const { convert } = catapult.utils;
 const { PacketType } = catapult.packet;
@@ -54,10 +55,13 @@ module.exports = {
 				return next(new NotFoundError());
 
 			if (params.address && (params.signerPublicKey || params.recipientAddress)) {
-				throw errors.createInvalidArgumentError(
+				return next(new InvalidArgumentError(
 					'can\'t filter by address if signerPublicKey or recipientAddress are already provided'
-				);
+				));
 			}
+
+			if ((params.fromTransferAmount || params.toTransferAmount) && !params.transferMosaicId)
+				return next(new InvalidArgumentError('can\'t filter by transfer amount if `transferMosaicId` is not provided'));
 
 			const filters = {
 				height: params.height ? routeUtils.parseArgument(params, 'height', 'uint64') : undefined,
@@ -67,7 +71,13 @@ module.exports = {
 				signerPublicKey: params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined,
 				recipientAddress: params.recipientAddress ? routeUtils.parseArgument(params, 'recipientAddress', 'address') : undefined,
 				transactionTypes: params.type ? routeUtils.parseArgumentAsArray(params, 'type', 'uint') : undefined,
-				embedded: params.embedded ? routeUtils.parseArgument(params, 'embedded', 'boolean') : undefined
+				embedded: params.embedded ? routeUtils.parseArgument(params, 'embedded', 'boolean') : undefined,
+
+				/** transfer transaction specific filters */
+				transferMosaicId: params.transferMosaicId ? routeUtils.parseArgument(params, 'transferMosaicId', 'uint64') : undefined,
+				fromTransferAmount: params.fromTransferAmount
+					? routeUtils.parseArgument(params, 'fromTransferAmount', 'uint64') : undefined,
+				toTransferAmount: params.toTransferAmount ? routeUtils.parseArgument(params, 'toTransferAmount', 'uint64') : undefined
 			};
 
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });

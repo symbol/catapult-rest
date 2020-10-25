@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -137,6 +138,9 @@ describe('namespace plugin', () => {
 				const formattingRules = {
 					[ModelType.none]: () => 'none',
 					[ModelType.binary]: () => 'binary',
+					[ModelType.uint8]: () => 'uint8',
+					[ModelType.uint16]: () => 'uint16',
+					[ModelType.uint32]: () => 'uint32',
 					[ModelType.uint64]: () => 'uint64',
 					[ModelType.uint64HexIdentifier]: () => 'uint64HexIdentifier',
 					[ModelType.objectId]: () => 'objectId',
@@ -189,7 +193,7 @@ describe('namespace plugin', () => {
 				// Assert:
 				expect(formattedAlias).to.contain.all.keys(['type', 'mosaicId']);
 				expect(formattedAlias).deep.equal({
-					type: 'int',
+					type: 'uint8',
 					mosaicId: 'uint64HexIdentifier'
 				});
 			});
@@ -207,7 +211,7 @@ describe('namespace plugin', () => {
 				// Assert:
 				expect(formattedAlias).to.contain.all.keys(['type', 'address']);
 				expect(formattedAlias).deep.equal({
-					type: 'int',
+					type: 'uint8',
 					address: 'binary'
 				});
 			});
@@ -224,7 +228,7 @@ describe('namespace plugin', () => {
 				// Assert:
 				expect(formattedAlias).to.contain.all.keys(['type']);
 				expect(formattedAlias).deep.equal({
-					type: 'int'
+					type: 'uint8'
 				});
 			});
 		});

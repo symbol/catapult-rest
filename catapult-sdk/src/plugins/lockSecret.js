@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -40,8 +41,8 @@ const lockSecretPlugin = {
 			mosaicId: ModelType.uint64HexIdentifier,
 			amount: ModelType.uint64,
 			endHeight: ModelType.uint64,
-			status: ModelType.int,
-			hashAlgorithm: ModelType.int,
+			status: ModelType.uint8,
+			hashAlgorithm: ModelType.uint8,
 			secret: ModelType.binary,
 			recipientAddress: ModelType.binary,
 			compositeHash: ModelType.binary
@@ -53,13 +54,13 @@ const lockSecretPlugin = {
 			mosaicId: ModelType.uint64HexIdentifier,
 			amount: ModelType.uint64,
 			duration: ModelType.uint64,
-			hashAlgorithm: ModelType.int
+			hashAlgorithm: ModelType.uint8
 		});
 		builder.addTransactionSupport(EntityType.secretProof, {
 			secret: ModelType.binary,
 			recipientAddress: ModelType.binary,
 			proof: ModelType.binary,
-			hashAlgorithm: ModelType.int
+			hashAlgorithm: ModelType.uint8
 		});
 	},
 

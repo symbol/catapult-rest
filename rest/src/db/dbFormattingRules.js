@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -40,9 +41,10 @@ module.exports = {
 	[ModelType.objectId]: value => (undefined === value ? '' : value.toHexString().toUpperCase()),
 	[ModelType.statusCode]: value => status.toString(value >>> 0),
 	[ModelType.string]: value => value.toString(),
-	[ModelType.uint]: value => convert.int32ToUint32(value),
+	[ModelType.uint8]: value => value,
 	// `uint16` required solely because accountRestrictions->restrictionAdditions array has uint16 provided as binary
 	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readInt16LE(0) : value),
+	[ModelType.uint32]: value => convert.int32ToUint32(value),
 	[ModelType.uint64]: value => uint64.toString(longToUint64(value)),
 	// `uint64HexIdentifier` requires branching accountRestrictions->restrictionAdditions provides uint64 as binary
 	[ModelType.uint64HexIdentifier]: value => uint64.toHex(value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value)),
