@@ -73,7 +73,7 @@ module.exports = {
 
 		// this endpoint is here because it is expected to support requests by block other than <current block>
 		server.get('/state/:state/hash/:hash/merkle', (req, res, next) => {
-			const { state } = req.params;
+			const state = routeUtils.parseArgument(req.params, 'state', 'uint');
 			const hash = routeUtils.parseArgument(req.params, 'hash', 'hash256');
 
 			if (!StatePathPacketTypes.includes(state))
@@ -83,7 +83,13 @@ module.exports = {
 			const { timeout } = services.config.apiNode;
 
 			const headerBuffer = packetHeader.createBuffer(state, packetHeader.size + constants.sizes.hash256);
+			// Original
 			const packetBuffer = Buffer.concat([headerBuffer, hash]);
+
+			// ALT
+			// const hashBuffer = Buffer.from(hash);
+			// const packetBuffer = Buffer.concat([headerBuffer, hashBuffer]);
+
 			return connections.singleUse()
 				.then(connection => connection.pushPull(packetBuffer, timeout))
 				.then(packet => {
