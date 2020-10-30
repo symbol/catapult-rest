@@ -1,4 +1,5 @@
 #nodeEqualityStrategy: public-key
+logLevel: 'Debug'
 nodes:
   - repeat: 0
   - trustedHosts: '127.0.0.1, 172.20.0.25, 172.20.0.1'
