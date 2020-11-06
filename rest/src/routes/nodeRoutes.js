@@ -135,5 +135,22 @@ module.exports = {
 					next();
 				});
 		});
+
+		server.get('/node/unlockedaccount', (req, res, next) => {
+			const { convert } = catapult.utils;
+			const headerBuffer = packetHeader.createBuffer(
+			   PacketType.unlockedAccount,
+			   packetHeader.size
+			);
+			const packetBuffer = headerBuffer;
+			return connections
+			   .singleUse()
+			   .then(connection => connection.pushPull(packetBuffer, timeout))
+			   .then(packet => {
+				  const unlockedKeys = convert.uint8ToHex(packet.payload).match(/.{1,64}/g);
+				  res.send({ unlockedAccount: !unlockedKeys ? [] : unlockedKeys});
+				  next();
+			   });
+		 });
 	}
 };
