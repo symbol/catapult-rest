@@ -18,13 +18,13 @@
     "lint:fix": "eslint src test --fix",
     "lint:jenkins": "eslint -o tests.catapult.lint.xml -f junit src test || exit 0",
     "bootstrap-clean": "symbol-bootstrap clean",
-    "bootstrap-start": "symbol-bootstrap start -a light -c bootstrap-preset.yml --healthCheck",
-    "bootstrap-start-detached": "symbol-bootstrap start -a light -c bootstrap-preset.yml --detached --healthCheck",
+    "bootstrap-start": "symbol-bootstrap start -p bootstrap -a light -c bootstrap-preset.yml --healthCheck",
+    "bootstrap-start-detached": "symbol-bootstrap start -p bootstrap -a light -c bootstrap-preset.yml --detached --healthCheck",
     "bootstrap-stop": "symbol-bootstrap stop",
     "bootstrap-run": "symbol-bootstrap run",
     "bootstrap-run-detached": "symbol-bootstrap run --detached --healthCheck",
     "bootstrap-compose": "symbol-bootstrap compose",
-    "bootstrap-config": "symbol-bootstrap config -a light -c bootstrap-preset.yml"
+    "bootstrap-config": "symbol-bootstrap config -p bootstrap -a light -c bootstrap-preset.yml"
   },
   "keywords": [],
   "author": "",
