@@ -22,6 +22,7 @@
 const lockSecretRoutes = require('../../../src/plugins/lockSecret/lockSecretRoutes');
 const routeUtils = require('../../../src/routes/routeUtils');
 const { MockServer } = require('../../routes/utils/routeTestUtils');
+const { test } = require('../../routes/utils/routeTestUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -212,6 +213,27 @@ describe('lock secret routes', () => {
 					// Act + Assert:
 					expect(() => mockServer.callRoute(route, req)).to.throw('address has an invalid format');
 				});
+			});
+		});
+
+		describe('by compositeHash', () => {
+			const compositeHashes = ['C54AFD996DF1F52748EBC5B40F8D0DC242A6A661299149F5F96A0C21ECCB653F'];
+			const uint64Hashes = compositeHashes.map(routeUtils.namedParserMap.hash256);
+			test.route.document.addGetPostDocumentRouteTests(lockSecretRoutes.register, {
+				routes: { singular: '/lock/secret/:compositeHash', plural: '/lock/secret' },
+
+				inputs: {
+					valid: { object: { compositeHash: compositeHashes[0] }, parsed: [uint64Hashes[0]], printable: compositeHashes[0] },
+					validMultiple: { object: { compositeHashes }, parsed: uint64Hashes },
+					invalid: { object: { compositeHash: '12345' }, error: 'compositeHash has an invalid format' },
+					invalidMultiple: {
+						object: { compositeHashes: [compositeHashes[0], '12345'] },
+						error: 'element in array compositeHashes has an invalid format'
+					}
+				},
+
+				dbApiName: 'secretLocksByCompositeHash',
+				type: 'secretLockInfo'
 			});
 		});
 	});

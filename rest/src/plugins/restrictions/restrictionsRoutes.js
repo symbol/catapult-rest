@@ -46,7 +46,7 @@ module.exports = {
 			accountRestrictionsSender,
 			{ base: '/restrictions/account', singular: 'address', plural: 'addresses' },
 			params => db.accountRestrictionsByAddresses(params),
-			routeUtils.namedParserMap.hash256
+			routeUtils.namedParserMap.address
 		);
 
 		// MERKLE

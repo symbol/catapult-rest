@@ -407,21 +407,19 @@ describe('account routes', () => {
 	describe('account state tree', () => {
 		describe('returns the requested tree with valid params', () => {
 			// Arrange:
-			const stateTree = [
-				'9922093F19F7160BDCBCA8AA48499DA8DF532D4102745670B85AA4BDF63B8D59',
-				'E8FCFD95CA220D442BE748F5494001A682DC8015A152EBC433222136E99A96B8',
-				'C1C1062C63CAB4197C87B366052ECE3F4FEAE575D81A7F728F4E3704613AF876',
-				'F8E8FCDAD1B94D2C76D769B113FF5CAC5D5170772F2D80E466EB04FCA23D6887',
-				'2D3418274BBC250616223C162534B460216AED82C4FA9A87B53083B7BA7A9391',
-				'AEAF30ED55BBE4805C53E5232D88242F0CF719F99A8E6D339BCBF5D5DE85E1FB',
-				'AFE6C917BABA60ADC1512040CC35033B563DAFD1718FA486AB1F3D9B84866B27'
-			].map((treeNode => Buffer.from(convert.hexToUint8(treeNode))));
+			const stateTree = '00008080DA9B4AF63BE985715EA635AF98E3CF3B0A22F9A2'
+				+ 'BE1C7DD40B79948AA63E36586E5D2E9D0C089C1C64BC0D'
+				+ '42A11ADBD1CD6CDB4B7C294062F55113525A64AE3CFF3F'
+				+ '04A7F2A487B42EA89323C4408F82415223ACFEC7DFA7924'
+				+ 'EFC31A70778AB17A00C3EAFF635F01BB3B474F0AF1BE99F'
+				+ 'BDA85EEFB209CC7BD158D3540DE3A3F2D1';
+			const stateTreeBytes = convert.hexToUint8(stateTree);
 
 			const packetType = PacketType.accountStatePath;
 			const packet = {
 				type: PacketType.accountStatePath,
-				size: 168,
-				payload: Buffer.concat(stateTree)
+				size: stateTreeBytes.length,
+				payload: stateTreeBytes
 			};
 			const services = serviceCreator(packet);
 
@@ -438,11 +436,7 @@ describe('account routes', () => {
 						expect(routeContext.responses.length).to.equal(1);
 						expect(routeContext.redirects.length).to.equal(0);
 						expect(routeContext.responses[0]).to.deep.equal({
-							formatter: 'ws',
-							payload: {
-								tree: stateTree
-							},
-							type: 'stateTree'
+							raw: stateTree
 						});
 					})
 				));

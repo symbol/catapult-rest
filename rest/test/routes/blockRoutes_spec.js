@@ -29,25 +29,11 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 
 const { address } = catapult.model;
-const { PacketType, StatePathPacketTypes } = catapult.packet;
 const { convert } = catapult.utils;
 
 describe('block routes', () => {
 	const addChainStatisticToDb = db => { db.chainStatisticCurrent = () => Promise.resolve({ height: convertToLong(10) }); };
 	const routeConfig = { pageSize: { min: 30, max: 80 } };
-
-	const serviceCreator = packet => ({
-		connections: {
-			singleUse: () => new Promise(resolve => {
-				resolve({
-					pushPull: () => new Promise(innerResolve => innerResolve(packet))
-				});
-			})
-		},
-		config: {
-			apiNode: { timeout: 1000 }
-		}
-	});
 
 	describe('blocks', () => {
 		describe('get', () => {
@@ -184,6 +170,4 @@ describe('block routes', () => {
 			blockRouteMerkleProcessorSpy.restore();
 		});
 	});
-
-
 });

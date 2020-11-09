@@ -25,7 +25,6 @@ const routeUtils = require('../../routes/routeUtils');
 const catapult = require('catapult-sdk');
 
 const { PacketType } = catapult.packet;
-const { uint64 } = catapult.utils;
 
 module.exports = {
 	register: (server, db, services) => {
