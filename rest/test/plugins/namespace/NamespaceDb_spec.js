@@ -54,7 +54,8 @@ describe('namespace db', () => {
 			sortDirection: -1
 		};
 
-		const createNamespace = (objectId, aliasType, level0, ownerAddress, registrationType, active = true, expirationHeight = { start: 1, end: 1000 }) => ({
+		const createNamespace = (objectId, aliasType, level0, ownerAddress, registrationType,
+			active = true, expirationHeight = { start: 1, end: 1000 }) => ({
 			_id: createObjectId(objectId),
 			meta: { active },
 			namespace: {
