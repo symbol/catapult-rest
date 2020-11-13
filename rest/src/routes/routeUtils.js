@@ -59,8 +59,8 @@ const namedParserMap = {
 	address: str => {
 		if (constants.sizes.addressEncoded === str.length)
 			return address.stringToAddress(str);
-		if (constants.sizes.addressDecoded * 2 === str.length)
-			return convert.hexToUint8(str);
+		// if (constants.sizes.addressDecoded * 2 === str.length)
+		// 	return convert.hexToUint8(str);
 		throw Error(`invalid length of address '${str.length}'`);
 	},
 	publicKey: str => {
@@ -74,8 +74,8 @@ const namedParserMap = {
 			return ['publicKey', convert.hexToUint8(str)];
 		if (constants.sizes.addressEncoded === str.length)
 			return ['address', address.stringToAddress(str)];
-		if (constants.sizes.addressDecoded * 2 === str.length)
-			return ['address', convert.hexToUint8(str)];
+		// if (constants.sizes.addressDecoded * 2 === str.length)
+		// 	return ['address', convert.hexToUint8(str)];
 
 		throw Error(`invalid length of account id '${str.length}'`);
 	},
