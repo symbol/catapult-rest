@@ -39,10 +39,10 @@ module.exports.createConnectionService = (config, logger = () => {}) => {
 	const authorizingConnectionPromises = {};
 
 	/**
-	 * Opens a new connection authenticated to catapult.
-	 * @param {boolean} isPersistent Determines whether the new connection should be pooled and kept open for reuse.
-	 * @returns {Promise} A promise bound to the creation of the connection.
-	 */
+   * Opens a new connection authenticated to catapult.
+   * @param {boolean} isPersistent Determines whether the new connection should be pooled and kept open for reuse.
+   * @returns {Promise} A promise bound to the creation of the connection.
+   */
 	const openAuthorizedConnection = isPersistent => {
 		logger(`connecting to ${node.host}:${node.port}`);
 
@@ -57,7 +57,9 @@ module.exports.createConnectionService = (config, logger = () => {}) => {
 		try {
 			secureContext = tls.createSecureContext(contextOptions);
 		} catch (error) {
-			logger('an error occurred with the provided TLS key and certificates before trying to establish any connection to the server');
+			logger(
+				'an error occurred with the provided TLS key and certificates before trying to establish any connection to the server'
+			);
 			throw error;
 		}
 
@@ -86,7 +88,10 @@ module.exports.createConnectionService = (config, logger = () => {}) => {
 						return serverConnection;
 					}
 
-					logger(`failed while connecting to the node ${node.host}:${node.port}`, serverSocket.authorizationError);
+					logger(
+						`failed while connecting to the node ${node.host}:${node.port}`,
+						serverSocket.authorizationError
+					);
 					reject(serverSocket.authorizationError);
 					throw serverSocket.authorizationError;
 				})
@@ -113,9 +118,9 @@ module.exports.createConnectionService = (config, logger = () => {}) => {
 
 	return {
 		/**
-		 * Leases an available connection.
-		 * @returns {module:connection/catapultConnection~CatapultConnection} A connection.
-		 */
+     * Leases an available connection.
+     * @returns {module:connection/catapultConnection~CatapultConnection} A connection.
+     */
 		lease: () => {
 			const authorizingPromise = authorizingConnectionPromises[node];
 			if (authorizingPromise)
@@ -129,9 +134,10 @@ module.exports.createConnectionService = (config, logger = () => {}) => {
 		},
 
 		/**
-		 * Creates a new connection that gets automatically closed after being used.
-		 * @returns {module:connection/catapultConnection~CatapultConnection} A connection.
-		 */
-		singleUse: () => openAuthorizedConnection(false)
+     * Creates a new connection that gets automatically closed after being used.
+     * @returns {module:connection/catapultConnection~CatapultConnection} A connection.
+     */
+		singleUse: () => openAuthorizedConnection(false),
+		nodeKeyPem: config.key
 	};
 };

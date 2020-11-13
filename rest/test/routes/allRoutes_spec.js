@@ -66,6 +66,7 @@ describe('all routes', () => {
 			'/node/storage',
 			'/node/time',
 			'/node/unlockedaccount',
+			'/node/publicKey',
 
 			'/transactions/:group/:transactionId',
 			'/transactions/:group',

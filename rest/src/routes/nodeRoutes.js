@@ -24,12 +24,14 @@ const nodeInfoCodec = require('../sockets/nodeInfoCodec');
 const nodePeersCodec = require('../sockets/nodePeersCodec');
 const nodeTimeCodec = require('../sockets/nodeTimeCodec');
 const catapult = require('catapult-sdk');
+const sshpk = require('sshpk');
 const fs = require('fs');
 const path = require('path');
 
 const packetHeader = catapult.packet.header;
 const { PacketType } = catapult.packet;
 const { BinaryParser } = catapult.parser;
+const { convert } = catapult.utils;
 
 // ATM, both rest and rest sdk share the same version. In the future,
 // we will have an open api and sdk dependencies with their given versions.
@@ -175,7 +177,6 @@ module.exports = {
 		});
 
 		server.get('/node/unlockedaccount', (req, res, next) => {
-			const { convert } = catapult.utils;
 			const headerBuffer = packetHeader.createBuffer(
 				PacketType.unlockedAccount,
 				packetHeader.size
@@ -191,6 +192,15 @@ module.exports = {
 					res.send({ unlockedAccount: !unlockedKeys ? [] : unlockedKeys });
 					next();
 				});
+		});
+
+		server.get('/node/publicKey', (req, res, next) => {
+			const certKey = sshpk.parsePrivateKey(connections.nodeKeyPem);
+			const publicKey = certKey.toPublic().part.A.data;
+			res.send({
+				nodePublicKey: publicKey ? convert.uint8ToHex(publicKey) : undefined
+			});
+			return next();
 		});
 	}
 };

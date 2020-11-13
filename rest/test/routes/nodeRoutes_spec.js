@@ -22,24 +22,36 @@
 const { MockServer, test } = require('./utils/routeTestUtils');
 const nodeRoutes = require('../../src/routes/nodeRoutes');
 const errors = require('../../src/server/errors');
+const convert = require('catapult-sdk/_build/utils/convert');
 const { expect } = require('chai');
 const fs = require('fs');
 const path = require('path');
 
 // ATM, both rest and rest sdk share the same version. In the future,
 // we will have an open api and sdk dependencies with their given versions.
-const restVersion = fs.readFileSync(path.resolve(__dirname, '../../../version.txt'), 'UTF-8').trim();
+const restVersion = fs
+	.readFileSync(path.resolve(__dirname, '../../../version.txt'), 'UTF-8')
+	.trim();
 const sdkVersion = restVersion;
 
 describe('node routes', () => {
 	describe('get', () => {
 		const serviceCreator = packet => ({
 			connections: {
-				singleUse: () => new Promise(resolve => {
-					resolve({
-						pushPull: () => new Promise(innerResolve => innerResolve(packet))
-					});
-				})
+				singleUse: () =>
+					new Promise(resolve => {
+						resolve({
+							pushPull: () =>
+								new Promise(innerResolve => innerResolve(packet))
+						});
+					}),
+				nodeKeyPem: Buffer.from(
+					convert.hexToUint8(
+						'2D2D2D2D2D424547494E2050524956415445204B45592D2D2D2D2D0A4D43344'
+              + '341514177425159444B3256774243494549443474466858327A726B69737673747138495936397566626773545'
+              + '0564C7753675A7148546F314579634E0A2D2D2D2D2D454E442050524956415445204B45592D2D2D2D2D0A'
+					)
+				)
 			},
 			config: {
 				apiNode: { timeout: 1000 }
@@ -48,12 +60,72 @@ describe('node routes', () => {
 
 		describe('node health', () => {
 			const publicKeyBuffer = Buffer.from([
-				0xE3, 0x27, 0xC0, 0xF1, 0xC9, 0x97, 0x5C, 0x3A, 0xA5, 0x1B, 0x2A, 0x41, 0x76, 0x81, 0x58, 0xC1,
-				0x07, 0x7D, 0x16, 0xB4, 0x60, 0x99, 0x9A, 0xAB, 0xE7, 0xAD, 0xB5, 0x26, 0x2B, 0xE2, 0x9A, 0x68
+				0xe3,
+				0x27,
+				0xc0,
+				0xf1,
+				0xc9,
+				0x97,
+				0x5c,
+				0x3a,
+				0xa5,
+				0x1b,
+				0x2a,
+				0x41,
+				0x76,
+				0x81,
+				0x58,
+				0xc1,
+				0x07,
+				0x7d,
+				0x16,
+				0xb4,
+				0x60,
+				0x99,
+				0x9a,
+				0xab,
+				0xe7,
+				0xad,
+				0xb5,
+				0x26,
+				0x2b,
+				0xe2,
+				0x9a,
+				0x68
 			]);
 			const networkGenerationHashSeedBuffer = Buffer.from([
-				0xA3, 0x00, 0xEA, 0xFE, 0xDA, 0xBD, 0x5C, 0xFA, 0x0D, 0x4B, 0x94, 0x1D, 0x15, 0xBB, 0x51, 0xB1,
-				0xB4, 0x64, 0x72, 0x42, 0xF1, 0xFF, 0x11, 0x00, 0x9F, 0xD0, 0x9A, 0x8F, 0x3D, 0x35, 0x87, 0xF8
+				0xa3,
+				0x00,
+				0xea,
+				0xfe,
+				0xda,
+				0xbd,
+				0x5c,
+				0xfa,
+				0x0d,
+				0x4b,
+				0x94,
+				0x1d,
+				0x15,
+				0xbb,
+				0x51,
+				0xb1,
+				0xb4,
+				0x64,
+				0x72,
+				0x42,
+				0xf1,
+				0xff,
+				0x11,
+				0x00,
+				0x9f,
+				0xd0,
+				0x9a,
+				0x8f,
+				0x3d,
+				0x35,
+				0x87,
+				0xf8
 			]);
 			const packet = {
 				type: 601,
@@ -64,7 +136,7 @@ describe('node routes', () => {
 					publicKeyBuffer,
 					networkGenerationHashSeedBuffer,
 					Buffer.from([0x02, 0x00, 0x00, 0x00]), // roles
-					Buffer.from([0xDC, 0x1E]), // port
+					Buffer.from([0xdc, 0x1e]), // port
 					Buffer.from([0x90]), // network identifier
 					Buffer.from([0x00]), // host size
 					Buffer.from([0x00]) // friendly name size
@@ -169,11 +241,15 @@ describe('node routes', () => {
 				// Arrange:
 				const failingService = {
 					connections: {
-						singleUse: () => new Promise(resolve => {
-							resolve({
-								pushPull: () => Promise.reject(errors.createServiceUnavailableError('connection failed'))
-							});
-						})
+						singleUse: () =>
+							new Promise(resolve => {
+								resolve({
+									pushPull: () =>
+										Promise.reject(
+											errors.createServiceUnavailableError('connection failed')
+										)
+								});
+							})
 					},
 					config: {
 						apiNode: { timeout: 1000 }
@@ -181,7 +257,11 @@ describe('node routes', () => {
 				};
 
 				const mockServer = new MockServer();
-				nodeRoutes.register(mockServer.server, createMockDb(true), failingService);
+				nodeRoutes.register(
+					mockServer.server,
+					createMockDb(true),
+					failingService
+				);
 				const route = mockServer.getRoute('/node/health').get();
 
 				// Act
@@ -206,12 +286,72 @@ describe('node routes', () => {
 			it('can retrieve node information', () => {
 				// Arrange:
 				const publicKeyBuffer = Buffer.from([
-					0xE3, 0x27, 0xC0, 0xF1, 0xC9, 0x97, 0x5C, 0x3A, 0xA5, 0x1B, 0x2A, 0x41, 0x76, 0x81, 0x58, 0xC1,
-					0x07, 0x7D, 0x16, 0xB4, 0x60, 0x99, 0x9A, 0xAB, 0xE7, 0xAD, 0xB5, 0x26, 0x2B, 0xE2, 0x9A, 0x68
+					0xe3,
+					0x27,
+					0xc0,
+					0xf1,
+					0xc9,
+					0x97,
+					0x5c,
+					0x3a,
+					0xa5,
+					0x1b,
+					0x2a,
+					0x41,
+					0x76,
+					0x81,
+					0x58,
+					0xc1,
+					0x07,
+					0x7d,
+					0x16,
+					0xb4,
+					0x60,
+					0x99,
+					0x9a,
+					0xab,
+					0xe7,
+					0xad,
+					0xb5,
+					0x26,
+					0x2b,
+					0xe2,
+					0x9a,
+					0x68
 				]);
 				const networkGenerationHashSeedBuffer = Buffer.from([
-					0xA3, 0x00, 0xEA, 0xFE, 0xDA, 0xBD, 0x5C, 0xFA, 0x0D, 0x4B, 0x94, 0x1D, 0x15, 0xBB, 0x51, 0xB1,
-					0xB4, 0x64, 0x72, 0x42, 0xF1, 0xFF, 0x11, 0x00, 0x9F, 0xD0, 0x9A, 0x8F, 0x3D, 0x35, 0x87, 0xF8
+					0xa3,
+					0x00,
+					0xea,
+					0xfe,
+					0xda,
+					0xbd,
+					0x5c,
+					0xfa,
+					0x0d,
+					0x4b,
+					0x94,
+					0x1d,
+					0x15,
+					0xbb,
+					0x51,
+					0xb1,
+					0xb4,
+					0x64,
+					0x72,
+					0x42,
+					0xf1,
+					0xff,
+					0x11,
+					0x00,
+					0x9f,
+					0xd0,
+					0x9a,
+					0x8f,
+					0x3d,
+					0x35,
+					0x87,
+					0xf8
 				]);
 
 				const packet = {
@@ -223,7 +363,7 @@ describe('node routes', () => {
 						publicKeyBuffer,
 						networkGenerationHashSeedBuffer,
 						Buffer.from([0x02, 0x00, 0x00, 0x00]), // roles
-						Buffer.from([0xDC, 0x1E]), // port
+						Buffer.from([0xdc, 0x1e]), // port
 						Buffer.from([0x90]), // network identifier
 						Buffer.from([0x00]), // host size
 						Buffer.from([0x00]) // friendly name size
@@ -232,27 +372,35 @@ describe('node routes', () => {
 				const services = serviceCreator(packet);
 
 				// Act:
-				return test.route.prepareExecuteRoute(nodeRoutes.register, '/node/info', 'get', {}, {}, services, routeContext =>
-					routeContext.routeInvoker().then(() => {
-						// Assert:
-						expect(routeContext.numNextCalls).to.equal(1);
-						expect(routeContext.responses.length).to.equal(1);
-						expect(routeContext.redirects.length).to.equal(0);
-						expect(routeContext.responses[0]).to.deep.equal({
-							formatter: 'ws',
-							payload: {
-								friendlyName: Buffer.alloc(0),
-								host: Buffer.alloc(0),
-								networkIdentifier: 144,
-								port: 7900,
-								publicKey: publicKeyBuffer,
-								networkGenerationHashSeed: networkGenerationHashSeedBuffer,
-								roles: 2,
-								version: 23
-							},
-							type: 'nodeInfo'
-						});
-					}));
+				return test.route.prepareExecuteRoute(
+					nodeRoutes.register,
+					'/node/info',
+					'get',
+					{},
+					{},
+					services,
+					routeContext =>
+						routeContext.routeInvoker().then(() => {
+							// Assert:
+							expect(routeContext.numNextCalls).to.equal(1);
+							expect(routeContext.responses.length).to.equal(1);
+							expect(routeContext.redirects.length).to.equal(0);
+							expect(routeContext.responses[0]).to.deep.equal({
+								formatter: 'ws',
+								payload: {
+									friendlyName: Buffer.alloc(0),
+									host: Buffer.alloc(0),
+									networkIdentifier: 144,
+									port: 7900,
+									publicKey: publicKeyBuffer,
+									networkGenerationHashSeed: networkGenerationHashSeedBuffer,
+									roles: 2,
+									version: 23
+								},
+								type: 'nodeInfo'
+							});
+						})
+				);
 			});
 		});
 
@@ -260,12 +408,72 @@ describe('node routes', () => {
 			it('can retrieve node peers', () => {
 				// Arrange:
 				const publicKeyBuffer = Buffer.from([
-					0xE3, 0x27, 0xC0, 0xF1, 0xC9, 0x97, 0x5C, 0x3A, 0xA5, 0x1B, 0x2A, 0x41, 0x76, 0x81, 0x58, 0xC1,
-					0x07, 0x7D, 0x16, 0xB4, 0x60, 0x99, 0x9A, 0xAB, 0xE7, 0xAD, 0xB5, 0x26, 0x2B, 0xE2, 0x9A, 0x68
+					0xe3,
+					0x27,
+					0xc0,
+					0xf1,
+					0xc9,
+					0x97,
+					0x5c,
+					0x3a,
+					0xa5,
+					0x1b,
+					0x2a,
+					0x41,
+					0x76,
+					0x81,
+					0x58,
+					0xc1,
+					0x07,
+					0x7d,
+					0x16,
+					0xb4,
+					0x60,
+					0x99,
+					0x9a,
+					0xab,
+					0xe7,
+					0xad,
+					0xb5,
+					0x26,
+					0x2b,
+					0xe2,
+					0x9a,
+					0x68
 				]);
 				const networkGenerationHashSeedBuffer = Buffer.from([
-					0xA3, 0x00, 0xEA, 0xFE, 0xDA, 0xBD, 0x5C, 0xFA, 0x0D, 0x4B, 0x94, 0x1D, 0x15, 0xBB, 0x51, 0xB1,
-					0xB4, 0x64, 0x72, 0x42, 0xF1, 0xFF, 0x11, 0x00, 0x9F, 0xD0, 0x9A, 0x8F, 0x3D, 0x35, 0x87, 0xF8
+					0xa3,
+					0x00,
+					0xea,
+					0xfe,
+					0xda,
+					0xbd,
+					0x5c,
+					0xfa,
+					0x0d,
+					0x4b,
+					0x94,
+					0x1d,
+					0x15,
+					0xbb,
+					0x51,
+					0xb1,
+					0xb4,
+					0x64,
+					0x72,
+					0x42,
+					0xf1,
+					0xff,
+					0x11,
+					0x00,
+					0x9f,
+					0xd0,
+					0x9a,
+					0x8f,
+					0x3d,
+					0x35,
+					0x87,
+					0xf8
 				]);
 
 				const packet = {
@@ -278,7 +486,7 @@ describe('node routes', () => {
 						publicKeyBuffer,
 						networkGenerationHashSeedBuffer,
 						Buffer.from([0x02, 0x00, 0x00, 0x00]), // roles
-						Buffer.from([0xDC, 0x1E]), // port
+						Buffer.from([0xdc, 0x1e]), // port
 						Buffer.from([0x90]), // network identifier
 						Buffer.from([0x00]), // host size
 						Buffer.from([0x00]), // friendly name size
@@ -289,7 +497,7 @@ describe('node routes', () => {
 						publicKeyBuffer,
 						networkGenerationHashSeedBuffer,
 						Buffer.from([0x03, 0x00, 0x00, 0x00]), // roles
-						Buffer.from([0xDC, 0x1E]), // port
+						Buffer.from([0xdc, 0x1e]), // port
 						Buffer.from([0x90]), // network identifier
 						Buffer.from([0x00]), // host size
 						Buffer.from([0x00]) // friendly name size
@@ -299,37 +507,47 @@ describe('node routes', () => {
 				const services = serviceCreator(packet);
 
 				// Act:
-				return test.route.prepareExecuteRoute(nodeRoutes.register, '/node/peers', 'get', {}, {}, services, routeContext =>
-					routeContext.routeInvoker().then(() => {
-						// Assert:
-						expect(routeContext.numNextCalls).to.equal(1);
-						expect(routeContext.responses.length).to.equal(1);
-						expect(routeContext.redirects.length).to.equal(0);
-						expect(routeContext.responses[0]).to.deep.equal({
-							formatter: 'ws',
-							payload: [{
-								friendlyName: Buffer.alloc(0),
-								host: Buffer.alloc(0),
-								networkIdentifier: 144,
-								port: 7900,
-								publicKey: publicKeyBuffer,
-								networkGenerationHashSeed: networkGenerationHashSeedBuffer,
-								roles: 2,
-								version: 23
-							},
-							{
-								friendlyName: Buffer.alloc(0),
-								host: Buffer.alloc(0),
-								networkIdentifier: 144,
-								port: 7900,
-								publicKey: publicKeyBuffer,
-								networkGenerationHashSeed: networkGenerationHashSeedBuffer,
-								roles: 3,
-								version: 24
-							}],
-							type: 'nodeInfo'
-						});
-					}));
+				return test.route.prepareExecuteRoute(
+					nodeRoutes.register,
+					'/node/peers',
+					'get',
+					{},
+					{},
+					services,
+					routeContext =>
+						routeContext.routeInvoker().then(() => {
+							// Assert:
+							expect(routeContext.numNextCalls).to.equal(1);
+							expect(routeContext.responses.length).to.equal(1);
+							expect(routeContext.redirects.length).to.equal(0);
+							expect(routeContext.responses[0]).to.deep.equal({
+								formatter: 'ws',
+								payload: [
+									{
+										friendlyName: Buffer.alloc(0),
+										host: Buffer.alloc(0),
+										networkIdentifier: 144,
+										port: 7900,
+										publicKey: publicKeyBuffer,
+										networkGenerationHashSeed: networkGenerationHashSeedBuffer,
+										roles: 2,
+										version: 23
+									},
+									{
+										friendlyName: Buffer.alloc(0),
+										host: Buffer.alloc(0),
+										networkIdentifier: 144,
+										port: 7900,
+										publicKey: publicKeyBuffer,
+										networkGenerationHashSeed: networkGenerationHashSeedBuffer,
+										roles: 3,
+										version: 24
+									}
+								],
+								type: 'nodeInfo'
+							});
+						})
+				);
 			});
 		});
 
@@ -359,10 +577,23 @@ describe('node routes', () => {
 
 		describe('node storage', () => {
 			const executeRoute = (routeName, db, assertResponse) =>
-				test.route.executeSingle(nodeRoutes.register, routeName, 'get', {}, db, serviceCreator({}).config, assertResponse);
+				test.route.executeSingle(
+					nodeRoutes.register,
+					routeName,
+					'get',
+					{},
+					db,
+					serviceCreator({}).config,
+					assertResponse
+				);
 
-			const createMockStorageInfoDb = (numBlocks, numTransactions, numAccounts) => ({
-				storageInfo: () => Promise.resolve({ numBlocks, numTransactions, numAccounts })
+			const createMockStorageInfoDb = (
+				numBlocks,
+				numTransactions,
+				numAccounts
+			) => ({
+				storageInfo: () =>
+					Promise.resolve({ numBlocks, numTransactions, numAccounts })
 			});
 
 			it('can retrieve node storage', () => {
@@ -386,28 +617,53 @@ describe('node routes', () => {
 				const packet = {
 					type: 700,
 					size: 24,
-					payload: Buffer.from([0x90, 0xF8, 0x6D, 0x06, 0x01, 0x00, 0x00, 0x00, 0x90, 0xF8, 0x6D, 0x06, 0x10, 0x00, 0x00, 0x00])
+					payload: Buffer.from([
+						0x90,
+						0xf8,
+						0x6d,
+						0x06,
+						0x01,
+						0x00,
+						0x00,
+						0x00,
+						0x90,
+						0xf8,
+						0x6d,
+						0x06,
+						0x10,
+						0x00,
+						0x00,
+						0x00
+					])
 				};
 				const services = serviceCreator(packet);
 
 				// Act:
-				return test.route.prepareExecuteRoute(nodeRoutes.register, '/node/time', 'get', {}, {}, services, routeContext =>
-					routeContext.routeInvoker().then(() => {
-						// Assert:
-						expect(routeContext.numNextCalls).to.equal(1);
-						expect(routeContext.responses.length).to.equal(1);
-						expect(routeContext.redirects.length).to.equal(0);
-						expect(routeContext.responses[0]).to.deep.equal({
-							formatter: 'ws',
-							payload: {
-								communicationTimestamps: {
-									receiveTimestamp: [107870352, 16],
-									sendTimestamp: [107870352, 1]
-								}
-							},
-							type: 'nodeTime'
-						});
-					}));
+				return test.route.prepareExecuteRoute(
+					nodeRoutes.register,
+					'/node/time',
+					'get',
+					{},
+					{},
+					services,
+					routeContext =>
+						routeContext.routeInvoker().then(() => {
+							// Assert:
+							expect(routeContext.numNextCalls).to.equal(1);
+							expect(routeContext.responses.length).to.equal(1);
+							expect(routeContext.redirects.length).to.equal(0);
+							expect(routeContext.responses[0]).to.deep.equal({
+								formatter: 'ws',
+								payload: {
+									communicationTimestamps: {
+										receiveTimestamp: [107870352, 16],
+										sendTimestamp: [107870352, 1]
+									}
+								},
+								type: 'nodeTime'
+							});
+						})
+				);
 			});
 		});
 
@@ -417,25 +673,93 @@ describe('node routes', () => {
 				const packet = {
 					type: 772,
 					size: 40,
-					payload: Buffer.from([0x9b, 0x4E, 0xF2, 0x78, 0x9b, 0x4E, 0xF2, 0x78, 0x9b,
-						0x4E, 0xF2, 0x78, 0x9b, 0x4E, 0xF2, 0x78, 0x9b, 0x4E, 0xF2, 0x78, 0x9b,
-						0x4E, 0xF2, 0x78, 0x9b, 0x4E, 0xF2, 0x78, 0x9b, 0x4E, 0xF2, 0x78])
+					payload: Buffer.from([
+						0x9b,
+						0x4e,
+						0xf2,
+						0x78,
+						0x9b,
+						0x4e,
+						0xf2,
+						0x78,
+						0x9b,
+						0x4e,
+						0xf2,
+						0x78,
+						0x9b,
+						0x4e,
+						0xf2,
+						0x78,
+						0x9b,
+						0x4e,
+						0xf2,
+						0x78,
+						0x9b,
+						0x4e,
+						0xf2,
+						0x78,
+						0x9b,
+						0x4e,
+						0xf2,
+						0x78,
+						0x9b,
+						0x4e,
+						0xf2,
+						0x78
+					])
 				};
 				const services = serviceCreator(packet);
 
 				// Act:
-				return test.route.prepareExecuteRoute(nodeRoutes.register, '/node/unlockedaccount', 'get', {}, {}, services, routeContext =>
-					routeContext.routeInvoker().then(() => {
-						// Assert:
-						expect(routeContext.numNextCalls).to.equal(1);
-						expect(routeContext.responses.length).to.equal(1);
-						expect(routeContext.redirects.length).to.equal(0);
-						expect(routeContext.responses[0]).to.deep.equal({
-							unlockedAccount: [
-								'9B4EF2789B4EF2789B4EF2789B4EF2789B4EF2789B4EF2789B4EF2789B4EF278'
-							]
-						});
-					}));
+				return test.route.prepareExecuteRoute(
+					nodeRoutes.register,
+					'/node/unlockedaccount',
+					'get',
+					{},
+					{},
+					services,
+					routeContext =>
+						routeContext.routeInvoker().then(() => {
+							// Assert:
+							expect(routeContext.numNextCalls).to.equal(1);
+							expect(routeContext.responses.length).to.equal(1);
+							expect(routeContext.redirects.length).to.equal(0);
+							expect(routeContext.responses[0]).to.deep.equal({
+								unlockedAccount: [
+									'9B4EF2789B4EF2789B4EF2789B4EF2789B4EF2789B4EF2789B4EF2789B4EF278'
+								]
+							});
+						})
+				);
+			});
+			describe('node public key', () => {
+				it('can retrieve node public key', () => {
+					// Arrange:
+
+					const services = serviceCreator({});
+
+					// Act:
+					return test.route.prepareExecuteRoute(
+						nodeRoutes.register,
+						'/node/publicKey',
+						'get',
+						{},
+						{},
+						services,
+						routeContext =>
+							routeContext.routeInvoker().then(() => {
+								// Assert:
+								expect(routeContext.numNextCalls).to.equal(1);
+								expect(routeContext.responses.length).to.equal(1);
+								expect(routeContext.redirects.length).to.equal(0);
+								expect(routeContext.responses[0]).to.deep.equal({
+									nodePublicKey: [
+										'D10DD5FD380B86363F7C1812DFABC9CBC7D1036286E2024415519D84AF6D4B42'
+									]
+								});
+							})
+					);
+				});
 			});
 		});
 	});
