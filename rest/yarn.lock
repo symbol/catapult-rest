@@ -5683,7 +5683,7 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-sshpk@1.16.1, sshpk@^1.14.1, sshpk@^1.7.0:
+sshpk@1.16.1, sshpk@^1.14.1, sshpk@^1.16.1, sshpk@^1.7.0:
   version "1.16.1"
   resolved "https://registry.yarnpkg.com/sshpk/-/sshpk-1.16.1.tgz#fb661c0bef29b39db40769ee39fa70093d6f6877"
   integrity sha512-HXXqVUq7+pcKeLqqZj6mHFUMvXtOJt1uoUx09pFW6011inTMxqI8BA8PM95myrIyyKwdnzjdFjLiE6KBPVtJIg==
@@ -5921,10 +5921,10 @@ supports-color@^7.1.0:
   dependencies:
     has-flag "^4.0.0"
 
-symbol-bootstrap@^0.2.2-alpha-202011112255:
-  version "0.2.2-alpha-202011112255"
-  resolved "https://registry.yarnpkg.com/symbol-bootstrap/-/symbol-bootstrap-0.2.2-alpha-202011112255.tgz#adfe0f395cad006c5c28c9949c4d0ff6e157663a"
-  integrity sha512-HtdPb++P59vzpnbVIwflydWJ4YQs3nEPZ7f2eTEbvTt9cc4HBmXgtk37jpJqQ+BK7IdUTws7D0scxRmqnJKihQ==
+symbol-bootstrap@0.3.0-alpha-202011191321:
+  version "0.3.0-alpha-202011191321"
+  resolved "https://registry.yarnpkg.com/symbol-bootstrap/-/symbol-bootstrap-0.3.0-alpha-202011191321.tgz#8f14fdc77b6f962b926a55cdc2a9cba13c6b0931"
+  integrity sha512-A89YGHjRsUWPFduZrduQttzRgEpZ1R+/TERQZ+mDNsEHNXqNgjcVg/b9MF/6Gjrk3KGQtjsMrHi4jvkFoTo0Rg==
   dependencies:
     "@oclif/command" "^1.7.0"
     "@oclif/config" "^1.16.0"
@@ -5935,6 +5935,7 @@ symbol-bootstrap@^0.2.2-alpha-202011112255:
     memorystream "^0.3.1"
     node-forge "^0.10.0"
     shx "^0.3.2"
+    sshpk "^1.16.1"
     symbol-sdk "^0.21.0"
     tslib "^1.13.0"
     utf8 "^2.1.2"
