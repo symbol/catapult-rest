@@ -38,9 +38,13 @@ const createLatestConditions = (catapultDb, height) => {
 };
 
 const addActiveFlag = (namespace, height) => {
+	if (!namespace)
+		return namespace;
+
 	// What about calculated fields in mongo?
-	const endHeight = longToUint64(namespace.namespace.endHeight);
-	namespace.meta.active = 1 === uint64.compare(endHeight, height);
+	const endHeightUint64 = longToUint64(namespace.namespace.endHeight);
+	const heightUint64 = longToUint64(convertToLong(height));
+	namespace.meta.active = 1 === uint64.compare(endHeightUint64, heightUint64);
 	return namespace;
 };
 
