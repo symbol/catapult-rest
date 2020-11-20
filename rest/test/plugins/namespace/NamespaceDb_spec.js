@@ -160,7 +160,8 @@ describe('namespace db', () => {
 			it('all', () =>
 				runTestAndVerifyIds(
 					dbNamespaces(),
-					db => db.namespaces(undefined, undefined, undefined, undefined, paginationOptions), [[10, true], [12, false], [20, true], [30, true], [40, true], [60, false]]
+					db => db.namespaces(undefined, undefined, undefined, undefined, paginationOptions),
+					[[10, true], [12, false], [20, true], [30, true], [40, true], [60, false]]
 				));
 		});
 
@@ -284,14 +285,16 @@ describe('namespace db', () => {
 				options.sortDirection = 1;
 
 				// Act + Assert:
-				return runTestAndVerifyIds(dbNamespaces(), db => db.namespaces(undefined, undefined, undefined, undefined, options), [[30, true]]);
+				return runTestAndVerifyIds(dbNamespaces(),
+					db => db.namespaces(undefined, undefined, undefined, undefined, options), [[30, true]]);
 			});
 
 			it('lt', () => {
 				options.sortDirection = -1;
 
 				// Act + Assert:
-				return runTestAndVerifyIds(dbNamespaces(), db => db.namespaces(undefined, undefined, undefined, undefined, options), [[10, true]]);
+				return runTestAndVerifyIds(dbNamespaces(),
+					db => db.namespaces(undefined, undefined, undefined, undefined, options), [[10, true]]);
 			});
 		});
 	});
@@ -419,7 +422,12 @@ describe('namespace db', () => {
 				.then(() => populateCollection(db, 'namespaces', [namespace1, namespace2, namespace3, namespace4]))
 				.then(() => sanitizeDbEntities([namespace1, namespace2, namespace3, namespace4]))
 				.then(() => dbFacade.activeNamespacesWithAlias(aliasTypeMosaic, [76756, 87823]))
-				.then(entities => { expect(entities).to.deep.equal([{ ...namespace1, meta: { active: true, latest: true } }, { ...namespace2, meta: { active: true, latest: true } }]); })
+				.then(entities => {
+					expect(entities).to.deep.equal([
+						{ ...namespace1, meta: { active: true, latest: true } },
+						{ ...namespace2, meta: { active: true, latest: true } }
+					]);
+				})
 				.then(() => db.close());
 		});
 
@@ -445,7 +453,12 @@ describe('namespace db', () => {
 						address.stringToAddress(testAddress.two)
 					]
 				))
-				.then(entities => { expect(entities).to.deep.equal([{ ...namespace1, meta: { active: true, latest: true } }, { ...namespace2, meta: { active: true, latest: true } }]); })
+				.then(entities => {
+					expect(entities).to.deep.equal([
+						{ ...namespace1, meta: { active: true, latest: true } },
+						{ ...namespace2, meta: { active: true, latest: true } }
+					]);
+				})
 				.then(() => db.close());
 		});
 
