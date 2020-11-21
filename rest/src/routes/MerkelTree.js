@@ -93,11 +93,11 @@ class MerkleTree {
 		const pathLength = this.getPathLength(nibbleCount);
 		const path = raw.slice(2, 2 + pathLength);
 		if (this.isBranch(marker)) {
-			const lessBranch = this.parseBranch(raw.slice(2 + pathLength), path);
+			const lessBranch = this.parseBranch(raw.slice(2 + pathLength), path, nibbleCount);
 			return this.parseMerkleTreeFromRaw(lessBranch);
 		}
 		if (this.isLeaf(marker)) {
-			const lessLeaf = this.parseLeaf(raw.slice(2 + pathLength), path);
+			const lessLeaf = this.parseLeaf(raw.slice(2 + pathLength), path, nibbleCount);
 			return this.parseMerkleTreeFromRaw(lessLeaf);
 		}
 	}
@@ -106,9 +106,10 @@ class MerkleTree {
 	 * Parse branch tree node
 	 * @param {Uint8Array} offsetRaw partial raw buffer
 	 * @param {Uint8Array} path merkle tree path
+     * @param {number} nibbleCount number of nibbles
 	 * @returns {Uint8Array} unprocess raw buffer
 	 */
-	parseBranch(offsetRaw, path) {
+	parseBranch(offsetRaw, path, nibbleCount) {
 		const linkMask = offsetRaw.slice(0, 2); // little endian
 		const bits = this.getBitsFromMask(linkMask);
 		const linksRaw = offsetRaw.slice(2, 2 + (32 * bits.length));
@@ -120,7 +121,7 @@ class MerkleTree {
 			});
 		}
 		this.tree.push({
-			type: 0, path: convert.uint8ToHex(path), linkMask: convert.uint8ToHex(linkMask), links
+			type: 0, path: convert.uint8ToHex(path), nibbleCount, linkMask: convert.uint8ToHex(linkMask), links
 		});
 		return offsetRaw.slice(2 + (32 * bits.length));
 	}
@@ -129,11 +130,14 @@ class MerkleTree {
 	 * Parse leaf tree node
 	 * @param {Uint8Array} offsetRaw partial raw buffer
 	 * @param {Uint8Array} path merkle tree path
+     * @param {number} nibbleCount number of nibbles
 	 * @returns {Uint8Array} unprocess raw buffer
 	 */
-	parseLeaf(offsetRaw, path) {
+	parseLeaf(offsetRaw, path, nibbleCount) {
 		const hash = convert.uint8ToHex(offsetRaw.slice(0, 32));
-		this.tree.push({ type: 255, path: convert.uint8ToHex(path), hash });
+		this.tree.push({
+			type: 255, path: convert.uint8ToHex(path), nibbleCount, hash
+		});
 		return offsetRaw.slice(32);
 	}
 }

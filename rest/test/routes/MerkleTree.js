@@ -22,7 +22,7 @@ const MerkleTree = require('../../src/routes/MerkelTree');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
 
-describe('merkle utils', () => {
+describe('MerkleTree', () => {
 	describe('merkle tree parse', () => {
 		let merkleTree = new MerkleTree();
 		describe('getBitsFromMask', () => {
@@ -65,7 +65,7 @@ describe('merkle utils', () => {
                 + '36586E5D2E9D0C089C1C64BC0D42A11ADBD1CD6CDB4B7C294062F55113525A64AE3C';
 			merkleTree = new MerkleTree();
 			const { tree } = merkleTree;
-			merkleTree.parseBranch(catapult.utils.convert.hexToUint8(branch), new Uint8Array());
+			merkleTree.parseBranch(catapult.utils.convert.hexToUint8(branch), new Uint8Array(), 0);
 			expect(tree.length).to.equal(1);
 			expect(tree[0].type).to.equal(0);
 			expect(tree[0].linkMask).to.equal('8080');
@@ -81,7 +81,7 @@ describe('merkle utils', () => {
 			merkleTree = new MerkleTree();
 			const { tree } = merkleTree;
 			merkleTree.parseLeaf(catapult.utils.convert.hexToUint8(leaf),
-				catapult.utils.convert.hexToUint8('04A7F2A487B42EA89323C4408F82415223ACFEC7DFA7924EFC31A70778AB17A0'));
+				catapult.utils.convert.hexToUint8('04A7F2A487B42EA89323C4408F82415223ACFEC7DFA7924EFC31A70778AB17A0'), 63);
 			expect(tree.length).to.equal(1);
 			expect(tree[0].type).to.equal(255);
 			expect(tree[0].linkMask).to.equal(undefined);
