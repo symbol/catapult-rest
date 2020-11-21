@@ -20,8 +20,8 @@
  */
 
 const { MockServer } = require('./utils/routeTestUtils');
-const MerkleTree = require('../../src/routes/MerkelTree');
 const { test } = require('./utils/routeTestUtils');
+const MerkleTree = require('../../src/routes/MerkelTree');
 const accountRoutes = require('../../src/routes/accountRoutes');
 const routeResultTypes = require('../../src/routes/routeResultTypes');
 const routeUtils = require('../../src/routes/routeUtils');
@@ -440,7 +440,7 @@ describe('account routes', () => {
 						expect(routeContext.redirects.length).to.equal(0);
 						expect(routeContext.responses[0]).to.deep.equal({
 							raw: stateTree,
-							tree,
+							tree
 						});
 					})
 				));
