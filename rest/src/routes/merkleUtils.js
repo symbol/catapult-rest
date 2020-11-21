@@ -21,12 +21,13 @@
 /* eslint-disable */
 const errors = require('../server/errors');
 const catapult = require('catapult-sdk');
+const MerkleTree = require('./MerkelTree');
 
 const packetHeader = catapult.packet.header;
 const { StatePathPacketTypes } = catapult.packet;
 const { convert } = catapult.utils;
 
-const merleUtils = {
+const merkleUtils = {
 	/**
 	 * It sends a merkle tree request to api server for the give state path and key.
 	 *
@@ -42,7 +43,7 @@ const merleUtils = {
 		const buildResponse = packet => 
 			{ 
 				const raw = convert.uint8ToHex(packet.payload);
-				return { raw, tree: new MerkleTree().parseMerkleTreeFromRaw(raw)}
+				return { raw, tree: new MerkleTree().parseMerkleTreeFromRaw(packet.payload)}
 			};
 		const { connections } = services;
 		const { timeout } = services.config.apiNode;
@@ -59,4 +60,4 @@ const merleUtils = {
 	},
 };
 
-module.exports = merleUtils;
+module.exports = merkleUtils;
