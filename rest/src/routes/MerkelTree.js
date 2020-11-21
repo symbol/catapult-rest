@@ -121,7 +121,12 @@ class MerkleTree {
 			});
 		}
 		this.tree.push({
-			type: 0, path: convert.uint8ToHex(path), nibbleCount, linkMask: convert.uint8ToHex(linkMask), links
+			type: 0,
+			path: convert.uint8ToHex(path),
+			encodedPath: convert.uint8ToHex(this.encodePath(path, nibbleCount, false)),
+			nibbleCount,
+			linkMask: convert.uint8ToHex(linkMask),
+			links
 		});
 		return offsetRaw.slice(2 + (32 * bits.length));
 	}
@@ -136,9 +141,47 @@ class MerkleTree {
 	parseLeaf(offsetRaw, path, nibbleCount) {
 		const hash = convert.uint8ToHex(offsetRaw.slice(0, 32));
 		this.tree.push({
-			type: 255, path: convert.uint8ToHex(path), nibbleCount, hash
+			type: 255,
+			path: convert.uint8ToHex(path),
+			encodedPath: convert.uint8ToHex(this.encodePath(path, nibbleCount, true)),
+			nibbleCount,
+			hash
 		});
 		return offsetRaw.slice(32);
+	}
+
+	/**
+     * Encode path depends on node type and nibble count
+     * @param {Uint8Array} path path buffer
+     * @param {number} nibbleCount number of nibbles
+     * @param {boolean} isLeaf is leaf node
+     * @returns {Uint8Array} encoded path
+     */
+	encodePath(path, nibbleCount, isLeaf) {
+		const encodedKey = new Uint8Array(Math.floor(nibbleCount / 2) + 1);
+		encodedKey[0] = isLeaf ? 0x20 : 0; // set leaf flag
+		let i = 0;
+		if (1 === nibbleCount % 2) {
+			// set odd flag and merge in first nibble
+			encodedKey[0] = encodedKey[0] | 0x10 | this.nibbleAt(path, 0);
+			++i;
+		}
+
+		for (; i < nibbleCount; i += 2)
+			encodedKey[Math.floor(i / 2) + 1] = (this.nibbleAt(path, i) << 4) + this.nibbleAt(path, i + 1);
+
+		return encodedKey;
+	}
+
+	/**
+     * Get byte at given nibble index
+     * @param {Uint8Array} path path buffer
+     * @param {number} index nibble index
+     * @returns {number} byte
+     */
+	nibbleAt(path, index) {
+		const byte = path[Math.floor((index / 2))];
+		return 0 === index % 2 ? (byte & 0xf0) >> 4 : byte & 0x0f;
 	}
 }
 

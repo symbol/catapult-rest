@@ -60,6 +60,23 @@ describe('MerkleTree', () => {
 			expect(merkleTree.isLeaf(1)).to.equal(false);
 		});
 
+		describe('nibbleAt', () => {
+			const path = catapult.utils.convert.hexToUint8('B7BB382C56');
+			expect(merkleTree.nibbleAt(path, 0)).to.equal(11);
+			expect(merkleTree.nibbleAt(path, 5)).to.equal(8);
+			expect(merkleTree.nibbleAt(path, 10)).to.equal(0);
+		});
+
+		describe('encodePath', () => {
+			let path = catapult.utils.convert.hexToUint8('B7BB382C56');
+			expect(catapult.utils.convert.uint8ToHex(merkleTree.encodePath(path, 10, false))).to.equal('00B7BB382C56');
+			path = catapult.utils.convert.hexToUint8('3DC610D300');
+			expect(catapult.utils.convert.uint8ToHex(merkleTree.encodePath(path, 9, false))).to.equal('13DC610D30');
+			path = catapult.utils.convert.hexToUint8('02396A7E61AE1B1C4C66BD6850C2951C77044CFA5BD0');
+			expect(catapult.utils.convert.uint8ToHex(merkleTree.encodePath(path, 43, true)))
+				.to.equal('302396A7E61AE1B1C4C66BD6850C2951C77044CFA5BD');
+		});
+
 		describe('parseBranch', () => {
 			const branch = '8080DA9B4AF63BE985715EA635AF98E3CF3B0A22F9A2BE1C7DD40B79948AA63E'
                 + '36586E5D2E9D0C089C1C64BC0D42A11ADBD1CD6CDB4B7C294062F55113525A64AE3C';
