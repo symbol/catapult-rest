@@ -126,3 +126,4 @@ rules:
   - off
   consistent-return:
   - off
+  
