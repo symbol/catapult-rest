@@ -51,13 +51,13 @@ describe('merkle utils', () => {
 		});
 
 		describe('isBranch', () => {
-			expect(merkleTree.isBranch(0)).to.true;
-			expect(merkleTree.isBranch(1)).to.false;
+			expect(merkleTree.isBranch(0)).to.equal(true);
+			expect(merkleTree.isBranch(1)).to.equal(false);
 		});
 
 		describe('isLeaf', () => {
-			expect(merkleTree.isLeaf(255)).to.true;
-			expect(merkleTree.isLeaf(1)).to.false;
+			expect(merkleTree.isLeaf(255)).to.equal(true);
+			expect(merkleTree.isLeaf(1)).to.equal(false);
 		});
 
 		describe('parseBranch', () => {
@@ -84,7 +84,7 @@ describe('merkle utils', () => {
 				catapult.utils.convert.hexToUint8('04A7F2A487B42EA89323C4408F82415223ACFEC7DFA7924EFC31A70778AB17A0'));
 			expect(tree.length).to.equal(1);
 			expect(tree[0].type).to.equal(255);
-			expect(tree[0].linkMask).to.be.undefined;
+			expect(tree[0].linkMask).to.equal(undefined);
 			expect(tree[0].path).to.equal('04A7F2A487B42EA89323C4408F82415223ACFEC7DFA7924EFC31A70778AB17A0');
 			expect(tree[0].hash).to.equal('0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1');
 		});
@@ -106,7 +106,7 @@ describe('merkle utils', () => {
 			expect(tree[0].links[1].link).to.equal('6E5D2E9D0C089C1C64BC0D42A11ADBD1CD6CDB4B7C294062F55113525A64AE3C');
 
 			expect(tree[1].type).to.equal(255);
-			expect(tree[1].linkMask).to.be.undefined;
+			expect(tree[1].linkMask).to.equal(undefined);
 			expect(tree[1].path).to.equal('04A7F2A487B42EA89323C4408F82415223ACFEC7DFA7924EFC31A70778AB17A0');
 			expect(tree[1].hash).to.equal('0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1');
 		});
@@ -204,7 +204,7 @@ describe('merkle utils', () => {
 			expect(tree[1].links[11].link).to.equal('EA95B6BDD4B78132DB94CC70389A62ADD291E5130CC09AFC3E5B5A58A655A14F');
 
 			expect(tree[2].type).to.equal(255);
-			expect(tree[2].linkMask).to.be.undefined;
+			expect(tree[2].linkMask).to.equal(undefined);
 			expect(tree[2].path).to.equal('DD0A830D85825627C194FD126705843470B23E2B6A223A317BC385CE912E25');
 			expect(tree[2].hash).to.equal('E7158DBBF548B8B76BA4CD15E895DBA9429E9A4D6C1226AB9D53E91D911671A7');
 		});
@@ -244,7 +244,7 @@ describe('merkle utils', () => {
 			expect(tree[1].links[1].link).to.equal('7D6F47C31E28BDADCD84330066B6771B8A666268A0209A37E47525BEA3DFF3E9');
 
 			expect(tree[2].type).to.equal(255);
-			expect(tree[2].linkMask).to.be.undefined;
+			expect(tree[2].linkMask).to.equal(undefined);
 			expect(tree[2].path).to.equal('02396A7E61AE1B1C4C66BD6850C2951C77044CFA5BD0');
 			expect(tree[2].hash).to.equal('4AAFD429BA7128AAA203D7F148DEE82F2D1068C95AB5AF53B27B9C336327E8AA');
 		});

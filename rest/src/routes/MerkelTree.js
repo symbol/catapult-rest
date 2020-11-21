@@ -37,7 +37,7 @@ class MerkleTree {
 	 * @returns {string[]} array of the indices of bits
 	 */
 	getBitsFromMask(mask) {
-		const intValue = parseInt(`0x${convert.uint8ToHex(mask.reverse())}`);
+		const intValue = parseInt(`0x${convert.uint8ToHex(mask.reverse())}`, 16);
 		let index = 0;
 		const bits = [];
 		for (let i = 1; i <= intValue; i *= 2) {
@@ -64,7 +64,7 @@ class MerkleTree {
 	/**
 	 * Is branch node
 	 * @param {number} marker node marker
-	 * @returns {boolean}
+	 * @returns {boolean} if tree node is branch
 	 */
 	isBranch(marker) {
 		return 0 === marker;
@@ -73,7 +73,7 @@ class MerkleTree {
 	/**
 	 * Is leaf node
 	 * @param {number} marker node marker
-	 * @returns {boolean}
+	 * @returns {boolean} if tree node is leaf
 	 */
 	isLeaf(marker) {
 		return 255 === marker;
@@ -111,18 +111,18 @@ class MerkleTree {
 	parseBranch(offsetRaw, path) {
 		const linkMask = offsetRaw.slice(0, 2); // little endian
 		const bits = this.getBitsFromMask(linkMask);
-		const linksRaw = offsetRaw.slice(2, 2 + 32 * bits.length);
+		const linksRaw = offsetRaw.slice(2, 2 + (32 * bits.length));
 		const links = [];
 		for (let i = 0; i < bits.length; i++) {
 			links.push({
 				bit: bits[i],
-				link: convert.uint8ToHex(linksRaw.slice(i * 32, i * 32 + 32))
+				link: convert.uint8ToHex(linksRaw.slice(i * 32, (i * 32) + 32))
 			});
 		}
 		this.tree.push({
 			type: 0, path: convert.uint8ToHex(path), linkMask: convert.uint8ToHex(linkMask), links
 		});
-		return offsetRaw.slice(2 + 32 * bits.length);
+		return offsetRaw.slice(2 + (32 * bits.length));
 	}
 
 	/**
