@@ -21,11 +21,13 @@
 const MerkleTree = require('../../src/routes/MerkelTree');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
+const fs = require('fs');
+const fsPath = require('path');
 
 describe('MerkleTree', () => {
 	describe('merkle tree parse', () => {
 		let merkleTree = new MerkleTree();
-		describe('getBitsFromMask', () => {
+		it('getBitsFromMask', () => {
 			let bits = merkleTree.getBitsFromMask(catapult.utils.convert.hexToUint8('0C46'));
 			expect(bits.length).to.equal(5);
 			expect(bits.join('')).to.equal('239AE');
@@ -39,7 +41,7 @@ describe('MerkleTree', () => {
 			expect(bits.join('')).to.equal('49');
 		});
 
-		describe('getPathLength', () => {
+		it('getPathLength', () => {
 			let pathLength = merkleTree.getPathLength(0);
 			expect(pathLength).to.equal(0);
 
@@ -50,24 +52,24 @@ describe('MerkleTree', () => {
 			expect(pathLength).to.equal(5);
 		});
 
-		describe('isBranch', () => {
+		it('isBranch', () => {
 			expect(merkleTree.isBranch(0)).to.equal(true);
 			expect(merkleTree.isBranch(1)).to.equal(false);
 		});
 
-		describe('isLeaf', () => {
+		it('isLeaf', () => {
 			expect(merkleTree.isLeaf(255)).to.equal(true);
 			expect(merkleTree.isLeaf(1)).to.equal(false);
 		});
 
-		describe('nibbleAt', () => {
+		it('nibbleAt', () => {
 			const path = catapult.utils.convert.hexToUint8('B7BB382C56');
 			expect(merkleTree.nibbleAt(path, 0)).to.equal(11);
 			expect(merkleTree.nibbleAt(path, 5)).to.equal(8);
 			expect(merkleTree.nibbleAt(path, 10)).to.equal(0);
 		});
 
-		describe('encodePath', () => {
+		it('encodePath', () => {
 			let path = catapult.utils.convert.hexToUint8('B7BB382C56');
 			expect(catapult.utils.convert.uint8ToHex(merkleTree.encodePath(path, 10, false))).to.equal('00B7BB382C56');
 			path = catapult.utils.convert.hexToUint8('3DC610D300');
@@ -77,7 +79,7 @@ describe('MerkleTree', () => {
 				.to.equal('302396A7E61AE1B1C4C66BD6850C2951C77044CFA5BD');
 		});
 
-		describe('parseBranch', () => {
+		it('parseBranch', () => {
 			const branch = '8080DA9B4AF63BE985715EA635AF98E3CF3B0A22F9A2BE1C7DD40B79948AA63E'
                 + '36586E5D2E9D0C089C1C64BC0D42A11ADBD1CD6CDB4B7C294062F55113525A64AE3C';
 			merkleTree = new MerkleTree();
@@ -93,7 +95,7 @@ describe('MerkleTree', () => {
 			expect(tree[0].links[1].link).to.equal('6E5D2E9D0C089C1C64BC0D42A11ADBD1CD6CDB4B7C294062F55113525A64AE3C');
 		});
 
-		describe('parseLeaf', () => {
+		it('parseLeaf', () => {
 			const leaf = '0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1';
 			merkleTree = new MerkleTree();
 			const { tree } = merkleTree;
@@ -106,7 +108,7 @@ describe('MerkleTree', () => {
 			expect(tree[0].hash).to.equal('0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1');
 		});
 
-		describe('parseRaw', () => {
+		it('parseRaw', () => {
 			const raw = '00008080DA9B4AF63BE985715EA635AF98E3CF3B0A22F9A2BE1C7DD40B79948AA63E36586E5D2E9D0C089C'
                 + '1C64BC0D42A11ADBD1CD6CDB4B7C294062F55113525A64AE3CFF3F04A7F2A487B42EA89323C4408F82415223ACFEC7D'
                 + 'FA7924EFC31A70778AB17A00C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1';
@@ -128,7 +130,7 @@ describe('MerkleTree', () => {
 			expect(tree[1].hash).to.equal('0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1');
 		});
 
-		describe('parseRaw -  multiple branches', () => {
+		it('parseRaw -  multiple branches', () => {
 			const raw = '0000FFFF5EC7D52423FC5C8BC0F8F15FC79C16193A852B32232008D15B3CEDDD97FC1E9F62C6805349E0'
                 + 'C741E92D4693E98AA6D5CDE12ADE901E1B6E19FA5C55DA8B8628841F3802703D6B7B233542DFDBBC11F4DE72BCDE'
                 + '62BEDBD64D2D6BA220D232462422162DFE1D04C9E9272ECC9F2B8EB37BF09A6C12C2DA0FE588D045E6DDDFBE74CE'
@@ -226,7 +228,7 @@ describe('MerkleTree', () => {
 			expect(tree[2].hash).to.equal('E7158DBBF548B8B76BA4CD15E895DBA9429E9A4D6C1226AB9D53E91D911671A7');
 		});
 
-		describe('parseRaw -  non zero nibbles', () => {
+		it('parseRaw -  non zero nibbles', () => {
 			const raw = '000AB7BB382C56806217BB7F07DD6E5ED7ED72441AC98FDDE6666476BC2DFD4C038BDE0A0FDF650309BBCB7268B70'
                 + 'EE39982B7BBC9ED4AA138A20C529B57A8483A7F4140CF2DD707C403B450D28E74BB0D0286E32BE4EAE0871DDDA0F666CA7C06'
                 + 'A948AB408D7D3759E0E1D7D8FAD9309D6468CD4D3D7CAE1CEB723F332C16935D3C1DC46120CE532A00093DC610D3001002625'
@@ -264,6 +266,19 @@ describe('MerkleTree', () => {
 			expect(tree[2].linkMask).to.equal(undefined);
 			expect(tree[2].path).to.equal('02396A7E61AE1B1C4C66BD6850C2951C77044CFA5BD0');
 			expect(tree[2].hash).to.equal('4AAFD429BA7128AAA203D7F148DEE82F2D1068C95AB5AF53B27B9C336327E8AA');
+		});
+
+		describe('merkle tree parse from testnet examples', () => {
+			const treePath = fsPath.resolve(__dirname, '../merkle/trees.json');
+			const trees = JSON.parse(fs.readFileSync(treePath, 'UTF-8').trim());
+			trees.forEach(tree => {
+				const fieldName = Object.keys(tree).filter(n => 'raw' !== n)[0];
+				it(`${fieldName} ${tree[fieldName]}`, () => {
+					const testnetTree = new MerkleTree();
+					testnetTree.parseMerkleTreeFromRaw(catapult.utils.convert.hexToUint8(tree.raw));
+					expect(testnetTree.tree.length).to.be.gt(0);
+				});
+			});
 		});
 	});
 });
