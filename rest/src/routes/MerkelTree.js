@@ -158,19 +158,22 @@ class MerkleTree {
      * @returns {Uint8Array} encoded path
      */
 	encodePath(path, nibbleCount, isLeaf) {
-		const encodedKey = new Uint8Array(Math.floor(nibbleCount / 2) + 1);
-		encodedKey[0] = isLeaf ? 0x20 : 0; // set leaf flag
-		let i = 0;
-		if (1 === nibbleCount % 2) {
-			// set odd flag and merge in first nibble
-			encodedKey[0] = encodedKey[0] | 0x10 | this.nibbleAt(path, 0);
-			++i;
+		if (0 < nibbleCount && 0 < path.length) {
+			const encodedKey = new Uint8Array(Math.floor(nibbleCount / 2) + 1);
+			encodedKey[0] = isLeaf ? 0x20 : 0; // set leaf flag
+			let i = 0;
+			if (1 === nibbleCount % 2) {
+				// set odd flag and merge in first nibble
+				encodedKey[0] = encodedKey[0] | 0x10 | this.nibbleAt(path, 0);
+				++i;
+			}
+
+			for (; i < nibbleCount; i += 2)
+				encodedKey[Math.floor(i / 2) + 1] = (this.nibbleAt(path, i) << 4) + this.nibbleAt(path, i + 1);
+
+			return encodedKey;
 		}
-
-		for (; i < nibbleCount; i += 2)
-			encodedKey[Math.floor(i / 2) + 1] = (this.nibbleAt(path, i) << 4) + this.nibbleAt(path, i + 1);
-
-		return encodedKey;
+		return new Uint8Array();
 	}
 
 	/**
