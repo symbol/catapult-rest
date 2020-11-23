@@ -117,7 +117,7 @@ describe('MerkleTree', () => {
 		});
 
 		it('getLeafHash', () => {
-			const encodedPath = '0020B0D86F48CC652CA98B5A463EDF4849AC6D6CB431EDE4DFBA0698A26D4106D7';
+			const encodedPath = '20B0D86F48CC652CA98B5A463EDF4849AC6D6CB431EDE4DFBA0698A26D4106D7';
 			const value = 'EFB918C83096F8013736864B6914B95F8BB1892D448AED557BD852D18B261EE1';
 			merkleTree = new MerkleTree();
 			const leafHash = merkleTree.getLeafHash(encodedPath, value);
@@ -134,7 +134,7 @@ describe('MerkleTree', () => {
 			expect(tree[0].type).to.equal(255);
 			expect(tree[0].linkMask).to.equal(undefined);
 			expect(tree[0].path).to.equal('04A7F2A487B42EA89323C4408F82415223ACFEC7DFA7924EFC31A70778AB17A0');
-			expect(tree[0].hash).to.equal('0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1');
+			expect(tree[0].value).to.equal('0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1');
 		});
 
 		it('parseRaw', () => {
@@ -156,7 +156,7 @@ describe('MerkleTree', () => {
 			expect(tree[1].type).to.equal(255);
 			expect(tree[1].linkMask).to.equal(undefined);
 			expect(tree[1].path).to.equal('04A7F2A487B42EA89323C4408F82415223ACFEC7DFA7924EFC31A70778AB17A0');
-			expect(tree[1].hash).to.equal('0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1');
+			expect(tree[1].value).to.equal('0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1');
 		});
 
 		it('parseRaw -  multiple branches', () => {
@@ -254,7 +254,7 @@ describe('MerkleTree', () => {
 			expect(tree[2].type).to.equal(255);
 			expect(tree[2].linkMask).to.equal(undefined);
 			expect(tree[2].path).to.equal('DD0A830D85825627C194FD126705843470B23E2B6A223A317BC385CE912E25');
-			expect(tree[2].hash).to.equal('E7158DBBF548B8B76BA4CD15E895DBA9429E9A4D6C1226AB9D53E91D911671A7');
+			expect(tree[2].value).to.equal('E7158DBBF548B8B76BA4CD15E895DBA9429E9A4D6C1226AB9D53E91D911671A7');
 		});
 
 		it('parseRaw -  non zero nibbles', () => {
@@ -294,7 +294,7 @@ describe('MerkleTree', () => {
 			expect(tree[2].type).to.equal(255);
 			expect(tree[2].linkMask).to.equal(undefined);
 			expect(tree[2].path).to.equal('02396A7E61AE1B1C4C66BD6850C2951C77044CFA5BD0');
-			expect(tree[2].hash).to.equal('4AAFD429BA7128AAA203D7F148DEE82F2D1068C95AB5AF53B27B9C336327E8AA');
+			expect(tree[2].value).to.equal('4AAFD429BA7128AAA203D7F148DEE82F2D1068C95AB5AF53B27B9C336327E8AA');
 		});
 
 		describe('merkle tree parse from testnet examples', () => {
