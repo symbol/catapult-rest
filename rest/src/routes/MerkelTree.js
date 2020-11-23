@@ -100,6 +100,7 @@ class MerkleTree {
 			const lessLeaf = this.parseLeaf(raw.slice(2 + pathLength), path, nibbleCount);
 			return this.parseMerkleTreeFromRaw(lessLeaf);
 		}
+		throw new Error(`${convert.uint8ToHex(raw)} is not a branch or a leaf!`);
 	}
 
 	/**
