@@ -160,7 +160,7 @@ class MerkleTree {
 	 * @param {number} nibbleCount number of nibbles
 	 * @param {boolean} isLeaf is leaf node
 	 * @returns {Uint8Array} encoded path
-     */
+	 */
 	encodePath(path, nibbleCount, isLeaf) {
 		const encodedKey = new Uint8Array(Math.floor(nibbleCount / 2) + 1);
 		encodedKey[0] = isLeaf ? 0x20 : 0; // set leaf flag
@@ -182,7 +182,7 @@ class MerkleTree {
 	 * @param {Uint8Array} path path buffer
 	 * @param {number} index nibble index
 	 * @returns {number} byte
-     */
+	 */
 	nibbleAt(path, index) {
 		const byte = path[Math.floor((index / 2))];
 		return 0 === index % 2 ? (byte & 0xf0) >> 4 : byte & 0x0f;
