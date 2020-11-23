@@ -95,6 +95,27 @@ describe('MerkleTree', () => {
 			expect(tree[0].links[1].link).to.equal('6E5D2E9D0C089C1C64BC0D42A11ADBD1CD6CDB4B7C294062F55113525A64AE3C');
 		});
 
+		it('getBranchHash', () => {
+			const encodedPath = '00';
+			const links = [
+				{
+					bit: '6',
+					link: '65DA42890A39521AF4F06A5C7A96AC14C3B70611C671FF7E00B401A0C7110ECB'
+				},
+				{
+					bit: 'C',
+					link: 'D0E3CD07177472CC42C7DBB645C15854D06F150E11B7D3C73AB05A53AFB88C07'
+				},
+				{
+					bit: 'D',
+					link: '1CB226DA02F7748A47D40798316418341991E4AF2D83E1EDDAECA55F1D00DD59'
+				}
+			];
+			merkleTree = new MerkleTree();
+			const branchHash = merkleTree.getBranchHash(encodedPath, links);
+			expect(branchHash).to.equal('EA1E622F7655215A1A3D4C4FA112155BD8AE3AAF2E2C62899763A45D7E91C89C');
+		});
+
 		it('parseLeaf', () => {
 			const leaf = '0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1';
 			merkleTree = new MerkleTree();

@@ -120,13 +120,15 @@ class MerkleTree {
 				link: convert.uint8ToHex(linksRaw.slice(i * 32, (i * 32) + 32))
 			});
 		}
+		const encodedPath = convert.uint8ToHex(this.encodePath(path, nibbleCount, false));
 		this.tree.push({
 			type: 0,
 			path: convert.uint8ToHex(path),
-			encodedPath: convert.uint8ToHex(this.encodePath(path, nibbleCount, false)),
+			encodedPath,
 			nibbleCount,
 			linkMask: convert.uint8ToHex(linkMask),
-			links
+			links,
+			branchHash: this.getBranchHash(encodedPath, links)
 		});
 		return offsetRaw.slice(2 + (32 * bits.length));
 	}
@@ -182,6 +184,24 @@ class MerkleTree {
 	nibbleAt(path, index) {
 		const byte = path[Math.floor((index / 2))];
 		return 0 === index % 2 ? (byte & 0xf0) >> 4 : byte & 0x0f;
+	}
+
+	/**
+	 * Calculate branch hash. Hash(encodedPath + 16 links)
+	 * @param {string} encodedPath encoded path of the branch in hexadecimal format
+	 * @param {Array} links branch links array
+	 * @returns {string} branch hash (Hash(encodedPath + links))
+	 */
+	getBranchHash(encodedPath, links) {
+		const branchLinks = Array(16).fill(catapult.utils.convert.uint8ToHex(new Uint8Array(32)));
+		links.forEach(link => {
+			branchLinks[parseInt(`0x${link.bit}`, 16)] = link.link;
+		});
+		return catapult.crypto.sha3Hasher.getHasher(32).update(
+			catapult.utils.convert.hexToUint8(encodedPath + branchLinks.join(''))
+		)
+			.hex()
+			.toUpperCase();
 	}
 }
 
