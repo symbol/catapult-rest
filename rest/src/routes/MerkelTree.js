@@ -106,7 +106,7 @@ class MerkleTree {
 	 * Parse branch tree node
 	 * @param {Uint8Array} offsetRaw partial raw buffer
 	 * @param {Uint8Array} path merkle tree path
-     * @param {number} nibbleCount number of nibbles
+	 * @param {number} nibbleCount number of nibbles
 	 * @returns {Uint8Array} unprocess raw buffer
 	 */
 	parseBranch(offsetRaw, path, nibbleCount) {
@@ -137,7 +137,7 @@ class MerkleTree {
 	 * Parse leaf tree node
 	 * @param {Uint8Array} offsetRaw partial raw buffer
 	 * @param {Uint8Array} path merkle tree path
-     * @param {number} nibbleCount number of nibbles
+	 * @param {number} nibbleCount number of nibbles
 	 * @returns {Uint8Array} unprocess raw buffer
 	 */
 	parseLeaf(offsetRaw, path, nibbleCount) {
@@ -155,11 +155,11 @@ class MerkleTree {
 	}
 
 	/**
-     * Encode path depends on node type and nibble count
-     * @param {Uint8Array} path path buffer
-     * @param {number} nibbleCount number of nibbles
-     * @param {boolean} isLeaf is leaf node
-     * @returns {Uint8Array} encoded path
+	 * Encode path depends on node type and nibble count
+	 * @param {Uint8Array} path path buffer
+	 * @param {number} nibbleCount number of nibbles
+	 * @param {boolean} isLeaf is leaf node
+	 * @returns {Uint8Array} encoded path
      */
 	encodePath(path, nibbleCount, isLeaf) {
 		const encodedKey = new Uint8Array(Math.floor(nibbleCount / 2) + 1);
@@ -178,10 +178,10 @@ class MerkleTree {
 	}
 
 	/**
-     * Get byte at given nibble index
-     * @param {Uint8Array} path path buffer
-     * @param {number} index nibble index
-     * @returns {number} byte
+	 * Get byte at given nibble index
+	 * @param {Uint8Array} path path buffer
+	 * @param {number} index nibble index
+	 * @returns {number} byte
      */
 	nibbleAt(path, index) {
 		const byte = path[Math.floor((index / 2))];
