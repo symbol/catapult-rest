@@ -116,6 +116,14 @@ describe('MerkleTree', () => {
 			expect(branchHash).to.equal('EA1E622F7655215A1A3D4C4FA112155BD8AE3AAF2E2C62899763A45D7E91C89C');
 		});
 
+		it('getLeafHash', () => {
+			const encodedPath = '0020B0D86F48CC652CA98B5A463EDF4849AC6D6CB431EDE4DFBA0698A26D4106D7';
+			const value = 'EFB918C83096F8013736864B6914B95F8BB1892D448AED557BD852D18B261EE1';
+			merkleTree = new MerkleTree();
+			const leafHash = merkleTree.getLeafHash(encodedPath, value);
+			expect(leafHash).to.equal('65DA42890A39521AF4F06A5C7A96AC14C3B70611C671FF7E00B401A0C7110ECB');
+		});
+
 		it('parseLeaf', () => {
 			const leaf = '0C3EAFF635F01BB3B474F0AF1BE99FBDA85EEFB209CC7BD158D3540DE3A3F2D1';
 			merkleTree = new MerkleTree();

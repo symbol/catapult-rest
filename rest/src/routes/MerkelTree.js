@@ -141,13 +141,15 @@ class MerkleTree {
 	 * @returns {Uint8Array} unprocess raw buffer
 	 */
 	parseLeaf(offsetRaw, path, nibbleCount) {
-		const hash = convert.uint8ToHex(offsetRaw.slice(0, 32));
+		const value = convert.uint8ToHex(offsetRaw.slice(0, 32));
+		const encodedPath = convert.uint8ToHex(this.encodePath(path, nibbleCount, true));
 		this.tree.push({
 			type: 255,
 			path: convert.uint8ToHex(path),
-			encodedPath: convert.uint8ToHex(this.encodePath(path, nibbleCount, true)),
+			encodedPath,
 			nibbleCount,
-			hash
+			value,
+			leafHash: this.getLeafHash(encodedPath, value)
 		});
 		return offsetRaw.slice(32);
 	}
@@ -199,6 +201,20 @@ class MerkleTree {
 		});
 		return catapult.crypto.sha3Hasher.getHasher(32).update(
 			catapult.utils.convert.hexToUint8(encodedPath + branchLinks.join(''))
+		)
+			.hex()
+			.toUpperCase();
+	}
+
+	/**
+	 * Calculate leaf hash. Hash(encodedPath + leaf value)
+	 * @param {string} encodedPath encoded path of the leaf in hexadecimal format
+	 * @param {Array} leafValue leaf value
+	 * @returns {string} leaf hash (Hash(encodedPath + leaf value))
+	 */
+	getLeafHash(encodedPath, leafValue) {
+		return catapult.crypto.sha3Hasher.getHasher(32).update(
+			catapult.utils.convert.hexToUint8(encodedPath + leafValue)
 		)
 			.hex()
 			.toUpperCase();
