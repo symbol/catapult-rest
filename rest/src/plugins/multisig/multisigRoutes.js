@@ -44,6 +44,13 @@ module.exports = {
 			});
 		});
 
+		server.get('/multisig', (req, res, next) => {
+			const sender = routeUtils.createSender('multisigEntry');
+			const accountAddress = req.params.address ? routeUtils.parseArgument(req.params, 'address', 'address') : undefined;
+			const options = routeUtils.parsePaginationArguments(req.params, services.config.pageSize, { id: 'objectId' });
+			return db.multisigs(accountAddress, options).then(result => sender.sendPage(res, next)(result));
+		});
+
 		const getMultisigEntries = (multisigEntries, fieldName) => {
 			const addresses = new Set();
 			multisigEntries.forEach(multisigEntry => multisigEntry.multisig[fieldName].forEach(address => {

@@ -22,17 +22,19 @@
 const MultisigDb = require('../../../src/plugins/multisig/MultisigDb');
 const dbTestUtils = require('../../db/utils/dbTestUtils');
 const test = require('../../testUtils');
+const { expect } = require('chai');
 const MongoDb = require('mongodb');
 
 const { Binary } = MongoDb;
+const { createObjectId } = dbTestUtils.db;
 
-const createMultisigEntry = (id, owner) => ({
+const createMultisigEntry = (id, account, cosignatoryAddresses, multisigAddresses) => ({
 	// simulated account is multisig with two cosigners and cosigns one multisig account
 	_id: dbTestUtils.db.createObjectId(id),
 	multisig: {
-		accountAddress: new Binary(owner.address),
-		cosignatoryAddresses: [new Binary(test.random.address()), new Binary(test.random.address())],
-		multisigAddresses: [new Binary(test.random.address())]
+		accountAddress: new Binary(account.address || account),
+		cosignatoryAddresses: (cosignatoryAddresses || []).map(a => new Binary(a)),
+		multisigAddresses: (multisigAddresses || []).map(a => new Binary(a))
 	}
 });
 
@@ -43,6 +45,76 @@ const multisigDbTestUtils = {
 			dbTestUtils.db.runDbTest(dbEntities, 'multisigs', db => new MultisigDb(db), issueDbCommand, assertDbCommandResult)
 	}
 };
+
+describe('multisigs db', () => {
+	const ownerAddressTest1 = test.random.address();
+	const ownerAddressTest2 = test.random.address();
+	const ownerAddressTest3 = test.random.address();
+	const ownerAddressTest4 = test.random.address();
+
+	it('returns with no params', () => {
+		// Arrange:
+		const paginationOptions = {
+			pageSize: 10,
+			pageNumber: 1,
+			sortField: 'id',
+			sortDirection: -1
+		};
+
+		const dbMultisigs = [
+			createMultisigEntry(10, ownerAddressTest1, [ownerAddressTest3], [ownerAddressTest3]),
+			createMultisigEntry(20, ownerAddressTest2, [ownerAddressTest3], [ownerAddressTest3]),
+			createMultisigEntry(30, ownerAddressTest3, [ownerAddressTest3], [ownerAddressTest3]),
+			createMultisigEntry(40, ownerAddressTest3, [ownerAddressTest3, ownerAddressTest2], []),
+			createMultisigEntry(50, ownerAddressTest1, [ownerAddressTest3], [ownerAddressTest3, ownerAddressTest2]),
+			createMultisigEntry(60, ownerAddressTest1, [ownerAddressTest3], [ownerAddressTest4])
+		];
+
+		return multisigDbTestUtils.db.runDbTest(
+			dbMultisigs,
+			db => db.multisigs(undefined, paginationOptions),
+			page => {
+				expect(page.data.length).to.equal(6);
+				expect(page.data[0].id).to.deep.equal(createObjectId(60));
+				expect(page.data[1].id).to.deep.equal(createObjectId(50));
+				expect(page.data[2].id).to.deep.equal(createObjectId(40));
+				expect(page.data[3].id).to.deep.equal(createObjectId(30));
+				expect(page.data[4].id).to.deep.equal(createObjectId(20));
+				expect(page.data[5].id).to.deep.equal(createObjectId(10));
+			}
+		);
+	});
+
+	it('returns with address param', () => {
+		// Arrange:
+		const paginationOptions = {
+			pageSize: 10,
+			pageNumber: 1,
+			sortField: 'id',
+			sortDirection: 1
+		};
+
+		const dbMultisigs = [
+			createMultisigEntry(10, ownerAddressTest1, [ownerAddressTest3], [ownerAddressTest3]),
+			createMultisigEntry(20, ownerAddressTest2, [ownerAddressTest3], [ownerAddressTest3]),
+			createMultisigEntry(30, ownerAddressTest3, [ownerAddressTest3], [ownerAddressTest3]),
+			createMultisigEntry(40, ownerAddressTest3, [ownerAddressTest3, ownerAddressTest2], []),
+			createMultisigEntry(50, ownerAddressTest1, [ownerAddressTest3], [ownerAddressTest3, ownerAddressTest2]),
+			createMultisigEntry(60, ownerAddressTest1, [ownerAddressTest3], [ownerAddressTest4])
+		];
+		return multisigDbTestUtils.db.runDbTest(
+			dbMultisigs,
+			db => db.multisigs(ownerAddressTest2, paginationOptions),
+			page => {
+				expect(page.data.length).to.deep.equal(3);
+				expect(page.data[0].id).to.deep.equal(createObjectId(20));
+				expect(page.data[1].id).to.deep.equal(createObjectId(40));
+				expect(page.data[2].id).to.deep.equal(createObjectId(50));
+			}
+		);
+	});
+});
+
 Object.assign(multisigDbTestUtils, test);
 
 module.exports = multisigDbTestUtils;

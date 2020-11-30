@@ -18,6 +18,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { buildOffsetCondition } = require('../../db/dbUtils');
 
 class MultisigDb {
 	/**
@@ -38,6 +39,35 @@ class MultisigDb {
 	multisigsByAddresses(addresses) {
 		const buffers = addresses.map(address => Buffer.from(address));
 		return this.catapultDb.queryDocuments('multisigs', { 'multisig.accountAddress': { $in: buffers } });
+	}
+
+	/**
+	 * Retrieves multisig filtered and paginated.
+	 * @param {Uint8Array} address Account addresses.
+	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
+	 * @returns {Promise.<array>} Multisig infos for all accounts.
+	 */
+	multisigs(address, options) {
+		const sortingOptions = { id: '_id' };
+		let conditions = {};
+		if (address) {
+			const bufferAddress = Buffer.from(address);
+			conditions = {
+				$or: [
+					{ 'multisig.accountAddress': bufferAddress },
+					{ 'multisig.cosignatoryAddresses': bufferAddress },
+					{ 'multisig.multisigAddresses': bufferAddress }
+				]
+			};
+		}
+
+		const offsetCondition = buildOffsetCondition(options, sortingOptions);
+		if (offsetCondition)
+			conditions = Object.assign(conditions, offsetCondition);
+
+		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
+		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'multisigs', options);
 	}
 
 	// endregion
