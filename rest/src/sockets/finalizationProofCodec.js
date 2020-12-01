@@ -69,10 +69,6 @@ const finalizationProofCodec = {
 						parentPublicKey: parser.buffer(sizes.signerPublicKey),
 						signature: parser.buffer(sizes.signature)
 					},
-					top: {
-						parentPublicKey: parser.buffer(sizes.signerPublicKey),
-						signature: parser.buffer(sizes.signature)
-					},
 					bottom: {
 						parentPublicKey: parser.buffer(sizes.signerPublicKey),
 						signature: parser.buffer(sizes.signature)

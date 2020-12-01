@@ -49,14 +49,11 @@ describe('deserialize', () => {
 	const createSignature = () => {
 		const rootParentPublicKey = testPublicKey;
 		const rootSignature = testInnerSignature;
-		const topParentPublicKey = testPublicKey;
-		const topSignature = testInnerSignature;
 		const bottomParentPublicKey = testPublicKey;
 		const bottomSignature = testInnerSignature;
 
 		const signature = [
 			rootParentPublicKey, rootSignature,
-			topParentPublicKey, topSignature,
 			bottomParentPublicKey, bottomSignature
 		];
 
@@ -99,10 +96,6 @@ describe('deserialize', () => {
 			for (let i = 0; i < signatureCount; ++i) {
 				expectedSignatures.push({
 					root: {
-						parentPublicKey: testPublicKey,
-						signature: testInnerSignature
-					},
-					top: {
 						parentPublicKey: testPublicKey,
 						signature: testInnerSignature
 					},
