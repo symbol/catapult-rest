@@ -64,7 +64,7 @@ const sizes = {
 	/**
 	 * @property {numeric} Size of a voting key.
 	 */
-	votingKey: 32
+	votingKey: 48
 };
 
 module.exports = sizes;
