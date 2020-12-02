@@ -69,7 +69,8 @@ describe('deserialize', () => {
 		const messageGroupHeight = Buffer.from([0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // 8b
 
 		const messageGroup = [
-			messageGroupSize, messageGrouphashCount, messageGroupsignatureCount, messageGroupsignatureSchema, messageGroupStage, messageGroupHeight
+			messageGroupSize, messageGrouphashCount, messageGroupsignatureCount,
+			messageGroupsignatureSchema, messageGroupStage, messageGroupHeight
 		];
 
 		for (let i = 0; i < hashCount; ++i)
