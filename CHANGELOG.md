@@ -5,7 +5,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 
 ## [v2.2.0] - 3-Dec-2020
 ### Added
-- Catapult-server finality (0.10.0.4) support.
+- Catapult-server finality (0.10.0.4 - testnet/v3) support.
 - Added version fields to states.
 - Added `/merkle` endpoints returning the merkle trees.
 - Simplified search endpoints.
