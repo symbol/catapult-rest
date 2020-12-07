@@ -43,7 +43,7 @@ class ReceiptsDb {
 	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<object>} Transaction statements page.
 	 */
-	transactionStatements(filters, options) {
+	async transactionStatements(filters, options) {
 		const sortingOptions = { id: '_id' };
 
 		let conditions = {};
@@ -68,8 +68,9 @@ class ReceiptsDb {
 			conditions['statement.receipts.targetAddress'] = Buffer.from(filters.targetAddress);
 
 		if (undefined !== filters.artifactId) {
-			const artifactIdType = isNamespaceId(filters.artifactId) ? 'namespaceId' : 'mosaicId';
-			conditions[[`statement.receipts.${artifactIdType}`]] = convertToLong(filters.artifactId);
+			const isNamespace = isNamespaceId(filters.artifactId);
+			const mosaicIds = !isNamespace ? [convertToLong(filters.artifactId)] : await this.mosaicIdsByNamespaceId(filters.artifactId);
+			conditions[`statement.receipts.mosaicId`] = { $in: mosaicIds };
 		}
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
@@ -99,6 +100,25 @@ class ReceiptsDb {
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, `${artifact}ResolutionStatements`, options);
+	}
+
+	/**
+	 * Retrives mosaics filtered by namespace id from resolution statements.
+	 * @param {NamespaceId} namespaceId Statement unresolved address.
+	 * @returns {Promise.<object>} mosaic ids
+	 */
+	mosaicIdsByNamespaceId(namespaceId) {
+		let conditions = {};
+		if (undefined !== namespaceId)
+			conditions['statement.unresolved'] = convertToLong(namespaceId);
+
+		return this.catapultDb.queryDocuments('mosaicResolutionStatements', conditions).then(
+			resolutions => {
+				const resolvedMosaicIds = [];
+				resolutions.map(resolution => resolution.statement.resolutionEntries.map(entry => entry.resolved)).map(ids => resolvedMosaicIds.push(...ids));
+				return resolvedMosaicIds;
+			}
+		);
 	}
 }
 
