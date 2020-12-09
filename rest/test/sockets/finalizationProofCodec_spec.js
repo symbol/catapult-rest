@@ -66,7 +66,7 @@ describe('deserialize', () => {
 		const messageGroupsignatureCount = Buffer.from([0x00, 0x00]); // 2b
 		const messageGroupsignatureSchema = Buffer.from([0x01, 0x00]); // 2b
 		const messageGroupStage = Buffer.from([0x01, 0x00, 0x00, 0x00]); // 4b
-		const messageGroupHeight = Buffer.from([0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // 8b
+		const messageGroupHeight = Buffer.from([0xCD, 0x49, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00]); // 8b
 
 		const messageGroup = [
 			messageGroupSize, messageGrouphashCount, messageGroupsignatureCount,
@@ -118,7 +118,7 @@ describe('deserialize', () => {
 				expectedMessageGroups.push({
 					signatureSchema: 1,
 					stage: 1,
-					height: [1, 0],
+					height: [215501, 0],
 					hashes: expectedHashes,
 					signatures: expectedSignatures
 				});
