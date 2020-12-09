@@ -19,12 +19,25 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { convertToLong, buildOffsetCondition } = require('../../db/dbUtils');
 const catapult = require('catapult-sdk');
+const { convertToLong, buildOffsetCondition } = require('../../db/dbUtils');
 
 const { convert, uint64 } = catapult.utils;
 
 const isNamespaceId = id => 0 !== (0x80 & convert.hexToUint8(uint64.toHex(id))[0]);
+
+const createLatestConditions = (height) => {
+	if (height) {
+		return ({
+			$and: [{
+				$or: [
+					{ 'mosaic.duration': convertToLong(0) },
+					{ 'mosaic.duration': { $gt: height } }]
+			}]
+		});
+	}
+	return {};
+};
 
 class ReceiptsDb {
 	/**
@@ -103,22 +116,38 @@ class ReceiptsDb {
 	}
 
 	/**
+	 * Retrieves active mosaics given their ids.
+	 * @param {Array.<module:catapult.utils/uint64~uint64>} ids Mosaic ids.
+	 * @returns {Promise.<array>} Mosaics.
+	 */
+	async activeMosaicsByIds(ids) {
+		const { height } = await this.catapultDb.chainStatisticCurrent();
+		const activeConditions = await createLatestConditions(height);
+
+		const conditions = { $and: [] };
+
+		conditions.$and.push({ 'mosaic.id': { $in: ids } });
+		conditions.$and.push(activeConditions);
+
+		return this.catapultDb.queryDocuments('mosaics', conditions);
+	}
+
+	/**
 	 * Retrives mosaics filtered by namespace id from resolution statements.
 	 * @param {NamespaceId} namespaceId Statement unresolved address.
 	 * @returns {Promise.<object>} mosaic ids
 	 */
-	mosaicIdsByNamespaceId(namespaceId) {
+	async mosaicIdsByNamespaceId(namespaceId) {
 		let conditions = {};
 		if (undefined !== namespaceId)
 			conditions['statement.unresolved'] = convertToLong(namespaceId);
 
-		return this.catapultDb.queryDocuments('mosaicResolutionStatements', conditions).then(
-			resolutions => {
-				const resolvedMosaicIds = [];
-				resolutions.map(resolution => resolution.statement.resolutionEntries.map(entry => entry.resolved)).map(ids => resolvedMosaicIds.push(...ids));
-				return resolvedMosaicIds;
-			}
-		);
+		const resolutions = await this.catapultDb.queryDocuments('mosaicResolutionStatements', conditions);
+		const resolvedIds = [];
+		resolutions.map(resolution => resolution.statement.resolutionEntries.map(entry => entry.resolved)).map(ids => resolvedIds.push(...ids));
+
+		const activeMosaics = await this.activeMosaicsByIds(resolvedIds);
+		return activeMosaics.map(activeMosaic => activeMosaic.mosaic.id);
 	}
 }
 
