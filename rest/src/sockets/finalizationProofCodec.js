@@ -26,6 +26,8 @@ const { sizes } = catapult.constants;
 
 const headerSize = 56;
 
+const v2ForkHeight = 215500; //This is the v1/v2 fork height on testnet
+
 const finalizationProofCodec = {
 	/**
 	 * Parses finalization proof.
@@ -61,16 +63,19 @@ const finalizationProofCodec = {
 				signatures: []
 			};
 
+			const votingKeySize = catapult.utils.uint64.compact(messageGroup.height) < v2ForkHeight ? 
+				sizes.votingKey : sizes.signerPublicKey;
+
 			for (let i = 0; i < hashCount; i++)
 				messageGroup.hashes.push(parser.buffer(sizes.hash256));
 			for (let i = 0; i < signatureCount; i++) {
 				const signature = {
 					root: {
-						parentPublicKey: parser.buffer(sizes.signerPublicKey),
+						parentPublicKey: parser.buffer(votingKeySize),
 						signature: parser.buffer(sizes.signature)
 					},
 					bottom: {
-						parentPublicKey: parser.buffer(sizes.signerPublicKey),
+						parentPublicKey: parser.buffer(votingKeySize),
 						signature: parser.buffer(sizes.signature)
 					}
 				};
