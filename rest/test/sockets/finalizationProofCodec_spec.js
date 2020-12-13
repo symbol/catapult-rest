@@ -131,7 +131,7 @@ describe('deserialize', () => {
 			binaryParser.push(Buffer.from(finalizationProofBuffer));
 
 			// Assert:
-			expect(finalizationProofCodec.deserialize(binaryParser)).to.deep.equal({
+			expect(finalizationProofCodec.deserialize(binaryParser, 215500)).to.deep.equal({
 				version: 100,
 				finalizationEpoch: 2,
 				finalizationPoint: 1,

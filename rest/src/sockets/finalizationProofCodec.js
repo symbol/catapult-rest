@@ -26,15 +26,14 @@ const { sizes } = catapult.constants;
 
 const headerSize = 56;
 
-const v2ForkHeight = 215500; // This is the v1/v2 fork height on testnet
-
 const finalizationProofCodec = {
 	/**
 	 * Parses finalization proof.
 	 * @param {object} parser Parser.
+	 * @param {number} v2ForkHeight Votingkey V2 fork height.
 	 * @returns {object} Parsed finalization proof.
 	 */
-	deserialize: parser => {
+	deserialize: (parser, v2ForkHeight) => {
 		const proof = {};
 
 		if (0 === parser.numUnprocessedBytes())

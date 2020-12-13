@@ -73,7 +73,9 @@ describe('network routes', () => {
 						+ '[chain]\n'
 						+ 'enableVerifiableState = true\n'
 						+ '[plugin:catapult.plugins.aggregate]\n'
-						+ 'maxTransactionsPerAggregate = 1\'000'));
+						+ 'maxTransactionsPerAggregate = 1\'000\n'
+						+ '[fork_heights]\n'
+						+ 'votingKeyLinkV2 = 215500'));
 
 				const services = { config: { network: { propertiesFilePath: 'wouldBeValidFilePath' } } };
 				const mockServer = new MockServer();
@@ -86,7 +88,8 @@ describe('network routes', () => {
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						network: { identifier: 'mijin-test' },
 						chain: { enableVerifiableState: true },
-						plugins: { aggregate: { maxTransactionsPerAggregate: '1\'000' } }
+						plugins: { aggregate: { maxTransactionsPerAggregate: '1\'000' } },
+						fork_heights: { votingKeyLinkV2: '215500' }
 					});
 					readFileStub.restore();
 				});
@@ -101,7 +104,9 @@ describe('network routes', () => {
 						+ '[private]\n'
 						+ 'secretCode = 42\n'
 						+ '[plugin:catapult.plugins.aggregate]\n'
-						+ 'maxTransactionsPerAggregate = 1\'000'));
+						+ 'maxTransactionsPerAggregate = 1\'000\n'
+						+ '[fork_heights]\n'
+						+ 'votingKeyLinkV2 = 215500'));
 
 				const services = { config: { network: { propertiesFilePath: 'wouldBeValidFilePath' } } };
 				const mockServer = new MockServer();
@@ -114,7 +119,8 @@ describe('network routes', () => {
 					expect(mockServer.send.firstCall.args[0]).to.deep.equal({
 						network: { identifier: 'mijin-test' },
 						chain: { enableVerifiableState: true },
-						plugins: { aggregate: { maxTransactionsPerAggregate: '1\'000' } }
+						plugins: { aggregate: { maxTransactionsPerAggregate: '1\'000' } },
+						fork_heights: { votingKeyLinkV2: '215500' }
 					});
 					readFileStub.restore();
 				});

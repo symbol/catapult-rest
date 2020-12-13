@@ -52,7 +52,8 @@ module.exports = {
 				res.send({
 					network: propertiesObject.network,
 					chain: propertiesObject.chain,
-					plugins: propertiesObject['plugin:catapult'].plugins
+					plugins: propertiesObject['plugin:catapult'].plugins,
+					fork_heights: propertiesObject.fork_heights
 				});
 				next();
 			}).catch(() => {

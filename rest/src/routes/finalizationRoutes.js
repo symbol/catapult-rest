@@ -23,7 +23,10 @@ const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 const finalizationProofCodec = require('../sockets/finalizationProofCodec');
 const catapult = require('catapult-sdk');
+const ini = require('ini');
 const { NotFoundError } = require('restify-errors');
+const fs = require('fs');
+const util = require('util');
 
 const packetHeader = catapult.packet.header;
 const { PacketType } = catapult.packet;
@@ -35,18 +38,31 @@ module.exports = {
 		const { connections } = services;
 		const { timeout } = services.config.apiNode;
 
+		const readAndParseNetworkPropertiesFile = () => {
+			const readFile = util.promisify(fs.readFile);
+			try {
+				return readFile(services.config.network.propertiesFilePath, 'utf8')
+					.then(fileData => ini.parse(fileData));
+			} catch (err) {
+				// If API node is not updated, then use static fork height
+				return new Promise(resolve => resolve({ fork_heights: { votingKeyLinkV2: '215500' } }));
+			}
+		};
+
 		const sendRequestAndResponse = (requestPacket, res, next) =>
 			connections.singleUse()
 				.then(connection => connection.pushPull(requestPacket, timeout))
-				.then(packet => {
+				.then(packet => readAndParseNetworkPropertiesFile().then(propertiesObject => {
+					const forkHeight = parseInt(propertiesObject.fork_heights.votingKeyLinkV2, 10);
 					const binaryParser = new BinaryParser();
 					binaryParser.push(packet.payload);
-					const payload = finalizationProofCodec.deserialize(binaryParser);
+					const payload = finalizationProofCodec.deserialize(binaryParser, forkHeight);
+
 					if (!payload)
 						return next(new NotFoundError());
 					res.send({ payload, type: routeResultTypes.finalizationProof, formatter: 'ws' });
 					return next();
-				});
+				}));
 
 		server.get('/finalization/proof/epoch/:epoch', (req, res, next) => {
 			const epoch = routeUtils.parseArgument(req.params, 'epoch', 'uint');
