@@ -38,7 +38,13 @@ module.exports = {
 
 		const readAndParseNetworkPropertiesFile = () => {
 			const readFile = util.promisify(fs.readFile);
-			return readFile(services.config.network.propertiesFilePath, 'utf8')
+			return readFile(services.config.apiNode.networkPropertyFilePath, 'utf8')
+				.then(fileData => ini.parse(fileData));
+		};
+
+		const readAndParseNodePropertiesFile = () => {
+			const readFile = util.promisify(fs.readFile);
+			return readFile(services.config.apiNode.nodePropertyFilePath, 'utf8')
 				.then(fileData => ini.parse(fileData));
 		};
 
@@ -62,12 +68,15 @@ module.exports = {
 
 		server.get('/network/fees/transaction', (req, res, next) => {
 			const numBlocksTransactionFeeStats = services.config.numBlocksTransactionFeeStats || 1;
-			return db.latestBlocksFeeMultiplier(numBlocksTransactionFeeStats).then(feeMultipliers => {
+			const nodeProperties = readAndParseNodePropertiesFile();
+			const latestBlocksFeeMultiplier = db.latestBlocksFeeMultiplier(numBlocksTransactionFeeStats);
+			return Promise.all([nodeProperties, latestBlocksFeeMultiplier]).then(feeMultipliers => {
 				res.send({
-					averageFeeMultiplier: Math.floor(average(feeMultipliers)),
-					medianFeeMultiplier: Math.floor(median(feeMultipliers)),
-					highestFeeMultiplier: Math.max(...feeMultipliers),
-					lowestFeeMultiplier: Math.min(...feeMultipliers)
+					averageFeeMultiplier: Math.floor(average(feeMultipliers[1])),
+					medianFeeMultiplier: Math.floor(median(feeMultipliers[1])),
+					highestFeeMultiplier: Math.max(...feeMultipliers[1]),
+					lowestFeeMultiplier: Math.min(...feeMultipliers[1]),
+					minFeeMultiplier: Number(feeMultipliers[0].node.minFeeMultiplier.replace(`'`, ''))
 				});
 				next();
 			});
