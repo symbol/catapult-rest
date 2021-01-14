@@ -9,7 +9,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 ### Added
 
 - `minFeeMultiplier` from the current connected Node in transaction fees endpoint
-- Added new `nodeProertyFilePath` in `rest.json`.
+- Added new `nodePropertyFilePath` in `rest.json`.
 
 ### Updated
 

@@ -68,9 +68,8 @@ module.exports = {
 
 		server.get('/network/fees/transaction', (req, res, next) => {
 			const numBlocksTransactionFeeStats = services.config.numBlocksTransactionFeeStats || 1;
-			const nodeProperties = readAndParseNodePropertiesFile();
 			const latestBlocksFeeMultiplier = db.latestBlocksFeeMultiplier(numBlocksTransactionFeeStats);
-			return Promise.all([nodeProperties, latestBlocksFeeMultiplier]).then(feeMultipliers => {
+			return Promise.all([readAndParseNodePropertiesFile(), latestBlocksFeeMultiplier]).then(feeMultipliers => {
 				res.send({
 					averageFeeMultiplier: Math.floor(average(feeMultipliers[1])),
 					medianFeeMultiplier: Math.floor(median(feeMultipliers[1])),
