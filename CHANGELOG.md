@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The changelog format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [v2.3.1] - 18-Jan-2021
+
+### Fixed
+
+- Fixed aggregate transaction codec issue.
+
 ## [v2.3.0] - 14-Jan-2021
 
 ### Added
