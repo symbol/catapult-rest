@@ -21,6 +21,9 @@
 
 /** @module db/CatapultDb */
 
+
+const MultisigDb = require('../plugins/multisig/MultisigDb');
+const multisigUtils = require('../plugins/multisig/multisigUtils');
 const connector = require('./connector');
 const { convertToLong, buildOffsetCondition } = require('./dbUtils');
 const catapult = require('catapult-sdk');
@@ -373,6 +376,30 @@ class CatapultDb {
 		const removedFields = ['meta.addresses'];
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		const conditions = buildConditions();
+
+		// Check multisig graph if address is used in search criteria for cosigning,
+		// Then, show transactions for other cosigers.
+		if (filters.address !== undefined && group === 'partial') {
+			return multisigUtils.getMultisigGrahp(new MultisigDb(this), filters.address).then((multisig) => {
+				if (multisig) {
+					const addresses = [];
+					multisig.forEach((level) => {
+						level.multisigEntries.forEach((entry) => {
+							addresses.push(...entry.multisig.cosignatoryAddresses);
+							addresses.push(...entry.multisig.multisigAddresses)
+						})
+					});
+					return addresses;
+				}
+			}).then((multisigAddresses) =>{
+				if (multisigAddresses) {
+					const buffers = multisigAddresses.map(address => address.buffer);
+					conditions['meta.addresses'] = { $in: buffers };
+				}
+			}).then(() => {
+				return this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options);
+			})
+		}
 
 		return this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options);
 	}
