@@ -379,20 +379,18 @@ class CatapultDb {
 
 		// Check multisig graph if address is used in search criteria for cosigning,
 		// Then, show transactions for other cosigers.
-		if (filters.address !== undefined && group === 'partial') {
-			return multisigUtils.getMultisigGrahp(new MultisigDb(this), filters.address).then((multisig) => {
-				if (multisig) {
+		if (filters.address !== undefined) {
+			return new MultisigDb(this).multisigsByAddresses([filters.address])
+				.then(multisigEntries => {
 					const addresses = [];
-					multisig.forEach((level) => {
-						level.multisigEntries.forEach((entry) => {
-							addresses.push(...entry.multisig.cosignatoryAddresses);
-							addresses.push(...entry.multisig.multisigAddresses)
-						})
-					});
+					if (multisigEntries.length) {
+						if (multisigEntries[0].multisig.multisigAddresses.length) {
+							addresses.push(...multisigEntries[0].multisig.multisigAddresses);
+						}
+					}
 					return addresses;
-				}
 			}).then((multisigAddresses) =>{
-				if (multisigAddresses) {
+				if (multisigAddresses && multisigAddresses.length) {
 					const buffers = multisigAddresses.map(address => address.buffer);
 					conditions['meta.addresses'] = { $in: buffers };
 				}

@@ -20,6 +20,9 @@
  */
 
 const winston = require('winston');
+const MultisigDb = require('../plugins/multisig/MultisigDb');
+const catapult = require('catapult-sdk');
+const { address } = catapult.model;
 
 /**
  * Manages client subscriptions.
@@ -29,9 +32,10 @@ class SubscriptionManager {
 	 * Creates a subscription manager.
 	 * @param {object} subscriptionCallbacks Callbacks to invoke in response to subscription changes.
 	 */
-	constructor(subscriptionCallbacks) {
+	constructor(subscriptionCallbacks, db) {
 		this.subscriptions = {};
 		this.callbacks = Object.assign({ newClient: () => {} }, subscriptionCallbacks);
+		this.catapultDb = db;
 	}
 
 	/**
@@ -40,6 +44,13 @@ class SubscriptionManager {
 	 * @param {object} client Client.
 	 */
 	add(channel, client) {
+		// Get the address from incoming subscription,
+		// Check and subscribe the multisig account if current subscriber is cosigner.
+		const address = channel.split('/')[1];
+		if (address) {
+			this.subscribeMultisigAccount(address, channel, client);
+		}
+
 		if (!(channel in this.subscriptions)) {
 			this.subscriptions[channel] = new Set();
 			try {
@@ -92,6 +103,27 @@ class SubscriptionManager {
 		Object.keys(this.subscriptions).forEach(channel => {
 			this.delete(channel, client);
 		});
+	}
+
+	/**
+	 * Check if the current subscriber is a cosigner of a multisig account. 
+	 * Then subscribe the multisig account for cosigning notification
+	 * @param {string} encodedAddress encloded address of the current subscriber
+	 * @param {object} channel current subscribing channel
+	 * @param {object} client current subscribeing client
+	 */
+	subscribeMultisigAccount(encodedAddress, channel, client) {
+		const decodedAddress = address.stringToAddress(encodedAddress);
+		return new MultisigDb(this.catapultDb).multisigsByAddresses([decodedAddress])
+			.then(multisigEntries => {
+				if (multisigEntries.length) {
+					multisigEntries[0].multisig.multisigAddresses.map((m) => {
+						const multisigAddress = address.addressToString(m.buffer);
+						this.add(channel.replace(encodedAddress, multisigAddress), client);
+					})
+					
+				}
+			})
 	}
 }
 
