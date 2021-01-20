@@ -20,58 +20,58 @@
  */
 
 const multisigUtils = {
-    getMultisigGrahp: (db, address) => {
-    const getMultisigEntries = (multisigEntries, fieldName) => {
-        const addresses = new Set();
-        multisigEntries.forEach(multisigEntry => multisigEntry.multisig[fieldName].forEach(address => {
-            addresses.add(address.buffer);
-        }));
+	getMultisigGrahp: (db, address) => {
+		const getMultisigEntries = (multisigEntries, fieldName) => {
+			const addresses = new Set();
+			multisigEntries.forEach(multisigEntry => multisigEntry.multisig[fieldName].forEach(multisigAddress => {
+				addresses.add(multisigAddress.buffer);
+			}));
 
-        return db.multisigsByAddresses(Array.from(addresses));
-    };
+			return db.multisigsByAddresses(Array.from(addresses));
+		};
 
-    const multisigLevels = [];
-    return db.multisigsByAddresses([address])
-        .then(multisigEntries => {
-            if (0 === multisigEntries.length)
-                return Promise.resolve(undefined);
+		const multisigLevels = [];
+		return db.multisigsByAddresses([address])
+			.then(multisigEntries => {
+				if (0 === multisigEntries.length)
+					return Promise.resolve(undefined);
 
-            multisigLevels.push({
-                level: 0,
-                multisigEntries: [multisigEntries[0]]
-            });
+				multisigLevels.push({
+					level: 0,
+					multisigEntries: [multisigEntries[0]]
+				});
 
-            return Promise.resolve(multisigEntries[0]);
-        })
-        .then(multisigEntry => {
-            if (undefined === multisigEntry)
-                return Promise.resolve(undefined);
+				return Promise.resolve(multisigEntries[0]);
+			})
+			.then(multisigEntry => {
+				if (undefined === multisigEntry)
+					return Promise.resolve(undefined);
 
-            const handleUpstream = (level, multisigEntries) => getMultisigEntries(multisigEntries, 'multisigAddresses')
-                .then(entries => {
-                    if (0 === entries.length)
-                        return Promise.resolve();
+				const handleUpstream = (level, multisigEntries) => getMultisigEntries(multisigEntries, 'multisigAddresses')
+					.then(entries => {
+						if (0 === entries.length)
+							return Promise.resolve();
 
-                    multisigLevels.unshift({ level, multisigEntries: entries });
-                    return handleUpstream(level - 1, entries);
-                });
+						multisigLevels.unshift({ level, multisigEntries: entries });
+						return handleUpstream(level - 1, entries);
+					});
 
-            const handleDownstream = (level, multisigEntries) => getMultisigEntries(multisigEntries, 'cosignatoryAddresses')
-                .then(entries => {
-                    if (0 === entries.length)
-                        return Promise.resolve();
+				const handleDownstream = (level, multisigEntries) => getMultisigEntries(multisigEntries, 'cosignatoryAddresses')
+					.then(entries => {
+						if (0 === entries.length)
+							return Promise.resolve();
 
-                    multisigLevels.push({ level, multisigEntries: entries });
-                    return handleDownstream(level + 1, entries);
-                });
+						multisigLevels.push({ level, multisigEntries: entries });
+						return handleDownstream(level + 1, entries);
+					});
 
-            const upstreamPromise = handleUpstream(-1, [multisigEntry]);
-            const downstreamPromise = handleDownstream(1, [multisigEntry]);
-            return Promise.all([upstreamPromise, downstreamPromise])
-                .then(() => multisigLevels);
-        })
-    }
-	
+				const upstreamPromise = handleUpstream(-1, [multisigEntry]);
+				const downstreamPromise = handleDownstream(1, [multisigEntry]);
+				return Promise.all([upstreamPromise, downstreamPromise])
+					.then(() => multisigLevels);
+			});
+	}
+
 };
 
 module.exports = multisigUtils;

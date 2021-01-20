@@ -45,7 +45,6 @@ module.exports = {
 			});
 		});
 
-		
 		server.get('/account/:address/multisig/graph', (req, res, next) => {
 			const accountAddress = routeUtils.parseArgument(req.params, 'address', 'address');
 			return multisigUtils.getMultisigGrahp(db, accountAddress)
