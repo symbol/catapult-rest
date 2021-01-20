@@ -21,11 +21,9 @@
 
 /** @module db/CatapultDb */
 
-
-const MultisigDb = require('../plugins/multisig/MultisigDb');
-const multisigUtils = require('../plugins/multisig/multisigUtils');
 const connector = require('./connector');
 const { convertToLong, buildOffsetCondition } = require('./dbUtils');
+const MultisigDb = require('../plugins/multisig/MultisigDb');
 const catapult = require('catapult-sdk');
 const MongoDb = require('mongodb');
 
@@ -384,19 +382,17 @@ class CatapultDb {
 				.then(multisigEntries => {
 					const addresses = [];
 					if (multisigEntries.length) {
-						if (multisigEntries[0].multisig.multisigAddresses.length) {
+						if (multisigEntries[0].multisig.multisigAddresses.length)
 							addresses.push(...multisigEntries[0].multisig.multisigAddresses);
-						}
 					}
 					return addresses;
-			}).then((multisigAddresses) =>{
-				if (multisigAddresses && multisigAddresses.length) {
-					const buffers = multisigAddresses.map(address => address.buffer);
-					conditions['meta.addresses'] = { $in: buffers };
-				}
-			}).then(() => {
-				return this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options);
-			})
+				}).then(multisigAddresses => {
+					if (multisigAddresses && multisigAddresses.length) {
+						const buffers = multisigAddresses.map(address => address.buffer);
+						conditions['meta.addresses'] = { $in: buffers };
+					}
+				})
+				.then(() => this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options));
 		}
 
 		return this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options);

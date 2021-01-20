@@ -19,9 +19,10 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const winston = require('winston');
 const MultisigDb = require('../plugins/multisig/MultisigDb');
 const catapult = require('catapult-sdk');
+const winston = require('winston');
+
 const { address } = catapult.model;
 
 /**
@@ -31,6 +32,7 @@ class SubscriptionManager {
 	/**
 	 * Creates a subscription manager.
 	 * @param {object} subscriptionCallbacks Callbacks to invoke in response to subscription changes.
+	 * @param {object} db Catapult DB.
 	 */
 	constructor(subscriptionCallbacks, db) {
 		this.subscriptions = {};
@@ -46,10 +48,9 @@ class SubscriptionManager {
 	add(channel, client) {
 		// Get the address from incoming subscription,
 		// Check and subscribe the multisig account if current subscriber is cosigner.
-		const address = channel.split('/')[1];
-		if (address) {
-			this.subscribeMultisigAccount(address, channel, client);
-		}
+		const currentSubscriber = channel.split('/')[1];
+		if (currentSubscriber)
+			this.subscribeMultisigAccount(currentSubscriber, channel, client);
 
 		if (!(channel in this.subscriptions)) {
 			this.subscriptions[channel] = new Set();
@@ -106,7 +107,7 @@ class SubscriptionManager {
 	}
 
 	/**
-	 * Check if the current subscriber is a cosigner of a multisig account. 
+	 * Check if the current subscriber is a cosigner of a multisig account.
 	 * Then subscribe the multisig account for cosigning notification
 	 * @param {string} encodedAddress encloded address of the current subscriber
 	 * @param {object} channel current subscribing channel
@@ -114,16 +115,15 @@ class SubscriptionManager {
 	 */
 	subscribeMultisigAccount(encodedAddress, channel, client) {
 		const decodedAddress = address.stringToAddress(encodedAddress);
-		return new MultisigDb(this.catapultDb).multisigsByAddresses([decodedAddress])
+		new MultisigDb(this.catapultDb).multisigsByAddresses([decodedAddress])
 			.then(multisigEntries => {
 				if (multisigEntries.length) {
-					multisigEntries[0].multisig.multisigAddresses.map((m) => {
+					multisigEntries[0].multisig.multisigAddresses.map(m => {
 						const multisigAddress = address.addressToString(m.buffer);
-						this.add(channel.replace(encodedAddress, multisigAddress), client);
-					})
-					
+						return this.add(channel.replace(encodedAddress, multisigAddress), client);
+					});
 				}
-			})
+			});
 	}
 }
 
