@@ -96,9 +96,10 @@ module.exports = {
 	 * @param {array} crossDomainConfig Configuration related to access control, contains allowed host and HTTP methods.
 	 * @param {object} formatters Formatters to use for formatting responses.
 	 * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
+	 * @param {object} db CatapultDB to check cosiger/multisig status 
 	 * @returns {object} Server.
 	 */
-	createServer: (crossDomainConfig, formatters, throttlingConfig) => {
+	createServer: (crossDomainConfig, formatters, throttlingConfig, db) => {
 		// create the server using a custom formatter
 		const server = restify.createServer({
 			name: '', // disable server header in response
@@ -196,7 +197,7 @@ module.exports = {
 			const subscriptionManager = new SubscriptionManager(Object.assign({}, callbacks, {
 				newChannel: (channel, subscribers) =>
 					callbacks.newChannel(channel, websocketUtils.createMultisender(channel, subscribers, formatters.ws))
-			}));
+			}), db);
 
 			const clients = new Set();
 			clientGroups.push({ clients, subscriptionManager });
