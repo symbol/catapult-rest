@@ -5900,10 +5900,10 @@ supports-color@^7.1.0:
   dependencies:
     has-flag "^4.0.0"
 
-symbol-bootstrap@0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/symbol-bootstrap/-/symbol-bootstrap-0.4.0.tgz#0d84f50fbeeea3ea20011f7e1789f5bac718a7b7"
-  integrity sha512-ezVsIN70QCVeWy3ntfdYj2UjqhpFfga+jRIrGExC+wuHb9cpATM+fi2Up9vxViKO4iYwAUlrETDfYLJNn6inNw==
+symbol-bootstrap@0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/symbol-bootstrap/-/symbol-bootstrap-0.4.1.tgz#7495c9e096ad0f4015852ec8bd329b3e48fc1756"
+  integrity sha512-Cxm8wnR+atUKvyFRRG9jV1zE03vw7MYc5gIALsAsR6Tdu1X9IGU6BiG4e9CgCPjrv4HhA6wcuW+309eMaZBw7w==
   dependencies:
     "@oclif/command" "^1.7.0"
     "@oclif/config" "^1.16.0"
