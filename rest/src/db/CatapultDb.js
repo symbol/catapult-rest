@@ -305,24 +305,31 @@ class CatapultDb {
 	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<object>} Transactions page.
 	 */
-	transactions(group, filters, options) {
+	async transactions(group, filters, options) {
 		const sortingOptions = { id: '_id' };
 
-		const buildAccountConditions = () => {
-			if (undefined !== filters.address)
-				return { 'meta.addresses': Buffer.from(filters.address) };
+		const buildAccountConditions = async () => {
+			// Check multisig graph if address is used in search criteria for cosigning,
+			// Then, show transactions for other cosigers.
+			if (undefined !== filters.address) {
+				const multisigEntries = await new MultisigDb(this).multisigsByAddresses([filters.address]);
+				const buffers = [];
 
+				if (multisigEntries.length && multisigEntries[0].multisig.multisigAddresses.length)	{
+					buffers.push(...multisigEntries[0].multisig.multisigAddresses).map(address => address.buffer);
+					return { 'meta.addresses': { $in: buffers } };
+				}
+				return { 'meta.addresses': Buffer.from(filters.address) };
+			}
 			const accountConditions = {};
 			if (undefined !== filters.signerPublicKey)
 				accountConditions['transaction.signerPublicKey'] = Buffer.from(filters.signerPublicKey);
-
 			if (undefined !== filters.recipientAddress)
 				accountConditions['transaction.recipientAddress'] = Buffer.from(filters.recipientAddress);
-
 			return accountConditions;
 		};
 
-		const buildConditions = () => {
+		const buildConditions = async () => {
 			let conditions = {};
 
 			const offsetCondition = buildOffsetCondition(options, sortingOptions);
@@ -364,7 +371,7 @@ class CatapultDb {
 					conditions[amountPath].$lte = convertToLong(filters.toTransferAmount);
 			}
 
-			const accountConditions = buildAccountConditions();
+			const accountConditions = await buildAccountConditions();
 			if (accountConditions)
 				conditions = Object.assign(conditions, accountConditions);
 
@@ -373,27 +380,7 @@ class CatapultDb {
 
 		const removedFields = ['meta.addresses'];
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
-		const conditions = buildConditions();
-
-		// Check multisig graph if address is used in search criteria for cosigning,
-		// Then, show transactions for other cosigers.
-		if (filters.address !== undefined) {
-			return new MultisigDb(this).multisigsByAddresses([filters.address])
-				.then(multisigEntries => {
-					const addresses = [];
-					if (multisigEntries.length) {
-						if (multisigEntries[0].multisig.multisigAddresses.length)
-							addresses.push(...multisigEntries[0].multisig.multisigAddresses);
-					}
-					return addresses;
-				}).then(multisigAddresses => {
-					if (multisigAddresses && multisigAddresses.length) {
-						const buffers = multisigAddresses.map(address => address.buffer);
-						conditions['meta.addresses'] = { $in: buffers };
-					}
-				})
-				.then(() => this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options));
-		}
+		const conditions = await buildConditions();
 
 		return this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options);
 	}
