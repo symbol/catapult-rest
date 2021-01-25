@@ -107,13 +107,13 @@ const connectToDbWithRetry = (db, config) => catapult.utils.future.makeRetryable
 	}
 );
 
-const createServer = (config, db) => {
+const createServer = (config) => {
 	const modelSystem = catapult.plugins.catapultModelSystem.configure(config.extensions, {
 		json: dbFormattingRules,
 		ws: messageFormattingRules
 	});
 	return {
-		server: bootstrapper.createServer(config.crossDomain, formatters.create(modelSystem.formatters), config.throttling, db),
+		server: bootstrapper.createServer(config.crossDomain, formatters.create(modelSystem.formatters), config.throttling),
 		codec: modelSystem.codec
 	};
 };
@@ -184,7 +184,7 @@ const registerRoutes = (server, db, services) => {
 	connectToDbWithRetry(db, config.db)
 		.then(() => {
 			winston.info('registering routes');
-			const serverAndCodec = createServer(config, db);
+			const serverAndCodec = createServer(config);
 			const { server } = serverAndCodec;
 			serviceManager.pushService(server, 'close');
 
