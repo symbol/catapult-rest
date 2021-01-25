@@ -313,10 +313,9 @@ class CatapultDb {
 			// Then, show transactions for other cosigers.
 			if (undefined !== filters.address) {
 				const multisigEntries = await new MultisigDb(this).multisigsByAddresses([filters.address]);
-				const buffers = [];
 
 				if (multisigEntries.length && multisigEntries[0].multisig.multisigAddresses.length)	{
-					buffers.push(...multisigEntries[0].multisig.multisigAddresses).map(address => address.buffer);
+					const buffers = multisigEntries[0].multisig.multisigAddresses.map(address => address.buffer);
 					return { 'meta.addresses': { $in: buffers } };
 				}
 				return { 'meta.addresses': Buffer.from(filters.address) };

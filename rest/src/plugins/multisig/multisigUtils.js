@@ -20,7 +20,7 @@
  */
 
 const multisigUtils = {
-	getMultisigGrahp: (db, address) => {
+	getMultisigGraph: (db, address) => {
 		const getMultisigEntries = (multisigEntries, fieldName) => {
 			const addresses = new Set();
 			multisigEntries.forEach(multisigEntry => multisigEntry.multisig[fieldName].forEach(multisigAddress => {

@@ -47,7 +47,7 @@ module.exports = {
 
 		server.get('/account/:address/multisig/graph', (req, res, next) => {
 			const accountAddress = routeUtils.parseArgument(req.params, 'address', 'address');
-			return multisigUtils.getMultisigGrahp(db, accountAddress)
+			return multisigUtils.getMultisigGraph(db, accountAddress)
 				.then(response => {
 					const sender = routeUtils.createSender('multisigGraph');
 					return undefined === response
