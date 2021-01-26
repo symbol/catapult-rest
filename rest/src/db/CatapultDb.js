@@ -316,6 +316,7 @@ class CatapultDb {
 
 				if (multisigEntries.length && multisigEntries[0].multisig.multisigAddresses.length)	{
 					const buffers = multisigEntries[0].multisig.multisigAddresses.map(address => address.buffer);
+					buffers.push(Buffer.from(filters.address));
 					return { 'meta.addresses': { $in: buffers } };
 				}
 				return { 'meta.addresses': Buffer.from(filters.address) };
