@@ -802,11 +802,7 @@ caseless@~0.12.0:
 
 "catapult-sdk@link:../catapult-sdk":
   version "0.0.0"
-  dependencies:
-    js-sha3 "^0.8.0"
-    long "^4.0.0"
-    ripemd160 "^2.0.2"
-    tweetnacl "^1.0.1"
+  uid ""
 
 catbuffer-typescript@0.0.24-alpha-202011210642:
   version "0.0.24-alpha-202011210642"
