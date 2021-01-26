@@ -107,7 +107,7 @@ const connectToDbWithRetry = (db, config) => catapult.utils.future.makeRetryable
 	}
 );
 
-const createServer = (config) => {
+const createServer = config => {
 	const modelSystem = catapult.plugins.catapultModelSystem.configure(config.extensions, {
 		json: dbFormattingRules,
 		ws: messageFormattingRules
