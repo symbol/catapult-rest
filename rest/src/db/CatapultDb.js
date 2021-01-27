@@ -480,11 +480,11 @@ class CatapultDb {
 			// fetch result sorted by specific mosaic amount, this unwinds mosaics and only returns matching mosaics (incomplete response)
 			queryPromise = this.database.collection('accounts')
 				.aggregate([], { promoteLongs: false })
-				.skip(pageSize * pageIndex)
-				.limit(pageSize)
 				.unwind('$account.mosaics')
 				.match(conditions)
 				.sort(sortConditions)
+				.skip(pageSize * pageIndex)
+				.limit(pageSize)
 				.toArray()
 				.then(accounts => {
 					const accountIds = accounts.map(account => account._id);
