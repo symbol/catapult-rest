@@ -489,8 +489,8 @@ class CatapultDb {
 				.then(accounts => {
 					const accountIds = accounts.map(account => account._id);
 					const newConditions = { _id: { $in: accountIds } };
-
-					// repeat the response with the found and sorted account ids, so that the result can be complete with all the mosaics
+					// Second query set pageIndex to 0;
+					options.pageNumber = 1;
 					return this.queryPagedDocuments(newConditions, [], {}, 'accounts', options)
 						.then(fullAccountsPage => {
 							// $in results do not preserve query order
