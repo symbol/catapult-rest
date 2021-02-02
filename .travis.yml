@@ -21,6 +21,7 @@ before_script:
 - log_env_variables
 - echo '$SUBPROJECT'
 - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
+- if [[ ! -z "$DOCKER_USERNAME" ]] ; then echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin; fi
 - sh yarn_setup.sh
 
 script: cd ${SUBPROJECT} && yarn run lint && yarn run test:travis && cd ..
