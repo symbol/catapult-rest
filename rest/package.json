@@ -13,7 +13,7 @@
     "test": "mocha --full-trace --recursive",
     "test:coverage": "nyc npm test && nyc report --reporter=text-lcov",
     "test:jenkins": "cross-env JUNIT_REPORT_PATH=test-results.xml mocha --reporter mocha-jenkins-reporter --mongoHost db --forbid-only --full-trace --recursive test || exit 0",
-    "test:travis": "npm run bootstrap-start-detached && nyc npm test && nyc report --reporter=text-lcov | coveralls && npm run bootstrap-stop ",
+    "test:travis": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "lint:jenkins": "eslint -o tests.catapult.lint.xml -f junit src test || exit 0",
