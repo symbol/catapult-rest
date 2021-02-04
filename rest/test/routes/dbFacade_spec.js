@@ -24,6 +24,7 @@ const { convertToLong } = require('../../src/db/dbUtils');
 const dbFacade = require('../../src/routes/dbFacade');
 const testDbOptions = require('../db/utils/testDbOptions');
 const { expect } = require('chai');
+const { Binary } = require('mongodb');
 const sinon = require('sinon');
 
 const Mijin_Test_Network = testDbOptions.networkId;
@@ -73,18 +74,19 @@ describe('db facade', () => {
 				transactionsByHashesStub.restore();
 			});
 		};
+		const toBinary = hash => new Binary(`${hash}`);
 
-		const createFailed = (value, hash) => ({ status: { f: value, hash } });
-		const createUnwrappedFailedStatus = (value, hash) => ({ group: 'failed', f: value, hash });
-		const createTransaction = (hash, deadline, height) => ({ meta: { hash, height }, transaction: { deadline } });
+		const createFailed = (value, hash) => ({ status: { f: value, hash: toBinary(hash) } });
+		const createUnwrappedFailedStatus = (value, hash) => ({ group: 'failed', f: value, hash: toBinary(hash) });
+		const createTransaction = (hash, deadline, height) => ({ meta: { hash: toBinary(hash), height }, transaction: { deadline } });
 		const createUnconfirmedStatus = (hash, deadline) => ({
-			group: 'unconfirmed', code: 0, hash, deadline, height: 0
+			group: 'unconfirmed', code: 0, hash: toBinary(hash), deadline, height: 0
 		});
 		const createConfirmedStatus = (hash, deadline, height) => ({
-			group: 'confirmed', code: 0, hash, deadline, height
+			group: 'confirmed', code: 0, hash: toBinary(hash), deadline, height
 		});
 		const createUnwrappedCustomStatus = (hash, deadline, height) => ({
-			group: 'custom', code: 0, hash, deadline, height
+			group: 'custom', code: 0, hash: toBinary(hash), deadline, height
 		});
 
 		it('unknown hashes are properly mapped', () =>

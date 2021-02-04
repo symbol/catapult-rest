@@ -84,7 +84,7 @@ const dbFacade = {
 		return Promise.all(promises).then(tuple => {
 			const resultingStatuses = [];
 			tuple.forEach(statusArray => statusArray.forEach(statusResult => {
-				if (!resultingStatuses.some(status => status.hash === statusResult.hash))
+				if (!resultingStatuses.some(status => status.hash.buffer.compare(statusResult.hash.buffer) === 0))
 					resultingStatuses.push(statusResult);
 			}));
 			return resultingStatuses;
