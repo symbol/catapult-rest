@@ -114,7 +114,7 @@ class CatapultDb {
 	}
 
 	connect(url, dbName, connectionPoolSize) {
-		return connector.connectToDatabase(url, dbName, connectionPoolSize)
+		return connector.connectToDatabase(url, dbName, connectionPoolSize || 10)
 			.then(client => {
 				this.client = client;
 				this.database = client.db();
@@ -166,9 +166,9 @@ class CatapultDb {
 	 * @returns {Promise} Promise that resolves to the sizes of collections in the database.
 	 */
 	storageInfo() {
-		const blockCountPromise = this.database.collection('blocks').countDocuments();
-		const transactionCountPromise = this.database.collection('transactions').countDocuments();
-		const accountCountPromise = this.database.collection('accounts').countDocuments();
+		const blockCountPromise = this.database.collection('blocks').estimatedDocumentCount();
+		const transactionCountPromise = this.database.collection('transactions').estimatedDocumentCount();
+		const accountCountPromise = this.database.collection('accounts').estimatedDocumentCount();
 		return Promise.all([blockCountPromise, transactionCountPromise, accountCountPromise])
 			.then(storageInfo => ({ numBlocks: storageInfo[0], numTransactions: storageInfo[1], numAccounts: storageInfo[2] }));
 	}
