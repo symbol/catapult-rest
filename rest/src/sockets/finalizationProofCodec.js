@@ -62,14 +62,9 @@ const finalizationProofCodec = {
 
 			for (let i = 0; i < hashCount; i++)
 				messageGroup.hashes.push(parser.buffer(sizes.hash256));
-
 			for (let i = 0; i < signatureCount; i++) {
 				const signature = {
 					root: {
-						parentPublicKey: parser.buffer(sizes.signerPublicKey),
-						signature: parser.buffer(sizes.signature)
-					},
-					top: {
 						parentPublicKey: parser.buffer(sizes.signerPublicKey),
 						signature: parser.buffer(sizes.signature)
 					},
@@ -78,9 +73,9 @@ const finalizationProofCodec = {
 						signature: parser.buffer(sizes.signature)
 					}
 				};
+
 				messageGroup.signatures.push(signature);
 			}
-
 			proof.messageGroups.push(messageGroup);
 			sizeLeft -= messageGroupSize;
 		}
