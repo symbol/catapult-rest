@@ -13,7 +13,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 ### Changed
 
 - Set default connection pool size to 10.
-- Changed `node/storage` endpoint to use esitmated counts from mongo collections.
+- Changed `node/storage` endpoint to use estimated counts from mongo collections.
 - Allow all transaction groups to be queried by cosigners.
 - Allow address aliases in web socket listener subscriptions.
 
