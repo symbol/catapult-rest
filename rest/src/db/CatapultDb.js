@@ -266,12 +266,13 @@ class CatapultDb {
 	 * @param {string} collectionName Name of the collection to be queried.
 	 * @param {object} options Pagination options, must contain `pageSize` and `pageNumber` (starting at 1).
 	 * @param {function} mapper to transform each element of the page.
+	 * @param {number} optionalPageIndex optional page index for second query pass
 	 * @returns {Promise.<object>} Page result, contains the attributes `data` with the actual results, and `paging` with pagination
 	 * metadata - which is comprised of: `pageNumber`, and `pageSize`.
 	 */
-	queryPagedDocuments(queryConditions, removedFields, sortConditions, collectionName, options, mapper) {
+	queryPagedDocuments(queryConditions, removedFields, sortConditions, collectionName, options, mapper, optionalPageIndex) {
 		const { pageSize } = options;
-		const pageIndex = options.pageNumber - 1;
+		const pageIndex = optionalPageIndex !== undefined ? optionalPageIndex : options.pageNumber - 1;
 
 		const projection = {};
 		removedFields.forEach(field => { projection[field] = 0; });
@@ -491,8 +492,7 @@ class CatapultDb {
 					const newConditions = { _id: { $in: accountIds } };
 					// repeat the response with the found and sorted account ids, so that the result can be complete with all the mosaics
 					// Second query set pageIndex to 0;
-					options.pageNumber = 1;
-					return this.queryPagedDocuments(newConditions, [], {}, 'accounts', options)
+					return this.queryPagedDocuments(newConditions, [], {}, 'accounts', options, undefined, 0)
 						.then(fullAccountsPage => {
 							// $in results do not preserve query order
 							fullAccountsPage.data.sort((account1, account2) =>
