@@ -51,7 +51,13 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
  * @returns {object} Newly created zmq connection service that is a stripped down EventEmitter.
  */
 module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptors, logger) =>
-	zmqUtils.createMultisocketEmitter((key, emitter) => {
+	zmqUtils.createMultisocketEmitter((key, emitter, currentSubscriptionCount) => {
+		console.log(zmqConfig.maxSubscription)
+		console.log(currentSubscriptionCount)
+		if (currentSubscriptionCount >= (zmqConfig.maxSubscription || 7) ) {
+			logger.error(`Max zmq subscription (${zmqConfig.maxSubscription}) reached.`)
+			throw Error(`Max zmq subscription (${zmqConfig.maxSubscription}) reached.`);
+		}
 		logger.info(`subscribing to ${key}`);
 		const subscriptionInfo = findSubscriptionInfo(key, emitter, codec, channelDescriptors);
 
