@@ -19,8 +19,6 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const EventEmitter = require('events');
-
 const logAllMonitorEvents = (zsocket, throttle, logger) => {
 	const eventNameLevelPairs = {
 		connect: 'info',
@@ -112,46 +110,35 @@ module.exports = {
 	 * @returns {object} Event emitter with partial interface (on, removeAllListeners, listenerCount).
 	 */
 	createMultisocketEmitter: zsocketFactory => {
-		const emitter = new EventEmitter();
-		const zsockets = {};
 		const isSubEvent = key => -1 !== key.indexOf('.');
 		const isValidSubEvent = key => key.endsWith('.close');
+		
 		const multisocketEmitter = {
-			on: (key, callback) => {
+			on: (key, callback, emitter, subscriptions) => {
 				if (isSubEvent(key)) {
 					if (!isValidSubEvent(key))
 						throw Error(`${key} indicates an unsupported subevent`);
-				} else if (!(key in zsockets)) {
-					const zsocket = zsocketFactory(key, emitter);
+				} 
+				else if (!(key in subscriptions)) {
+					const zsocket = zsocketFactory(key);
 					zsocket.on('zsocket_close', () => {
-						// firing of close indicates socket is fully closed, so prevent it from being closed again
-						// by bypassing close in removeAllListeners
-						delete zsockets[key];
-
-						emitter.emit(`${key}.close`);
+						delete subscriptions[key];
 						multisocketEmitter.removeAllListeners(key);
 					});
-					zsockets[key] = zsocket;
 				}
-
 				emitter.on(key, callback);
 			},
 
-			removeAllListeners: key => {
+			removeAllListeners: (key, emitter) => {
 				if (isSubEvent(key))
 					throw Error(`${key} must be a channel`);
 
 				emitter.removeAllListeners(key);
 				emitter.removeAllListeners(`${key}.close`);
-				if (!(key in zsockets))
-					return;
 
-				const zsocket = zsockets[key];
-				delete zsockets[key];
-				zsocket.close();
 			},
 
-			listenerCount: key => emitter.listenerCount(key),
+			listenerCount: (key, emitter) => emitter.listenerCount(key),
 
 			/**
 			  * Gets the number of active zmq sockets.
@@ -170,5 +157,5 @@ module.exports = {
 		};
 
 		return multisocketEmitter;
-	}
+	},
 };

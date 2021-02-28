@@ -29,9 +29,13 @@ const bootstrapper = require('./server/bootstrapper');
 const formatters = require('./server/formatters');
 const messageFormattingRules = require('./server/messageFormattingRules');
 const catapult = require('catapult-sdk');
+const zmqUtils = require('./connection/zmqUtils');
+const zmq = require('zeromq');
 const sshpk = require('sshpk');
 const winston = require('winston');
 const fs = require('fs');
+const { ServerMessageHandler } = require('./connection/serverMessageHandlers');
+const EventEmitter = require('events');
 
 const createLoggingTransportConfiguration = loggingConfig => {
 	const transportConfig = Object.assign({}, loggingConfig);
@@ -140,8 +144,18 @@ const registerRoutes = (server, db, services) => {
 
 	// 3. augment services with extension-dependent config and services
 	servicesView.config.transactionStates = transactionStates;
-	servicesView.zmqService = createZmqConnectionService(services.config.websocket.mq, services.codec, messageChannelDescriptors, winston);
+	const zsocket = zmq.socket('sub');
+	zmqUtils.prepareZsocket(zsocket, services.config.websocket.mq, winston);
+	zsocket.connect(`tcp://${services.config.websocket.mq.host}:${services.config.websocket.mq.port}`);
+	
+	const subscriptions = {};
+	const emitter = new EventEmitter();
 
+	zsocket.on('message', ServerMessageHandler.zmqMessageHandler(services.codec, emitter));
+
+	servicesView.serviceEmitter = emitter;
+	servicesView.zmqService = createZmqConnectionService(zsocket, subscriptions, messageChannelDescriptors, winston);
+	servicesView.subscriptions = subscriptions;
 	// 4. configure basic routes
 	allRoutes.register(server, db, servicesView);
 };

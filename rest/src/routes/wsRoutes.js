@@ -23,10 +23,10 @@ module.exports = {
 	register: (server, db, services) => {
 		server.ws('/ws', {
 			newChannel: (channel, sender) => {
-				services.zmqService.on(channel, message => sender.send(message));
-				services.zmqService.on(`${channel}.close`, () => sender.close());
+				services.zmqService.on(channel, message => sender.send(message), services.serviceEmitter, services.subscriptions);
+				services.zmqService.on(`${channel}.close`, () => sender.close(), services.serviceEmitter, services.subscriptions);
 			},
-			removeChannel: channel => services.zmqService.removeAllListeners(channel)
+			removeChannel: channel => services.zmqService.removeAllListeners(channel, services.serviceEmitter)
 		});
 	}
 };

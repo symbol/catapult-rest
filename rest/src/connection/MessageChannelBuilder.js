@@ -19,17 +19,15 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { ServerMessageHandler } = require('./serverMessageHandlers');
 const catapult = require('catapult-sdk');
 
-const createBlockDescriptor = (marker, handler) => ({
+const createBlockDescriptor = (name, marker, handler) => ({
 	filter: topicParam => {
 		if (topicParam)
 			throw new Error('unexpected param to block subscription');
 
 		return marker;
-	},
-	handler
+	}
 });
 
 const { convert } = catapult.utils;
@@ -72,19 +70,18 @@ class MessageChannelBuilder {
 
 		// add basic descriptors
 		this.descriptors.block = createBlockDescriptor(
-			Buffer.of(0x49, 0x6A, 0xCA, 0x80, 0xE4, 0xD8, 0xF2, 0x9F),
-			ServerMessageHandler.block
+			'block',
+			Buffer.of(0x49, 0x6A, 0xCA, 0x80, 0xE4, 0xD8, 0xF2, 0x9F)
 		);
 		this.descriptors.finalizedBlock = createBlockDescriptor(
-			Buffer.of(0x54, 0x79, 0xCE, 0x31, 0xA0, 0x32, 0x48, 0x4D),
-			ServerMessageHandler.finalizedBlock
+			'finalizedBlock',
+			Buffer.of(0x54, 0x79, 0xCE, 0x31, 0xA0, 0x32, 0x48, 0x4D)
 		);
-		this.add('confirmedAdded', 'a', ServerMessageHandler.transaction);
-		this.add('unconfirmedAdded', 'u', ServerMessageHandler.transaction);
-		this.add('unconfirmedRemoved', 'r', ServerMessageHandler.transactionHash);
+		this.add('confirmedAdded', 'a');
+		this.add('unconfirmedAdded', 'u');
+		this.add('unconfirmedRemoved', 'r');
 		this.descriptors.status = {
-			filter: this.createAddressFilter('s'),
-			handler: ServerMessageHandler.transactionStatus
+			filter: this.createAddressFilter('s')
 		};
 	}
 
@@ -92,9 +89,8 @@ class MessageChannelBuilder {
 	 * Adds support for a new channel.
 	 * @param {string} name Channel name.
 	 * @param {string} markerChar Channel marker character.
-	 * @param {function} handler Channel data handler.
 	 */
-	add(name, markerChar, handler) {
+	add(name, markerChar) {
 		if (name in this.descriptors)
 			throw Error(`'${name}' channel has already been registered`);
 
@@ -104,7 +100,7 @@ class MessageChannelBuilder {
 		if (markerChar in this.channelMarkers)
 			throw Error(`'${markerChar}' channel marker has already been registered`);
 
-		this.descriptors[name] = { filter: this.createAddressFilter(markerChar), handler };
+		this.descriptors[name] = { filter: this.createAddressFilter(markerChar)};
 		this.channelMarkers[markerChar] = 1;
 	}
 

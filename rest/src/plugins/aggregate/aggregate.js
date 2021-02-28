@@ -21,7 +21,6 @@
 
 /** @module plugins/aggregate */
 const aggregateRoutes = require('./aggregateRoutes');
-const { ServerMessageHandler } = require('../../connection/serverMessageHandlers');
 const catapult = require('catapult-sdk');
 
 const { BinaryParser } = catapult.parser;
@@ -38,26 +37,9 @@ module.exports = {
 	},
 
 	registerMessageChannels: builder => {
-		builder.add('partialAdded', 'p', ServerMessageHandler.transaction);
-		builder.add('partialRemoved', 'q', ServerMessageHandler.transactionHash);
-		builder.add('cosignature', 'c', (codec, emit) => (topic, buffer) => {
-			const parser = new BinaryParser();
-			parser.push(buffer);
-
-			const version = parser.uint64();
-			const signerPublicKey = parser.buffer(catapult.constants.sizes.signerPublicKey);
-			const signature = parser.buffer(catapult.constants.sizes.signature);
-			const parentHash = parser.buffer(catapult.constants.sizes.hash256);
-			emit({
-				type: 'aggregate.cosignature',
-				payload: {
-					version,
-					signerPublicKey,
-					signature,
-					parentHash
-				}
-			});
-		});
+		builder.add('partialAdded', 'p');
+		builder.add('partialRemoved', 'q');
+		builder.add('cosignature', 'c');
 	},
 
 	registerRoutes: (...args) => {
