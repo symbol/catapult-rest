@@ -202,10 +202,10 @@ const registerRoutes = (server, db, services, zsocket, emitter) => {
 				apiNode: config.apiNode
 			};
 			const connectionService = createConnectionService(connectionConfig, winston.verbose);
-			
+
 			zsocket.connect(`tcp://${config.websocket.mq.host}:${config.websocket.mq.port}`);
 			zsocket.on('message', ServerMessageHandler.zmqMessageHandler(serverAndCodec.codec, emitter));
-			
+
 			registerRoutes(server, db, { codec: serverAndCodec.codec, config, connectionService }, zsocket, emitter);
 
 			winston.info(`listening on port ${config.port}`);

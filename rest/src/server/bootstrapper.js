@@ -226,9 +226,8 @@ module.exports = {
 			// close the servers
 			wss.close();
 			server.close();
-			if (zsocket) {
+			if (zsocket)
 				zsocket.close();
-			}
 		};
 
 		return promiseAwareServer;
