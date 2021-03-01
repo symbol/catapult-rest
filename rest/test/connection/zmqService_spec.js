@@ -52,6 +52,8 @@ describe('zmq service', () => {
 		cleanupActions.push(() => {
 			service.close(keys, emitter);
 			subscriptions = {};
+			zsocket.close();
+			
 		});
 		return service;
 	};

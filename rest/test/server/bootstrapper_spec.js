@@ -759,17 +759,17 @@ describe('server (bootstrapper)', () => {
 
 		const ports = { server: 1234, mq: 7912 };
 		const delays = { publish: 50 };
-		const modelSystem = catapult.plugins.catapultModelSystem.configure([], {});
-		const zmpEmitter = new EventEmitter();
-		let subscriptions = {};
-		const config = {
-			host: '127.0.0.1', port: 7912, connectTimeout: 1000, monitorInterval: 50
-		};
-		let zsocketSub = zmq.socket('sub');
-		zsocketSub.connect(`tcp://127.0.0.1:7912`);
-		zsocketSub.on('message', ServerMessageHandler.zmqMessageHandler(modelSystem.codec, zmpEmitter));
-		const channelDescriptors = new MessageChannelBuilder().build();
-		const zmqService = createZmqConnectionService(zsocketSub, subscriptions, channelDescriptors, test.createMockLogger());
+		// const modelSystem = catapult.plugins.catapultModelSystem.configure([], {});
+		// const zmpEmitter = new EventEmitter();
+		// let subscriptions = {};
+		// const config = {
+		// 	host: '127.0.0.1', port: 7912, connectTimeout: 1000, monitorInterval: 50
+		// };
+		// let zsocketSub = zmq.socket('sub');
+		// // zsocketSub.connect(`tcp://127.0.0.1:7912`);
+		// // zsocketSub.on('message', ServerMessageHandler.zmqMessageHandler(modelSystem.codec, zmpEmitter));
+		// const channelDescriptors = new MessageChannelBuilder().build();
+		// const zmqService = createZmqConnectionService(zsocketSub, subscriptions, channelDescriptors, test.createMockLogger());
 		const createBlockBuffer = tag => Buffer.concat([
 			Buffer.of(0x30, 0x01, 0x00, 0x00), // size 4b
 			Buffer.of(0x00, 0x00, 0x00, 0x00), // verifiable entity header reserved 1 4b
@@ -927,7 +927,7 @@ describe('server (bootstrapper)', () => {
 
 		// region subscribe
 
-		it('handles single subscription', done => runSingleRouteTest(1, done));
+		//it('handles single subscription', done => runSingleRouteTest(1, done));
 
 		// endregion
 
