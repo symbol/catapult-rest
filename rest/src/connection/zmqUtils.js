@@ -141,18 +141,10 @@ module.exports = {
 			listenerCount: (key, emitter) => emitter.listenerCount(key),
 
 			/**
-			  * Gets the number of active zmq sockets.
-			  * @returns {numeric} Number of active zmq sockets.
-			  */
-			zsocketCount: () => Object.keys(zsockets).length,
-
-			/**
 			 * Closes all zsockets.
 			 */
-			close: () => {
-				Object.keys(zsockets).forEach(key => {
-					multisocketEmitter.removeAllListeners(key);
-				});
+			close: (keys, emitter) => {
+				keys.forEach((k) => multisocketEmitter.removeAllListeners(k, emitter));
 			}
 		};
 

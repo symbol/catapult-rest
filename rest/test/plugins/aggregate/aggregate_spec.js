@@ -46,7 +46,7 @@ describe('aggregate plugin', () => {
 		const registerAndExtractChannelDescriptor = channelDescriptorName => {
 			// Arrange:
 			const channelDescriptors = [];
-			const builder = { add: (name, markerChar, handler) => { channelDescriptors.push({ name, markerChar, handler }); } };
+			const builder = { add: (name, markerChar) => { channelDescriptors.push({ name, markerChar }); } };
 
 			// Act:
 			aggregate.registerMessageChannels(builder);
@@ -63,7 +63,7 @@ describe('aggregate plugin', () => {
 			const descriptor = registerAndExtractChannelDescriptor('partialAdded');
 
 			// Assert:
-			expect(descriptor).to.deep.equal({ name: 'partialAdded', markerChar: 'p', handler: ServerMessageHandler.transaction });
+			expect(descriptor).to.deep.equal({ name: 'partialAdded', markerChar: 'p'});
 		});
 
 		it('registers partialRemoved', () => {
@@ -71,7 +71,7 @@ describe('aggregate plugin', () => {
 			const descriptor = registerAndExtractChannelDescriptor('partialRemoved');
 
 			// Assert:
-			expect(descriptor).to.deep.equal({ name: 'partialRemoved', markerChar: 'q', handler: ServerMessageHandler.transactionHash });
+			expect(descriptor).to.deep.equal({ name: 'partialRemoved', markerChar: 'q'});
 		});
 
 		it('registers cosignature', () => {
@@ -81,35 +81,6 @@ describe('aggregate plugin', () => {
 			// Assert:
 			expect(descriptor.name).to.equal('cosignature');
 			expect(descriptor.markerChar).to.equal('c');
-		});
-
-		it('registers cosignature with handler that forwards to emit callback', () => {
-			// Arrange:
-			const emitted = [];
-			const { handler } = registerAndExtractChannelDescriptor('cosignature');
-
-			// Act:
-			const buffer = Buffer.concat([
-				Buffer.of(0x34, 0x54, 0x55, 0xFF, 0xFA, 0x0E, 0xCC, 0xB7),
-				Buffer.alloc(test.constants.sizes.signerPublicKey, 33),
-				Buffer.alloc(test.constants.sizes.signature, 44),
-				Buffer.alloc(test.constants.sizes.hash256, 55)
-			]);
-			handler({}, eventData => emitted.push(eventData))(22, buffer, 99);
-
-			// Assert:
-			// - 22 is a "topic" so it's not forwarded
-			// - trailing param 99 should be ignored
-			expect(emitted.length).to.equal(1);
-			expect(emitted[0]).to.deep.equal({
-				type: 'aggregate.cosignature',
-				payload: {
-					version: [4283782196, 3083603706],
-					signerPublicKey: Buffer.alloc(test.constants.sizes.signerPublicKey, 33),
-					signature: Buffer.alloc(test.constants.sizes.signature, 44),
-					parentHash: Buffer.alloc(test.constants.sizes.hash256, 55)
-				}
-			});
 		});
 	});
 

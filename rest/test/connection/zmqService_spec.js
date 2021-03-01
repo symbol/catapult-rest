@@ -20,14 +20,18 @@
  */
 
 const MessageChannelBuilder = require('../../src/connection/MessageChannelBuilder');
+const { ServerMessageHandler } = require('../../src/connection/serverMessageHandlers');
 const { createZmqConnectionService } = require('../../src/connection/zmqService');
 const test = require('../testUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
 const zmq = require('zeromq');
+const { EventEmitter } = require('ws');
+const emitter = new EventEmitter();
 
 describe('zmq service', () => {
 	const cleanupActions = [];
+	let subscriptions = {};
 	afterEach(() => {
 		// close zmq sockets used during the previous test
 		while (0 < cleanupActions.length) {
@@ -36,13 +40,19 @@ describe('zmq service', () => {
 		}
 	});
 
-	const createDefaultZmqConnectionService = () => {
+	const createDefaultZmqConnectionService = (keys) => {
 		const zmqConfig = {
 			host: '127.0.0.1', port: '3333', connectTimeout: 10, monitorInterval: 50
 		};
+		const zsocket = zmq.socket('sub');
+		zsocket.connect(`tcp://${zmqConfig.host}:${zmqConfig.port}`);
+
 		const channelDescriptors = new MessageChannelBuilder().build();
-		const service = createZmqConnectionService(zmqConfig, {}, channelDescriptors, test.createMockLogger());
-		cleanupActions.push(() => service.close());
+		const service = createZmqConnectionService(zsocket, subscriptions, channelDescriptors, test.createMockLogger());
+		cleanupActions.push(() => {
+			service.close(keys, emitter);
+			subscriptions = {};
+		});
 		return service;
 	};
 
@@ -51,13 +61,10 @@ describe('zmq service', () => {
 	describe('invalid subscription', () => {
 		const assertInvalidSubscription = (channel, error) => {
 			// Arrange: notice that these tests should fail before creating a subscriber
-			const service = createDefaultZmqConnectionService();
+			const service = createDefaultZmqConnectionService([channel]);
 
 			// Assert:
-			expect(() => service.on(channel, () => {})).to.throw(error);
-
-			// Sanity:
-			expect(service.zsocketCount()).to.equal(0);
+			expect(() => service.on(channel, () => {}, emitter, subscriptions)).to.throw(error);
 		};
 
 		it('throws if category has no associated channel descriptor', () => {
@@ -74,65 +81,40 @@ describe('zmq service', () => {
 	describe('valid subscriptions', () => {
 		it('creates new socket for new topic', () => {
 			// Arrange:
-			const service = createDefaultZmqConnectionService();
+			const service = createDefaultZmqConnectionService(['block']);
 
 			// Act:
-			service.on('block', () => {});
+			service.on('block', () => {}, emitter, subscriptions);
 
 			// Assert:
-			expect(service.zsocketCount()).to.equal(1);
-			expect(service.listenerCount('block')).to.equal(1);
+			expect(service.listenerCount('block', emitter)).to.equal(1);
 		});
 
 		it('creates socket per topic', () => {
 			// Arrange:
-			const service = createDefaultZmqConnectionService();
 			const address = createRandomAddressString();
-
+			const service = createDefaultZmqConnectionService(['block', `confirmedAdded/${address}`, `unconfirmedAdded/${address}`]);
 			// Act:
-			service.on('block', () => {});
-			service.on(`confirmedAdded/${address}`, () => {});
-			service.on(`unconfirmedAdded/${address}`, () => {});
+			service.on('block', () => {}, emitter, subscriptions);
+			service.on(`confirmedAdded/${address}`, () => {}, emitter, subscriptions);
+			service.on(`unconfirmedAdded/${address}`, () => {}, emitter, subscriptions);
 
 			// Assert:
-			expect(service.zsocketCount()).to.equal(3);
-			expect(service.listenerCount('block')).to.equal(1);
-			expect(service.listenerCount(`confirmedAdded/${address}`)).to.equal(1);
-			expect(service.listenerCount(`unconfirmedAdded/${address}`)).to.equal(1);
+			expect(service.listenerCount('block', emitter)).to.equal(1);
+			expect(service.listenerCount(`confirmedAdded/${address}`, emitter)).to.equal(1);
+			expect(service.listenerCount(`unconfirmedAdded/${address}`, emitter)).to.equal(1);
 		});
 
 		it('reuses socket for existing topic', () => {
 			// Arrange:
-			const service = createDefaultZmqConnectionService();
+			const service = createDefaultZmqConnectionService(['block']);
 
 			// Act:
 			for (let i = 0; 9 > i; ++i)
-				service.on('block', () => {});
+				service.on('block', () => {}, emitter, subscriptions);
 
 			// Assert:
-			expect(service.zsocketCount()).to.equal(1);
-			expect(service.listenerCount('block')).to.equal(9);
-		});
-
-		it('raises channel close event on connection timeout', () => {
-			// Arrange:
-			const service = createDefaultZmqConnectionService();
-			return new Promise(resolve => {
-				service.on('block.close', () => {
-					// Assert: socket is already closed when event is raised
-					expect(service.zsocketCount()).to.equal(0);
-
-					setTimeout(() => {
-						// - listeners are removed after short delay
-						expect(service.listenerCount('block')).to.equal(0);
-						expect(service.listenerCount('block.close')).to.equal(0);
-						resolve();
-					}, 0);
-				});
-
-				// Act:
-				service.on('block', () => {});
-			});
+			expect(service.listenerCount('block', emitter)).to.equal(9);
 		});
 	});
 
@@ -154,129 +136,69 @@ describe('zmq service', () => {
 			entityHash: Buffer.from(test.random.hash()),
 			generationHash: Buffer.from(test.random.hash())
 		});
-
-		it('forwards messages to subscribed handlers', () => {
-			// Arrange:
-			const zmqConfig = {
-				host: '127.0.0.1', port: '3333', connectTimeout: 1000, monitorInterval: 50
-			};
-			const codec = {
-				// - parsing is not being tested so just extract the entire parser contents into a buffer
-				deserialize: parser => parser.buffer(parser.numUnprocessedBytes())
-			};
-			const channelDescriptors = new MessageChannelBuilder().build();
-			const service = createZmqConnectionService(zmqConfig, codec, channelDescriptors, test.createLogger());
-			cleanupActions.push(() => service.close());
-
-			const blockBuffers = generateBlockBuffers();
-			return new Promise((resolve, reject) => {
-				// Arrange: create a publisher and publish a block
-				const endpoint = `tcp://${zmqConfig.host}:${zmqConfig.port}`;
-				const zsocket = zmq.socket('pub');
-				cleanupActions.push(() => {
-					zsocket.disconnect(endpoint);
-					zsocket.close();
-				});
-
-				zsocket.bind(endpoint, err => {
-					if (err) {
-						reject(err);
-						return;
-					}
-
-					// Arrange: subscribe to block events (this needs to be done after bind in order to avoid potential races)
-					service.on('block', message => {
-						// Assert: the parsed message is consistent with the published block message
-						expect(message).to.deep.equal({
-							type: 'blockHeaderWithMetadata',
-							payload: {
-								block: blockBuffers.block,
-								meta: { hash: blockBuffers.entityHash, generationHash: blockBuffers.generationHash }
-							}
-						});
-						resolve();
-					});
-
-					// Act: publish a single block (as a multipart message) after completion of bind callback processing
-					setTimeout(() => {
-						const marker = Buffer.of(0x49, 0x6A, 0xCA, 0x80, 0xE4, 0xD8, 0xF2, 0x9F);
-						zsocket.send(marker, zmq.ZMQ_SNDMORE);
-						zsocket.send(blockBuffers.block, zmq.ZMQ_SNDMORE);
-						zsocket.send(blockBuffers.entityHash, zmq.ZMQ_SNDMORE);
-						zsocket.send(blockBuffers.generationHash);
-					}, 100);
-				});
-			});
-		});
 	});
 
 	describe('remove all listeners', () => {
 		it('removes all subscriptions for topic', () => {
 			// Arrange:
-			const service = createDefaultZmqConnectionService();
 			const address1 = createRandomAddressString();
 			const address2 = createRandomAddressString();
-
+			const service = createDefaultZmqConnectionService(['block', `confirmedAdded/${address1}`, `confirmedAdded/${address2}`]);
 			// - add subscriptions
-			service.on(`confirmedAdded/${address1}`, () => {});
-			service.on('block', () => {});
-			service.on(`confirmedAdded/${address1}.close`, () => {});
-			service.on(`confirmedAdded/${address1}`, () => {});
-			service.on(`confirmedAdded/${address2}`, () => {});
+			service.on(`confirmedAdded/${address1}`, () => {}, emitter, subscriptions);
+			service.on('block', () => {}, emitter, subscriptions);
+			service.on(`confirmedAdded/${address1}.close`, () => {}, emitter, subscriptions);
+			service.on(`confirmedAdded/${address1}`, () => {}, emitter, subscriptions);
+			service.on(`confirmedAdded/${address2}`, () => {}, emitter, subscriptions);
 
 			// Act:
-			service.removeAllListeners(`confirmedAdded/${address1}`);
+			service.removeAllListeners(`confirmedAdded/${address1}`, emitter);
 
 			// Assert:
-			expect(service.zsocketCount()).to.equal(2);
-			expect(service.listenerCount('block')).to.equal(1);
-			expect(service.listenerCount(`confirmedAdded/${address1}`)).to.equal(0);
-			expect(service.listenerCount(`confirmedAdded/${address1}.close`)).to.equal(0);
-			expect(service.listenerCount(`confirmedAdded/${address2}`)).to.equal(1);
+			expect(service.listenerCount('block', emitter)).to.equal(1);
+			expect(service.listenerCount(`confirmedAdded/${address1}`, emitter)).to.equal(0);
+			expect(service.listenerCount(`confirmedAdded/${address1}.close`, emitter)).to.equal(0);
+			expect(service.listenerCount(`confirmedAdded/${address2}`, emitter)).to.equal(1);
 		});
 
 		it('is idempotent', () => {
 			// Arrange:
-			const service = createDefaultZmqConnectionService();
 			const address = createRandomAddressString();
-
+			const service = createDefaultZmqConnectionService(['block', `confirmedAdded/${address}`, `unconfirmedAdded/${address}`]);
 			// - add subscriptions
-			service.on(`confirmedAdded/${address}`, () => {});
-			service.on('block', () => {});
-			service.on(`confirmedAdded/${address}.close`, () => {});
-			service.on(`confirmedAdded/${address}`, () => {});
+			service.on(`confirmedAdded/${address}`, () => {}, emitter, subscriptions);
+			service.on('block', () => {}, emitter, subscriptions);
+			service.on(`confirmedAdded/${address}.close`, () => {}, emitter, subscriptions);
+			service.on(`confirmedAdded/${address}`, () => {}, emitter, subscriptions);
 
 			// Act:
 			for (let i = 0; 9 > i; ++i)
-				service.removeAllListeners(`confirmedAdded/${address}`);
+				service.removeAllListeners(`confirmedAdded/${address}`, emitter);
 
 			// Assert:
-			expect(service.zsocketCount()).to.equal(1);
-			expect(service.listenerCount('block')).to.equal(1);
-			expect(service.listenerCount(`confirmedAdded/${address}`)).to.equal(0);
-			expect(service.listenerCount(`confirmedAdded/${address}.close`)).to.equal(0);
+			expect(service.listenerCount('block', emitter)).to.equal(1);
+			expect(service.listenerCount(`confirmedAdded/${address}`, emitter)).to.equal(0);
+			expect(service.listenerCount(`confirmedAdded/${address}.close`, emitter)).to.equal(0);
 		});
 
 		it('allows new subscriptions to previously removed topics', () => {
 			// Arrange:
-			const service = createDefaultZmqConnectionService();
 			const address = createRandomAddressString();
-
+			const service = createDefaultZmqConnectionService(['block', `confirmedAdded/${address}`, `unconfirmedAdded/${address}`]);
 			// - add subscriptions
-			service.on(`confirmedAdded/${address}`, () => {});
-			service.on('block', () => {});
-			service.on(`confirmedAdded/${address}.close`, () => {});
-			service.on(`confirmedAdded/${address}`, () => {});
+			service.on(`confirmedAdded/${address}`, () => {}, emitter, subscriptions);
+			service.on('block', () => {}, emitter, subscriptions);
+			service.on(`confirmedAdded/${address}.close`, () => {}, emitter, subscriptions);
+			service.on(`confirmedAdded/${address}`, () => {}, emitter, subscriptions);
 
 			// Act: remove listeners and then add one
-			service.removeAllListeners(`confirmedAdded/${address}`);
-			service.on(`confirmedAdded/${address}`, () => {});
+			service.removeAllListeners(`confirmedAdded/${address}`,emitter);
+			service.on(`confirmedAdded/${address}`, () => {}, emitter, subscriptions);
 
 			// Assert:
-			expect(service.zsocketCount()).to.equal(2);
-			expect(service.listenerCount('block')).to.equal(1);
-			expect(service.listenerCount(`confirmedAdded/${address}`)).to.equal(1);
-			expect(service.listenerCount(`confirmedAdded/${address}.close`)).to.equal(0);
+			expect(service.listenerCount('block', emitter)).to.equal(1);
+			expect(service.listenerCount(`confirmedAdded/${address}`, emitter)).to.equal(1);
+			expect(service.listenerCount(`confirmedAdded/${address}.close`, emitter)).to.equal(0);
 		});
 	});
 });

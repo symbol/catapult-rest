@@ -147,7 +147,7 @@ const registerRoutes = (server, db, services) => {
 	const zsocket = zmq.socket('sub');
 	zmqUtils.prepareZsocket(zsocket, services.config.websocket.mq, winston);
 	zsocket.connect(`tcp://${services.config.websocket.mq.host}:${services.config.websocket.mq.port}`);
-	
+
 	const subscriptions = {};
 	const emitter = new EventEmitter();
 

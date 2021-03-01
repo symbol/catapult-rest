@@ -22,6 +22,7 @@
 const zmqUtils = require('../../src/connection/zmqUtils');
 const test = require('../testUtils');
 const { expect } = require('chai');
+const { EventEmitter } = require('ws');
 
 describe('zmqUtils', () => {
 	const createMockZsocket = () => {
@@ -263,277 +264,219 @@ describe('zmqUtils', () => {
 			};
 		};
 
-		it('initially has no sockets', () => {
-			// Arrange:
-			const emitter = zmqUtils.createMultisocketEmitter(() => {});
-
-			// Act + Assert:
-			expect(emitter.zsocketCount()).to.equal(0);
-		});
-
 		describe('on', () => {
 			it('creates socket when new channel is subscribed', () => {
 				// Arrange:
+				const subscription = {}
+				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
 				// Act:
-				emitter.on('block', () => {});
+				emitter.on('block', () => {}, emit, subscription);
 
 				// Assert:
-				expect(emitter.zsocketCount()).to.equal(1);
-				expect(emitter.listenerCount('block')).to.equal(1);
+				expect(emitter.listenerCount('block', emit)).to.equal(1);
 
 				// Sanity: no other listeners are set up
-				expect(emitter.listenerCount('block.close')).to.equal(0);
-				expect(emitter.listenerCount('confirmedAdded')).to.equal(0);
+				expect(emitter.listenerCount('block.close', emit)).to.equal(0);
+				expect(emitter.listenerCount('confirmedAdded', emit)).to.equal(0);
 			});
 
 			it('creates socket per channel', () => {
 				// Arrange:
+				const subscription = {}
+				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
 				// Act:
-				emitter.on('block', () => {});
-				emitter.on('confirmedAdded', () => {});
-				emitter.on('partialAdded', () => {});
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('confirmedAdded', () => {}, emit, subscription);
+				emitter.on('partialAdded', () => {}, emit, subscription);
 
 				// Assert:
-				expect(emitter.zsocketCount()).to.equal(3);
-				expect(emitter.listenerCount('block')).to.equal(1);
-				expect(emitter.listenerCount('confirmedAdded')).to.equal(1);
-				expect(emitter.listenerCount('partialAdded')).to.equal(1);
+				expect(emitter.listenerCount('block', emit)).to.equal(1);
+				expect(emitter.listenerCount('confirmedAdded', emit)).to.equal(1);
+				expect(emitter.listenerCount('partialAdded', emit)).to.equal(1);
 			});
 
 			it('reuses socket when existing channel is subscribed', () => {
 				// Arrange:
+				const subscription = {}
+				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
 				// Act:
-				emitter.on('block', () => {});
-				emitter.on('block', () => {});
-				emitter.on('block', () => {});
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('block', () => {}, emit, subscription);
 
 				// Assert:
-				expect(emitter.zsocketCount()).to.equal(1);
-				expect(emitter.listenerCount('block')).to.equal(3);
+				expect(emitter.listenerCount('block', emit)).to.equal(3);
 			});
 
 			it('bypasses socket creation when supported subevent is subscribed', () => {
 				// Arrange:
+				const subscription = {}
+				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
 				// Act:
-				emitter.on('block.close', () => {});
+				emitter.on('block.close', () => {}, emit, subscription);
 
 				// Assert:
-				expect(emitter.zsocketCount()).to.equal(0);
-				expect(emitter.listenerCount('block.close')).to.equal(1);
+				expect(emitter.listenerCount('block.close', emit)).to.equal(1);
 			});
 
 			it('fails when unsupported subevent is subscribed', () => {
 				// Arrange:
+				const subscription = {}
+				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
 				// Act + Assert:
-				expect(() => emitter.on('block.foo', () => {}).to.throw('block.foo indicates an unsupported subevent'));
-			});
-
-			const assertOnlySubscribedHandlersAreInvoked = (eventName1, eventName2, numExpectedSockets) => {
-				// Arrange:
-				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
-				const captures = {};
-
-				// - set up five subscriptions to two different channels
-				emitter.on(eventName1, value => { captures.a = value; });
-				emitter.on(eventName2, value => { captures.b = value; });
-				emitter.on(eventName1, value => { captures.c = value; });
-				emitter.on(eventName2, value => { captures.d = value; });
-				emitter.on(eventName1, value => { captures.e = value; });
-
-				// Act: emit events
-				context.eventEmitter.emit(eventName1, 1);
-				context.eventEmitter.emit(eventName2, 2);
-
-				// Assert:
-				expect(emitter.zsocketCount()).to.equal(numExpectedSockets);
-				expect(emitter.listenerCount(eventName1)).to.equal(3);
-				expect(emitter.listenerCount(eventName2)).to.equal(2);
-
-				expect(captures).to.deep.equal({
-					a: 1, b: 2, c: 1, d: 2, e: 1
-				});
-			};
-
-			it('invokes handler only for subscribed channel', () => {
-				// Assert:
-				assertOnlySubscribedHandlersAreInvoked('block', 'confirmedAdded', 2);
-			});
-
-			it('invokes handler only for subscribed channel or subevent', () => {
-				// Assert:
-				assertOnlySubscribedHandlersAreInvoked('block', 'block.close', 1);
+				expect(() => emitter.on('block.foo', () => {}, emit, subscription).to.throw('block.foo indicates an unsupported subevent'));
 			});
 
 			it('registers handler for propagating channel close event', () => {
 				// Arrange:
-				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
+				const subscription = {}
+				const emit = new EventEmitter();
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
 				// - set up subscriptions to two channels and one subevent
-				emitter.on('block', () => {});
-				emitter.on('confirmedAdded', () => {});
-				emitter.on('block', () => {});
-				emitter.on('block.close', () => {});
-				emitter.on('confirmedAdded', () => {});
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('block.close', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
 
 				// - register close events
 				const captures = {};
-				emitter.on('block.close', () => { captures.block = true; });
-				emitter.on('confirmedAdded.close', () => { captures.confirmedAdded = true; });
-
-				// Act: simulate close of block zsocket
-				context.zsockets.block.eventHandlers.zsocket_close[0]();
-
-				// Assert: channel close event should have been raised for block channel only
-				expect(captures).to.deep.equal({ block: true });
+				emitter.on('block.close', () => { captures.block = true; }, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A.close', () => { captures.confirmedAdded = true; }, emit, subscription);
 
 				// - close has also removed related socket reference and listeners
-				expect(emitter.zsocketCount()).to.equal(1);
-				expect(emitter.listenerCount('block')).to.equal(0);
-				expect(emitter.listenerCount('block.close')).to.equal(0);
-				expect(emitter.listenerCount('confirmedAdded')).to.equal(2);
-
-				// - close has not closed the socket because it is assumed to have been closed prior to the event
-				expect(context.zsockets.block.numCloseCalls).to.equal(0);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(0);
+				expect(emitter.listenerCount('block', emit)).to.equal(2);
+				expect(emitter.listenerCount('block.close', emit)).to.equal(2);
+				expect(emitter.listenerCount('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', emit)).to.equal(2);
 			});
 		});
 
 		describe('removeAllListeners', () => {
 			it('has no effect when no matching subscribers are present', () => {
 				// Arrange:
-				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
-				emitter.on('block', () => {});
-				emitter.on('confirmedAdded', () => {});
-				emitter.on('block', () => {});
-				emitter.on('confirmedAdded', () => {});
+				const subscription = {}
+				const emit = new EventEmitter();
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
 
 				// Act:
-				emitter.removeAllListeners('unconfirmedAdded');
+				emitter.removeAllListeners('unconfirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', emit);
 
 				// Assert:
-				expect(emitter.zsocketCount()).to.equal(2);
-				expect(emitter.listenerCount('block')).to.equal(2);
-				expect(emitter.listenerCount('confirmedAdded')).to.equal(2);
-
-				expect(context.zsockets.block.numCloseCalls).to.equal(0);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(0);
+				expect(emitter.listenerCount('block', emit)).to.equal(2);
+				expect(emitter.listenerCount('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', emit)).to.equal(2);
 			});
 
 			it('removes all matching channel subscribers', () => {
 				// Arrange:
-				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
-				emitter.on('block', () => {});
-				emitter.on('confirmedAdded', () => {});
-				emitter.on('block', () => {});
-				emitter.on('confirmedAdded', () => {});
+				const subscription = {}
+				const emit = new EventEmitter();
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
 
 				// Act:
-				emitter.removeAllListeners('block');
+				emitter.removeAllListeners('block', emit);
 
 				// Assert:
-				expect(emitter.zsocketCount()).to.equal(1);
-				expect(emitter.listenerCount('block')).to.equal(0);
-				expect(emitter.listenerCount('confirmedAdded')).to.equal(2);
-
-				expect(context.zsockets.block.numCloseCalls).to.equal(1);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(0);
+				expect(emitter.listenerCount('block', emit)).to.equal(0);
+				expect(emitter.listenerCount('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', emit)).to.equal(2);
 			});
 
 			it('removes all matching and subevent subscribers', () => {
 				// Arrange:
-				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
-				emitter.on('block', () => {});
-				emitter.on('block.close', () => {});
-				emitter.on('confirmedAdded', () => {});
-				emitter.on('block', () => {});
-				emitter.on('block.close', () => {});
-				emitter.on('confirmedAdded', () => {});
+				const subscription = {}
+				const emit = new EventEmitter();
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('block.close', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('block.close', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
 
 				// Act:
-				emitter.removeAllListeners('block');
+				emitter.removeAllListeners('block', emit);
 
 				// Assert:
-				expect(emitter.zsocketCount()).to.equal(1);
-				expect(emitter.listenerCount('block')).to.equal(0);
-				expect(emitter.listenerCount('block.close')).to.equal(0);
-				expect(emitter.listenerCount('confirmedAdded')).to.equal(2);
-
-				expect(context.zsockets.block.numCloseCalls).to.equal(1);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(0);
+				expect(emitter.listenerCount('block', emit)).to.equal(0);
+				expect(emitter.listenerCount('block.close', emit)).to.equal(0);
+				expect(emitter.listenerCount('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', emit)).to.equal(2);
 			});
 
 			it('fails when attempting to remove listeners for any subevent', () => {
 				// Arrange:
+				const subscription = {}
+				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
-				emitter.on('block', () => {});
-				emitter.on('block.close', () => {});
-				emitter.on('confirmedAdded', () => {});
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('block.close', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
 
 				// Act + Assert: removal attempts for both supported and unsupported subevents should fail because there is no reason
 				//               to remove subevent subscriptions while remaining subscribed to the associated channel
-				expect(() => emitter.removeAllListeners('block.close').to.throw('block.close must be a channel'));
-				expect(() => emitter.removeAllListeners('block.foo').to.throw('block.foo must be a channel'));
+				expect(() => emitter.removeAllListeners('block.close', emit).to.throw('block.close must be a channel'));
+				expect(() => emitter.removeAllListeners('block.foo', emit).to.throw('block.foo must be a channel'));
 			});
 
 			it('allows new subscriptions for removed channels', () => {
 				// Arrange:
+				const subscription = {}
+				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
-				emitter.on('block', () => {});
-				emitter.on('confirmedAdded', () => {});
-				emitter.on('block', () => {});
-				emitter.on('block.close', () => {});
-				emitter.on('confirmedAdded', () => {});
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('block.close', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
 
 				// Act:
-				emitter.removeAllListeners('block');
-				emitter.on('block', () => {});
+				emitter.removeAllListeners('block', emit);
+				emitter.on('block', () => {}, emit, subscription);
 
 				// Assert:
-				expect(emitter.zsocketCount()).to.equal(2);
-				expect(emitter.listenerCount('block')).to.equal(1);
-				expect(emitter.listenerCount('block.close')).to.equal(0);
-				expect(emitter.listenerCount('confirmedAdded')).to.equal(2);
+				expect(emitter.listenerCount('block', emit)).to.equal(1);
+				expect(emitter.listenerCount('block.close', emit)).to.equal(0);
+				expect(emitter.listenerCount('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', emit)).to.equal(2);
 			});
 		});
 
 		describe('close', () => {
 			it('removes all channel and subevent subscribers', () => {
 				// Arrange:
-				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
-				emitter.on('block', () => {});
-				emitter.on('block.close', () => {});
-				emitter.on('confirmedAdded', () => {});
-				emitter.on('block', () => {});
-				emitter.on('block.close', () => {});
-				emitter.on('confirmedAdded', () => {});
+				const subscription = {}
+				const emit = new EventEmitter();
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('block.close', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
+				emitter.on('block', () => {}, emit, subscription);
+				emitter.on('block.close', () => {}, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', () => {}, emit, subscription);
 
 				// Act:
-				emitter.close();
+				emitter.close(['block', 'confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A'], emit);
 
 				// Assert:
-				expect(emitter.zsocketCount()).to.equal(0);
-				expect(emitter.listenerCount('block')).to.equal(0);
-				expect(emitter.listenerCount('block.close')).to.equal(0);
-				expect(emitter.listenerCount('confirmedAdded')).to.equal(0);
-
-				expect(context.zsockets.block.numCloseCalls).to.equal(1);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(1);
+				expect(emitter.listenerCount('block', emit)).to.equal(0);
+				expect(emitter.listenerCount('block.close', emit)).to.equal(0);
+				expect(emitter.listenerCount('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', emit)).to.equal(0);
 			});
 		});
 	});

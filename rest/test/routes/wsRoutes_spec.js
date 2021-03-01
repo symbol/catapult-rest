@@ -22,6 +22,7 @@
 const { test } = require('./utils/routeTestUtils');
 const wsRoutes = require('../../src/routes/wsRoutes');
 const { expect } = require('chai');
+const { EventEmitter } = require('ws');
 
 describe('web socket routes', () => {
 	const setupWebsocketTest = (action, assertCaptures) => {
@@ -46,7 +47,7 @@ describe('web socket routes', () => {
 		const assertSubscriptionToEvent = (channel, expectedEvent) => {
 			// Act:
 			setupWebsocketTest(
-				route => route.newChannel(channel, {}),
+				route => route.newChannel(channel, {}, new EventEmitter(), {}),
 				service => {
 					// Assert: channel event was registered
 					const handler = service.eventHandlers[expectedEvent];
@@ -87,7 +88,7 @@ describe('web socket routes', () => {
 
 			// Act:
 			setupWebsocketTest(
-				route => route.newChannel('block', sender),
+				route => route.newChannel('block', sender, new EventEmitter(), {}),
 				service => {
 					// - invoke the handler
 					const handler = service.eventHandlers['block.close'];
@@ -105,7 +106,7 @@ describe('web socket routes', () => {
 		it('forwards channel to service', () => {
 			// Act:
 			setupWebsocketTest(
-				route => route.removeChannel('block'),
+				route => route.removeChannel('block', new EventEmitter()),
 				service => {
 					// Assert:
 					expect(service.removedChannels).to.deep.equal(['block']);
