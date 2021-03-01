@@ -96,9 +96,10 @@ module.exports = {
 	 * @param {array} crossDomainConfig Configuration related to access control, contains allowed host and HTTP methods.
 	 * @param {object} formatters Formatters to use for formatting responses.
 	 * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
+	 * @param {object} zsocket zeroMQ subscriber socket.
 	 * @returns {object} Server.
 	 */
-	createServer: (crossDomainConfig, formatters, throttlingConfig) => {
+	createServer: (crossDomainConfig, formatters, throttlingConfig, zsocket) => {
 		// create the server using a custom formatter
 		const server = restify.createServer({
 			name: '', // disable server header in response
@@ -225,6 +226,9 @@ module.exports = {
 			// close the servers
 			wss.close();
 			server.close();
+			if (zsocket) {
+				zsocket.close();
+			}
 		};
 
 		return promiseAwareServer;

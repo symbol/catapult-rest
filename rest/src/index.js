@@ -111,18 +111,18 @@ const connectToDbWithRetry = (db, config) => catapult.utils.future.makeRetryable
 	}
 );
 
-const createServer = config => {
+const createServer = (config, zsocket) => {
 	const modelSystem = catapult.plugins.catapultModelSystem.configure(config.extensions, {
 		json: dbFormattingRules,
 		ws: messageFormattingRules
 	});
 	return {
-		server: bootstrapper.createServer(config.crossDomain, formatters.create(modelSystem.formatters), config.throttling),
+		server: bootstrapper.createServer(config.crossDomain, formatters.create(modelSystem.formatters), config.throttling, zsocket),
 		codec: modelSystem.codec
 	};
 };
 
-const registerRoutes = (server, db, services) => {
+const registerRoutes = (server, db, services, zsocket, emitter) => {
 	// 1. create a services view for extension routes
 	const servicesView = {
 		config: {
@@ -144,15 +144,7 @@ const registerRoutes = (server, db, services) => {
 
 	// 3. augment services with extension-dependent config and services
 	servicesView.config.transactionStates = transactionStates;
-	const zsocket = zmq.socket('sub');
-	zmqUtils.prepareZsocket(zsocket, services.config.websocket.mq, winston);
-	zsocket.connect(`tcp://${services.config.websocket.mq.host}:${services.config.websocket.mq.port}`);
-
 	const subscriptions = {};
-	const emitter = new EventEmitter();
-
-	zsocket.on('message', ServerMessageHandler.zmqMessageHandler(services.codec, emitter));
-
 	servicesView.serviceEmitter = emitter;
 	servicesView.zmqService = createZmqConnectionService(zsocket, subscriptions, messageChannelDescriptors, winston);
 	servicesView.subscriptions = subscriptions;
@@ -194,11 +186,15 @@ const registerRoutes = (server, db, services) => {
 
 	serviceManager.pushService(db, 'close');
 
+	const emitter = new EventEmitter();
+	const zsocket = zmq.socket('sub');
+	zmqUtils.prepareZsocket(zsocket, config.websocket.mq, winston);
+
 	winston.info(`connecting to ${config.db.url} (database:${config.db.name})`);
 	connectToDbWithRetry(db, config.db)
 		.then(() => {
 			winston.info('registering routes');
-			const serverAndCodec = createServer(config);
+			const serverAndCodec = createServer(config, zsocket);
 			const { server } = serverAndCodec;
 			serviceManager.pushService(server, 'close');
 
@@ -206,7 +202,11 @@ const registerRoutes = (server, db, services) => {
 				apiNode: config.apiNode
 			};
 			const connectionService = createConnectionService(connectionConfig, winston.verbose);
-			registerRoutes(server, db, { codec: serverAndCodec.codec, config, connectionService });
+			
+			zsocket.connect(`tcp://${config.websocket.mq.host}:${config.websocket.mq.port}`);
+			zsocket.on('message', ServerMessageHandler.zmqMessageHandler(serverAndCodec.codec, emitter));
+			
+			registerRoutes(server, db, { codec: serverAndCodec.codec, config, connectionService }, zsocket, emitter);
 
 			winston.info(`listening on port ${config.port}`);
 			server.listen(config.port);
