@@ -52,10 +52,8 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
  */
 module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptors, logger) =>
 	zmqUtils.createMultisocketEmitter((key, emitter, currentSubscriptionCount) => {
-		console.log(zmqConfig.maxSubscription)
-		console.log(currentSubscriptionCount)
-		if (currentSubscriptionCount >= (zmqConfig.maxSubscription || 7) ) {
-			logger.error(`Max zmq subscription (${zmqConfig.maxSubscription}) reached.`)
+		if (currentSubscriptionCount >= (zmqConfig.maxSubscription || 5000)) {
+			logger.error(`Max zmq subscription (${zmqConfig.maxSubscription}) reached.`);
 			throw Error(`Max zmq subscription (${zmqConfig.maxSubscription}) reached.`);
 		}
 		logger.info(`subscribing to ${key}`);
