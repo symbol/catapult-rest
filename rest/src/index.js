@@ -20,7 +20,9 @@
  */
 
 const { createConnectionService } = require('./connection/connectionService');
+const { ServerMessageHandler } = require('./connection/serverMessageHandlers');
 const { createZmqConnectionService } = require('./connection/zmqService');
+const zmqUtils = require('./connection/zmqUtils');
 const CatapultDb = require('./db/CatapultDb');
 const dbFormattingRules = require('./db/dbFormattingRules');
 const routeSystem = require('./plugins/routeSystem');
@@ -29,13 +31,11 @@ const bootstrapper = require('./server/bootstrapper');
 const formatters = require('./server/formatters');
 const messageFormattingRules = require('./server/messageFormattingRules');
 const catapult = require('catapult-sdk');
-const zmqUtils = require('./connection/zmqUtils');
-const zmq = require('zeromq');
 const sshpk = require('sshpk');
 const winston = require('winston');
-const fs = require('fs');
-const { ServerMessageHandler } = require('./connection/serverMessageHandlers');
+const zmq = require('zeromq');
 const EventEmitter = require('events');
+const fs = require('fs');
 
 const createLoggingTransportConfiguration = loggingConfig => {
 	const transportConfig = Object.assign({}, loggingConfig);

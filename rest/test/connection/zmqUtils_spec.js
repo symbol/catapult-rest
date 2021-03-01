@@ -255,19 +255,10 @@ describe('zmqUtils', () => {
 	});
 
 	describe('createMultisocketEmitter', () => {
-		const createMockZsocketWithCapture = context => {
-			context.zsockets = {};
-			return (key, eventEmitter) => {
-				context.eventEmitter = eventEmitter;
-				context.zsockets[key] = createMockZsocket();
-				return context.zsockets[key];
-			};
-		};
-
 		describe('on', () => {
 			it('creates socket when new channel is subscribed', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
@@ -284,7 +275,7 @@ describe('zmqUtils', () => {
 
 			it('creates socket per channel', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
@@ -301,7 +292,7 @@ describe('zmqUtils', () => {
 
 			it('reuses socket when existing channel is subscribed', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
@@ -316,7 +307,7 @@ describe('zmqUtils', () => {
 
 			it('bypasses socket creation when supported subevent is subscribed', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
@@ -329,7 +320,7 @@ describe('zmqUtils', () => {
 
 			it('fails when unsupported subevent is subscribed', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
@@ -339,7 +330,7 @@ describe('zmqUtils', () => {
 
 			it('registers handler for propagating channel close event', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 
@@ -353,7 +344,8 @@ describe('zmqUtils', () => {
 				// - register close events
 				const captures = {};
 				emitter.on('block.close', () => { captures.block = true; }, emit, subscription);
-				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A.close', () => { captures.confirmedAdded = true; }, emit, subscription);
+				emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A.close',
+					() => { captures.confirmedAdded = true; }, emit, subscription);
 
 				// - close has also removed related socket reference and listeners
 				expect(emitter.listenerCount('block', emit)).to.equal(2);
@@ -365,7 +357,7 @@ describe('zmqUtils', () => {
 		describe('removeAllListeners', () => {
 			it('has no effect when no matching subscribers are present', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 				emitter.on('block', () => {}, emit, subscription);
@@ -383,7 +375,7 @@ describe('zmqUtils', () => {
 
 			it('removes all matching channel subscribers', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 				emitter.on('block', () => {}, emit, subscription);
@@ -401,7 +393,7 @@ describe('zmqUtils', () => {
 
 			it('removes all matching and subevent subscribers', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 				emitter.on('block', () => {}, emit, subscription);
@@ -422,7 +414,7 @@ describe('zmqUtils', () => {
 
 			it('fails when attempting to remove listeners for any subevent', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 				emitter.on('block', () => {}, emit, subscription);
@@ -437,7 +429,7 @@ describe('zmqUtils', () => {
 
 			it('allows new subscriptions for removed channels', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 				emitter.on('block', () => {}, emit, subscription);
@@ -460,7 +452,7 @@ describe('zmqUtils', () => {
 		describe('close', () => {
 			it('removes all channel and subevent subscribers', () => {
 				// Arrange:
-				const subscription = {}
+				const subscription = {};
 				const emit = new EventEmitter();
 				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
 				emitter.on('block', () => {}, emit, subscription);

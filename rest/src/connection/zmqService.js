@@ -40,12 +40,12 @@ const findSubscriptionfilter = (key, channelDescriptors) => {
  * @returns {object} zmq connection service that is a stripped down EventEmitter.
  */
 module.exports.createZmqConnectionService = (zsocket, subscriptions, channelDescriptors, logger) =>
-	zmqUtils.createMultisocketEmitter((key) => {
+	zmqUtils.createMultisocketEmitter(key => {
 		logger.info(`subscribing to ${key}`);
 		const filter = findSubscriptionfilter(key, channelDescriptors);
 		if (!(key in subscriptions)) {
 			zsocket.subscribe(filter);
-			subscriptions[key] = {filter, key};
+			subscriptions[key] = { filter, key };
 		}
 		return zsocket;
 	});

@@ -21,7 +21,7 @@
 
 const catapult = require('catapult-sdk');
 
-const createBlockDescriptor = (name, marker, handler) => ({
+const createBlockDescriptor = marker => ({
 	filter: topicParam => {
 		if (topicParam)
 			throw new Error('unexpected param to block subscription');
@@ -70,11 +70,9 @@ class MessageChannelBuilder {
 
 		// add basic descriptors
 		this.descriptors.block = createBlockDescriptor(
-			'block',
 			Buffer.of(0x49, 0x6A, 0xCA, 0x80, 0xE4, 0xD8, 0xF2, 0x9F)
 		);
 		this.descriptors.finalizedBlock = createBlockDescriptor(
-			'finalizedBlock',
 			Buffer.of(0x54, 0x79, 0xCE, 0x31, 0xA0, 0x32, 0x48, 0x4D)
 		);
 		this.add('confirmedAdded', 'a');
@@ -100,7 +98,7 @@ class MessageChannelBuilder {
 		if (markerChar in this.channelMarkers)
 			throw Error(`'${markerChar}' channel marker has already been registered`);
 
-		this.descriptors[name] = { filter: this.createAddressFilter(markerChar)};
+		this.descriptors[name] = { filter: this.createAddressFilter(markerChar) };
 		this.channelMarkers[markerChar] = 1;
 	}
 

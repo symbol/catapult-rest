@@ -20,13 +20,13 @@
  */
 
 const MessageChannelBuilder = require('../../src/connection/MessageChannelBuilder');
-const { ServerMessageHandler } = require('../../src/connection/serverMessageHandlers');
 const { createZmqConnectionService } = require('../../src/connection/zmqService');
 const test = require('../testUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
-const zmq = require('zeromq');
 const { EventEmitter } = require('ws');
+const zmq = require('zeromq');
+
 const emitter = new EventEmitter();
 
 describe('zmq service', () => {
@@ -40,7 +40,7 @@ describe('zmq service', () => {
 		}
 	});
 
-	const createDefaultZmqConnectionService = (keys) => {
+	const createDefaultZmqConnectionService = keys => {
 		const zmqConfig = {
 			host: '127.0.0.1', port: '3333', connectTimeout: 10, monitorInterval: 50
 		};
@@ -53,7 +53,6 @@ describe('zmq service', () => {
 			service.close(keys, emitter);
 			subscriptions = {};
 			zsocket.close();
-			
 		});
 		return service;
 	};
@@ -120,26 +119,6 @@ describe('zmq service', () => {
 		});
 	});
 
-	describe('subscription messages', () => {
-		const generateBlockBuffers = () => ({
-			block: Buffer.concat([
-				Buffer.of(0x97, 0x87, 0x45, 0x0E, 0xE1, 0x6C, 0xB6, 0x62), // height 8b
-				Buffer.of(0x30, 0x3A, 0x46, 0x8B, 0x15, 0x2D, 0x60, 0x54), // timestamp 8b
-				Buffer.of(0x86, 0x02, 0x75, 0x30, 0xE8, 0x50, 0x78, 0xE8), // difficulty 8b
-				Buffer.from(test.random.hash()), // previous block hash 32b
-				Buffer.from(test.random.hash()), // block transactions hash 32b
-				Buffer.from(test.random.hash()), // receiptsHashBuffer 32b
-				Buffer.from(test.random.hash()), // stateHashBuffer 32b
-				test.random.bytes(test.constants.sizes.addressDecoded), // beneficiaryAddress 24b
-				Buffer.of(0x0A, 0x00, 0x00, 0x00), // fee multiplier 4b
-				Buffer.of(0x00, 0x00, 0x00, 0x00) // reserved padding 4b
-			]),
-
-			entityHash: Buffer.from(test.random.hash()),
-			generationHash: Buffer.from(test.random.hash())
-		});
-	});
-
 	describe('remove all listeners', () => {
 		it('removes all subscriptions for topic', () => {
 			// Arrange:
@@ -194,7 +173,7 @@ describe('zmq service', () => {
 			service.on(`confirmedAdded/${address}`, () => {}, emitter, subscriptions);
 
 			// Act: remove listeners and then add one
-			service.removeAllListeners(`confirmedAdded/${address}`,emitter);
+			service.removeAllListeners(`confirmedAdded/${address}`, emitter);
 			service.on(`confirmedAdded/${address}`, () => {}, emitter, subscriptions);
 
 			// Assert:

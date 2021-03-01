@@ -19,23 +19,20 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const MessageChannelBuilder = require('../../src/connection/MessageChannelBuilder');
-const { createZmqConnectionService } = require('../../src/connection/zmqService');
 const bootstrapper = require('../../src/server/bootstrapper');
 const errors = require('../../src/server/errors');
 const formatters = require('../../src/server/formatters');
-const test = require('../testUtils');
+// const test = require('../testUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
 const hippie = require('hippie');
 const restify = require('restify');
 const sinon = require('sinon');
 const winston = require('winston');
-const WebSocket = require('ws');
-const zmq = require('zeromq');
-const EventEmitter = require('events');
-const zmqUtils = require('../../src/connection/zmqUtils');
-const { ServerMessageHandler } = require('../../src/connection/serverMessageHandlers');
+// const WebSocket = require('ws');
+// const zmq = require('zeromq');
+// const EventEmitter = require('events');
+
 const supportedHttpMethods = ['get', 'post', 'put'];
 
 const dummyIds = {
@@ -151,7 +148,7 @@ const createServer = options => {
 	return server;
 };
 
-const createWebSocketServer = () => createServer({ formatterName: 'ws' });
+// const createWebSocketServer = () => createServer({ formatterName: 'ws' });
 
 describe('server (bootstrapper)', () => {
 	afterEach(() => {
@@ -752,376 +749,375 @@ describe('server (bootstrapper)', () => {
 		});
 	});
 
-	describe('websockets', () => {
-		// note: although rest server implementation uses single websocket route ('/ws'),
-		// server.ws allows you to register any name and you can register multiple different routes
-		// the tests are using custom `/ws/block*` routes
+	// describe('websockets', () => {
+	// 	// note: although rest server implementation uses single websocket route ('/ws'),
+	// 	// server.ws allows you to register any name and you can register multiple different routes
+	// 	// the tests are using custom `/ws/block*` routes
 
-		const ports = { server: 1234, mq: 7912 };
-		const delays = { publish: 50 };
-		// const modelSystem = catapult.plugins.catapultModelSystem.configure([], {});
-		// const zmpEmitter = new EventEmitter();
-		// let subscriptions = {};
-		// const config = {
-		// 	host: '127.0.0.1', port: 7912, connectTimeout: 1000, monitorInterval: 50
-		// };
-		// let zsocketSub = zmq.socket('sub');
-		// // zsocketSub.connect(`tcp://127.0.0.1:7912`);
-		// // zsocketSub.on('message', ServerMessageHandler.zmqMessageHandler(modelSystem.codec, zmpEmitter));
-		// const channelDescriptors = new MessageChannelBuilder().build();
-		// const zmqService = createZmqConnectionService(zsocketSub, subscriptions, channelDescriptors, test.createMockLogger());
-		const createBlockBuffer = tag => Buffer.concat([
-			Buffer.of(0x30, 0x01, 0x00, 0x00), // size 4b
-			Buffer.of(0x00, 0x00, 0x00, 0x00), // verifiable entity header reserved 1 4b
-			Buffer.from(test.random.bytes(test.constants.sizes.signature)), // signature 64b
-			Buffer.from('A4C656B45C02A02DEF64F15DD781DD5AF29698A353F414FAAA9CDB364A09F98F', 'hex'), // signerPublicKey 32b
-			Buffer.of(0x00, 0x00, 0x00, 0x00), // entity body reserved 1 4b
-			Buffer.of(0x03), // version 1b
-			Buffer.of(0x90), // network 1b
-			Buffer.of(0x00, 0x80), // type 2b
-			Buffer.of(0x97, 0x87, 0x45, 0x0E, tag || 0xE1, 0x6C, 0xB6, 0x62), // height 8b
-			Buffer.from(test.random.bytes(8)), // timestamp 8b
-			Buffer.from(test.random.bytes(8)), // difficulty 8b
-			Buffer.from(test.random.bytes(32)), // proofGamma 32b
-			Buffer.from(test.random.bytes(16)), // proofVerificationHash 16b
-			Buffer.from(test.random.bytes(32)), // proofScalar 32b
-			Buffer.from(test.random.bytes(test.constants.sizes.hash256)), // previous block hash 32b
-			Buffer.from(test.random.bytes(test.constants.sizes.hash256)), // transactionsHashBuffer 32b
-			Buffer.from(test.random.bytes(test.constants.sizes.hash256)), // receiptsHashBuffer 32b
-			Buffer.from(test.random.bytes(test.constants.sizes.hash256)), // stateHashBuffer 32b
-			test.random.bytes(test.constants.sizes.addressDecoded), // beneficiaryAddress 24b
-			Buffer.of(0x0A, 0x00, 0x00, 0x00), // fee feeMultiplierBuffer 4b
-			Buffer.of(0x00, 0x00, 0x00, 0x00) // reserved padding 4b
-		]);
+	// 	const ports = { server: 1234, mq: 7912 };
+	// 	const delays = { publish: 50 };
+	// 	const modelSystem = catapult.plugins.catapultModelSystem.configure([], {});
+	// 	const zmpEmitter = new EventEmitter();
+	// 	let subscriptions = {};
+	// 	const config = {
+	// 		host: '127.0.0.1', port: 7912, connectTimeout: 1000, monitorInterval: 50
+	// 	};
+	// 	let zsocketSub = zmq.socket('sub');
+	// 	// zsocketSub.connect(`tcp://127.0.0.1:7912`);
+	// 	// zsocketSub.on('message', ServerMessageHandler.zmqMessageHandler(modelSystem.codec, zmpEmitter));
+	// 	const channelDescriptors = new MessageChannelBuilder().build();
+	// 	const zmqService = createZmqConnectionService(zsocketSub, subscriptions, channelDescriptors, test.createMockLogger());
+	// 	const createBlockBuffer = tag => Buffer.concat([
+	// 		Buffer.of(0x30, 0x01, 0x00, 0x00), // size 4b
+	// 		Buffer.of(0x00, 0x00, 0x00, 0x00), // verifiable entity header reserved 1 4b
+	// 		Buffer.from(test.random.bytes(test.constants.sizes.signature)), // signature 64b
+	// 		Buffer.from('A4C656B45C02A02DEF64F15DD781DD5AF29698A353F414FAAA9CDB364A09F98F', 'hex'), // signerPublicKey 32b
+	// 		Buffer.of(0x00, 0x00, 0x00, 0x00), // entity body reserved 1 4b
+	// 		Buffer.of(0x03), // version 1b
+	// 		Buffer.of(0x90), // network 1b
+	// 		Buffer.of(0x00, 0x80), // type 2b
+	// 		Buffer.of(0x97, 0x87, 0x45, 0x0E, tag || 0xE1, 0x6C, 0xB6, 0x62), // height 8b
+	// 		Buffer.from(test.random.bytes(8)), // timestamp 8b
+	// 		Buffer.from(test.random.bytes(8)), // difficulty 8b
+	// 		Buffer.from(test.random.bytes(32)), // proofGamma 32b
+	// 		Buffer.from(test.random.bytes(16)), // proofVerificationHash 16b
+	// 		Buffer.from(test.random.bytes(32)), // proofScalar 32b
+	// 		Buffer.from(test.random.bytes(test.constants.sizes.hash256)), // previous block hash 32b
+	// 		Buffer.from(test.random.bytes(test.constants.sizes.hash256)), // transactionsHashBuffer 32b
+	// 		Buffer.from(test.random.bytes(test.constants.sizes.hash256)), // receiptsHashBuffer 32b
+	// 		Buffer.from(test.random.bytes(test.constants.sizes.hash256)), // stateHashBuffer 32b
+	// 		test.random.bytes(test.constants.sizes.addressDecoded), // beneficiaryAddress 24b
+	// 		Buffer.of(0x0A, 0x00, 0x00, 0x00), // fee feeMultiplierBuffer 4b
+	// 		Buffer.of(0x00, 0x00, 0x00, 0x00) // reserved padding 4b
+	// 	]);
 
-		// notice that the formatter only returns height and signerPublicKey
-		const createFormattedBlock = tag => ({
-			topic: 'block',
-			data: {
-				height: [0x0E458797, 0x62B66C00 | (tag || 0xE1)],
-				signerPublicKey: 'A4C656B45C02A02DEF64F15DD781DD5AF29698A353F414FAAA9CDB364A09F98F'
-			}
-		});
+	// 	// notice that the formatter only returns height and signerPublicKey
+	// 	const createFormattedBlock = tag => ({
+	// 		topic: 'block',
+	// 		data: {
+	// 			height: [0x0E458797, 0x62B66C00 | (tag || 0xE1)],
+	// 			signerPublicKey: 'A4C656B45C02A02DEF64F15DD781DD5AF29698A353F414FAAA9CDB364A09F98F'
+	// 		}
+	// 	});
 
-		const registerRoute = (server, route, zmqService, zmpEmitter, subscriptions) => {	
-			// create a custom emitter for raising client connected events
-			const emitter = new EventEmitter();
-			// register a ws route (notice that these callbacks make the same calls to zmqService as the callbacks in wsRoutes)
-			// except for newClient, which is exclusively used for testing
-			server.ws(route, {
-				newChannel: (channel, sender) => zmqService.on(channel, object => sender.send(object), zmpEmitter, subscriptions),
-				removeChannel: channel => zmqService.removeAllListeners(channel, zmpEmitter),
-				newClient: () => { 
-					emitter.emit('clientConnected'); }
-			});
+	// 	const registerRoute = (server, route, zmqService, zmpEmitter, subscriptions) => {
+	// 		// create a custom emitter for raising client connected events
+	// 		const emitter = new EventEmitter();
+	// 		// register a ws route (notice that these callbacks make the same calls to zmqService as the callbacks in wsRoutes)
+	// 		// except for newClient, which is exclusively used for testing
+	// 		server.ws(route, {
+	// 			newChannel: (channel, sender) => zmqService.on(channel, object => sender.send(object), zmpEmitter, subscriptions),
+	// 			removeChannel: channel => zmqService.removeAllListeners(channel, zmpEmitter),
+	// 			newClient: () => {
+	// 				emitter.emit('clientConnected');
+	// 			}
+	// 		});
 
-			return emitter;
-		};
+	// 		return emitter;
+	// 	};
 
-		const extractBasicClientOptionValues = options => {
-			if ('number' !== typeof options)
-				return { numTotalClients: options.numClients, messageIds: options.messageIds };
+	// 	const extractBasicClientOptionValues = options => {
+	// 		if ('number' !== typeof options)
+	// 			return { numTotalClients: options.numClients, messageIds: options.messageIds };
 
-			// by default, expect all message ids
-			const messageIds = new Set();
-			for (let i = 1; i <= options; ++i)
-				messageIds.add(i);
+	// 		// by default, expect all message ids
+	// 		const messageIds = new Set();
+	// 		for (let i = 1; i <= options; ++i)
+	// 			messageIds.add(i);
 
-			return { numTotalClients: options, messageIds };
-		};
+	// 		return { numTotalClients: options, messageIds };
+	// 	};
 
-		const createBoundZsocket = () => {
-			const zsocket = zmq.socket('pub');
-			zsocket.bindSync(`tcp://127.0.0.1:${ports.mq}`);
-			return zsocket;
-		};
+	// 	const createBoundZsocket = () => {
+	// 		const zsocket = zmq.socket('pub');
+	// 		zsocket.bindSync(`tcp://127.0.0.1:${ports.mq}`);
+	// 		return zsocket;
+	// 	};
 
-		const publishBlock = (zsocket, buffer) => {
-			// publish the block buffer to the block topic after short delay to allow subscribers to finish attaching
-			setTimeout(() => {
-				test.log('publishing block data');
-				zsocket.send([Buffer.of(0x49, 0x6A, 0xCA, 0x80, 0xE4, 0xD8, 0xF2, 0x9F), buffer]);
-			}, delays.publish);
-		};
+	// 	const publishBlock = (zsocket, buffer) => {
+	// 		// publish the block buffer to the block topic after short delay to allow subscribers to finish attaching
+	// 		setTimeout(() => {
+	// 			test.log('publishing block data');
+	// 			zsocket.send([Buffer.of(0x49, 0x6A, 0xCA, 0x80, 0xE4, 0xD8, 0xF2, 0x9F), buffer]);
+	// 		}, delays.publish);
+	// 	};
 
-		const createClientSockets = (route, emitter, options, handlers) => {
-			const { numTotalClients, messageIds } = extractBasicClientOptionValues(options);
+	// 	const createClientSockets = (route, emitter, options, handlers) => {
+	// 		const { numTotalClients, messageIds } = extractBasicClientOptionValues(options);
 
-			//  bind to a publisher if one is not provided
-			const zsocket = options.zsocket || createBoundZsocket();
-			const sockets = [];
+	// 		//  bind to a publisher if one is not provided
+	// 		const zsocket = options.zsocket || createBoundZsocket();
+	// 		const sockets = [];
 
-			const curryMessageCallback = (ws, id) => messageJson => {
-				test.log(`${route} (id ${id}) received message: ${messageJson}`);
+	// 		const curryMessageCallback = (ws, id) => messageJson => {
+	// 			test.log(`${route} (id ${id}) received message: ${messageJson}`);
 
-				// 1. if uid is sent, subscribe to topic 'block'
-				const message = messageJson ? JSON.parse(messageJson) : {};
-				if ('uid' in message) {
-					const responseJson = JSON.stringify(Object.assign(message, { subscribe: 'block' }));
-					ws.send(responseJson);
-					test.log('subscribed to block');
-					// store the client id in the socket
-					ws.uid = message.uid;
-					return;
-				}
+	// 			// 1. if uid is sent, subscribe to topic 'block'
+	// 			const message = messageJson ? JSON.parse(messageJson) : {};
+	// 			if ('uid' in message) {
+	// 				const responseJson = JSON.stringify(Object.assign(message, { subscribe: 'block' }));
+	// 				ws.send(responseJson);
+	// 				test.log('subscribed to block');
+	// 				// store the client id in the socket
+	// 				ws.uid = message.uid;
+	// 				return;
+	// 			}
 
-				// 2. if uid is not sent, handle payload (should be block buffer)
-				const messageHandler = () => {
-					expect(messageIds.has(id), `message id ${id}`).to.equal(true);
-					messageIds.delete(id);
-					handlers.onMessage(JSON.parse(messageJson));
+	// 			// 2. if uid is not sent, handle payload (should be block buffer)
+	// 			const messageHandler = () => {
+	// 				expect(messageIds.has(id), `message id ${id}`).to.equal(true);
+	// 				messageIds.delete(id);
+	// 				handlers.onMessage(JSON.parse(messageJson));
 
-					if (0 === messageIds.size) {
-						test.log('all messages processed');
-						handlers.onAllMessages(zsocket, sockets);
-					}
-				};
+	// 				if (0 === messageIds.size) {
+	// 					test.log('all messages processed');
+	// 					handlers.onAllMessages(zsocket, sockets);
+	// 				}
+	// 			};
 
-				messageHandler(id, messageJson);
-			};
+	// 			messageHandler(id, messageJson);
+	// 		};
 
-			// create web sockets
-			let numRemainingClients = numTotalClients;
-			for (let i = 1; i <= numTotalClients; ++i) {
-				const ws = new WebSocket(`ws://localhost:${ports.server}${route}`);
-				sockets.push(ws);
-				ws.on('message', curryMessageCallback(ws, i));
-			}
+	// 		// create web sockets
+	// 		let numRemainingClients = numTotalClients;
+	// 		for (let i = 1; i <= numTotalClients; ++i) {
+	// 			const ws = new WebSocket(`ws://localhost:${ports.server}${route}`);
+	// 			sockets.push(ws);
+	// 			ws.on('message', curryMessageCallback(ws, i));
+	// 		}
 
-			// aggregate test 'clientConnected' events to raise onAllConnected
-			emitter.on('clientConnected', () => {
-				if (0 === --numRemainingClients) {
-					test.log('all clients connected');
-					handlers.onAllConnected(zsocket, sockets);
-				}
-			});
-		};
+	// 		// aggregate test 'clientConnected' events to raise onAllConnected
+	// 		emitter.on('clientConnected', () => {
+	// 			if (0 === --numRemainingClients) {
+	// 				test.log('all clients connected');
+	// 				handlers.onAllConnected(zsocket, sockets);
+	// 			}
+	// 		});
+	// 	};
 
-		const createHandlers = (server, done, blockTag = undefined) => ({
-			onAllConnected: zsocket => {
-				// Act: publish a block
-				publishBlock(zsocket, createBlockBuffer(blockTag));
-			},
-			onMessage: payload => {
-				// Assert: notice that payload is already formatted
-				expect(payload, `blockTag: ${blockTag}`).to.deep.equal(createFormattedBlock(blockTag));
-			},
-			onAllMessages: zsocket => {
-				// close mq socket and server, otherwise subsequent tests would fail
-				zsocketSub.close();
-				zsocket.close();
-				server.close();
-				done();
-			}
-		});
+	// 	const createHandlers = (server, done, blockTag = undefined) => ({
+	// 		onAllConnected: zsocket => {
+	// 			// Act: publish a block
+	// 			publishBlock(zsocket, createBlockBuffer(blockTag));
+	// 		},
+	// 		onMessage: payload => {
+	// 			// Assert: notice that payload is already formatted
+	// 			expect(payload, `blockTag: ${blockTag}`).to.deep.equal(createFormattedBlock(blockTag));
+	// 		},
+	// 		onAllMessages: zsocket => {
+	// 			// close mq socket and server, otherwise subsequent tests would fail
+	// 			zsocket.close();
+	// 			server.close();
+	// 			done();
+	// 		}
+	// 	});
 
-		const runSingleRouteTest = (numClients, done) => {
-			// Arrange: set up the server with a single ws route
-			const server = createWebSocketServer();
-			const emitter = registerRoute(server, '/ws/block', zmqService, zmpEmitter, subscriptions);
-			server.listen(ports.server);
-			// Act + Assert: create a client websocket and run the test
-			createClientSockets('/ws/block', emitter, numClients, createHandlers(server, done));
-			
-		};
+	// 	const runSingleRouteTest = (numClients, done) => {
+	// 		// Arrange: set up the server with a single ws route
+	// 		const server = createWebSocketServer();
+	// 		const emitter = registerRoute(server, '/ws/block', zmqService, zmpEmitter, subscriptions);
+	// 		server.listen(ports.server);
+	// 		// Act + Assert: create a client websocket and run the test
+	// 		createClientSockets('/ws/block', emitter, numClients, createHandlers(server, done));
+	// 	};
 
-		// region subscribe
+	// 	// region subscribe
 
-		//it('handles single subscription', done => runSingleRouteTest(1, done));
+	// 	it('handles single subscription', done => runSingleRouteTest(1, done));
 
-		// endregion
+	// 	endregion
 
-		// region unsubscribe
+	// 	// region unsubscribe
 
-		// it('handles unsubscription of client from subscribed channel', done => {
-		// 	// Arrange: set up the server with a single ws route
-		// 	setTimeout(() => {
-		// 		const server = createWebSocketServer();
-		// 		const emitter = registerRoute(server, '/ws/block', zmqService, zmpEmitter, subscriptions);
-		// 		server.listen(ports.server);
-		// 		// - create three client websockets
-		// 		const defaultHandlers = createHandlers(server, done);
-		// 		const defaultOnAllConnected = defaultHandlers.onAllConnected;
-		// 		const defaultOnAllMessages = defaultHandlers.onAllMessages;
-		// 		createClientSockets(
-		// 			'/ws/block',
-		// 			emitter,
-		// 			{ numClients: 3, messageIds: new Set([1, 3]) }, // messages should only be sent to the first and last sockets
-		// 			Object.assign(defaultHandlers, {
-		// 				onAllConnected: (zsocket, sockets) => {
-		// 					// Act: unsubscribe the second websocket
-		// 					test.log('unsubscribing second websocket');
-		// 					sockets[1].send(JSON.stringify({ uid: sockets[1].uid, unsubscribe: 'block' }));
-		// 					defaultOnAllConnected(zsocket, sockets);
-		// 				},
-		// 				onAllMessages: (zsocket, sockets) => {
-		// 					// Assert: all sockets are still open
-		// 					sockets.forEach(socket => {
-		// 						expect(socket.readyState).to.equal(WebSocket.OPEN);
-		// 					});
+	// 	it('handles unsubscription of client from subscribed channel', done => {
+	// 		// Arrange: set up the server with a single ws route
+	// 		setTimeout(() => {
+	// 			const server = createWebSocketServer();
+	// 			const emitter = registerRoute(server, '/ws/block', zmqService, zmpEmitter, subscriptions);
+	// 			server.listen(ports.server);
+	// 			// - create three client websockets
+	// 			const defaultHandlers = createHandlers(server, done);
+	// 			const defaultOnAllConnected = defaultHandlers.onAllConnected;
+	// 			const defaultOnAllMessages = defaultHandlers.onAllMessages;
+	// 			createClientSockets(
+	// 				'/ws/block',
+	// 				emitter,
+	// 				{ numClients: 3, messageIds: new Set([1, 3]) }, // messages should only be sent to the first and last sockets
+	// 				Object.assign(defaultHandlers, {
+	// 					onAllConnected: (zsocket, sockets) => {
+	// 						// Act: unsubscribe the second websocket
+	// 						test.log('unsubscribing second websocket');
+	// 						sockets[1].send(JSON.stringify({ uid: sockets[1].uid, unsubscribe: 'block' }));
+	// 						defaultOnAllConnected(zsocket, sockets);
+	// 					},
+	// 					onAllMessages: (zsocket, sockets) => {
+	// 						// Assert: all sockets are still open
+	// 						sockets.forEach(socket => {
+	// 							expect(socket.readyState).to.equal(WebSocket.OPEN);
+	// 						});
 
-		// 					defaultOnAllMessages(zsocket);
-		// 				}
-		// 			})
-		// 		);
-		// 	}, 500);
-		// });
+	// 						defaultOnAllMessages(zsocket);
+	// 					}
+	// 				})
+	// 			);
+	// 		}, 500);
+	// 	});
 
-		// it('handles unsubscription of client from unknown channel', done => {
-		// 	// Arrange: set up the server with a single ws route
-		// 	setTimeout(() => {
-		// 		const server = createWebSocketServer();
-		// 		const emitter = registerRoute(server, '/ws/block', zmqService, zmpEmitter, subscriptions);
-		// 		server.listen(ports.server);
+	// 	it('handles unsubscription of client from unknown channel', done => {
+	// 		// Arrange: set up the server with a single ws route
+	// 		setTimeout(() => {
+	// 			const server = createWebSocketServer();
+	// 			const emitter = registerRoute(server, '/ws/block', zmqService, zmpEmitter, subscriptions);
+	// 			server.listen(ports.server);
 
-		// 		// - create three client websockets
-		// 		const defaultHandlers = createHandlers(server, done);
-		// 		const defaultOnAllConnected = defaultHandlers.onAllConnected;
-		// 		createClientSockets(
-		// 			'/ws/block',
-		// 			emitter,
-		// 			3,
-		// 			Object.assign(defaultHandlers, {
-		// 				onAllConnected: (zsocket, sockets) => {
-		// 					// Act: unsubscribe the second websocket from an unknown channel (this should have no effect)
-		// 					test.log('unsubscribing second websocket');
-		// 					sockets[1].send(JSON.stringify({ uid: sockets[1].uid, unsubscribe: 'chainStatistic' }));
-		// 					defaultOnAllConnected(zsocket, sockets);
-		// 				}
-		// 			})
-		// 		);
-		// 	}, 500);
-		// });
+	// 			// - create three client websockets
+	// 			const defaultHandlers = createHandlers(server, done);
+	// 			const defaultOnAllConnected = defaultHandlers.onAllConnected;
+	// 			createClientSockets(
+	// 				'/ws/block',
+	// 				emitter,
+	// 				3,
+	// 				Object.assign(defaultHandlers, {
+	// 					onAllConnected: (zsocket, sockets) => {
+	// 						// Act: unsubscribe the second websocket from an unknown channel (this should have no effect)
+	// 						test.log('unsubscribing second websocket');
+	// 						sockets[1].send(JSON.stringify({ uid: sockets[1].uid, unsubscribe: 'chainStatistic' }));
+	// 						defaultOnAllConnected(zsocket, sockets);
+	// 					}
+	// 				})
+	// 			);
+	// 		}, 500);
+	// 	});
 
-		// // endregion
+	// 	// endregion
 
-		// // region disconnect (client)
+	// 	// region disconnect (client)
 
-		// it('handles disconnecting client sockets', done => {
-		// 	// Arrange: set up the server with a single ws route
-		// 	setTimeout(() => {
-		// 		const server = createWebSocketServer();
-		// 		const emitter = registerRoute(server, '/ws/block', zmqService, zmpEmitter, subscriptions);
-		// 		server.listen(ports.server);
+	// 	it('handles disconnecting client sockets', done => {
+	// 		// Arrange: set up the server with a single ws route
+	// 		setTimeout(() => {
+	// 			const server = createWebSocketServer();
+	// 			const emitter = registerRoute(server, '/ws/block', zmqService, zmpEmitter, subscriptions);
+	// 			server.listen(ports.server);
 
-		// 		// - create three client websockets
-		// 		const defaultHandlers = createHandlers(server, done);
-		// 		const defaultOnAllConnected = defaultHandlers.onAllConnected;
-		// 		createClientSockets(
-		// 			'/ws/block',
-		// 			emitter,
-		// 			{ numClients: 3, messageIds: new Set([1, 3]) }, // messages should only be sent to the first and last sockets
-		// 			Object.assign(defaultHandlers, {
-		// 				onAllConnected: (zsocket, sockets) => {
-		// 					// Act: close the second websocket
-		// 					test.log('closing second websocket');
-		// 					sockets[1].close();
-		// 					defaultOnAllConnected(zsocket, sockets);
-		// 				}
-		// 			})
-		// 		);
-		// 	}, 500);
-		// });
+	// 			// - create three client websockets
+	// 			const defaultHandlers = createHandlers(server, done);
+	// 			const defaultOnAllConnected = defaultHandlers.onAllConnected;
+	// 			createClientSockets(
+	// 				'/ws/block',
+	// 				emitter,
+	// 				{ numClients: 3, messageIds: new Set([1, 3]) }, // messages should only be sent to the first and last sockets
+	// 				Object.assign(defaultHandlers, {
+	// 					onAllConnected: (zsocket, sockets) => {
+	// 						// Act: close the second websocket
+	// 						test.log('closing second websocket');
+	// 						sockets[1].close();
+	// 						defaultOnAllConnected(zsocket, sockets);
+	// 					}
+	// 				})
+	// 			);
+	// 		}, 500);
+	// 	});
 
-		// endregion
+	// 	// endregion
 
-		// region invalid subscription requests
+	// 	// region invalid subscription requests
 
-		const runInvalidClientTest = (done, messageCallback) => {
-			// Arrange: set up the server with a single ws route
-			const server = createWebSocketServer();
-			registerRoute(server, '/ws/block');
-			server.listen(ports.server);
+	// 	const runInvalidClientTest = (done, messageCallback) => {
+	// 		// Arrange: set up the server with a single ws route
+	// 		const server = createWebSocketServer();
+	// 		registerRoute(server, '/ws/block');
+	// 		server.listen(ports.server);
 
-			// - connect four clients to the route
-			const numConnections = 4;
-			let numCloses = 0;
-			const addHandlers = (ws, id) => {
-				ws.on('message', messageJson => messageCallback(ws, messageJson));
-				ws.on('close', () => {
-					// Assert: all clients have been closed
-					test.log(`client ${id} was closed`);
-					if (numConnections === ++numCloses) {
-						// close server, otherwise subsequent tests would fail
-						server.close();
-						done();
-					}
-				});
-			};
+	// 		// - connect four clients to the route
+	// 		const numConnections = 4;
+	// 		let numCloses = 0;
+	// 		const addHandlers = (ws, id) => {
+	// 			ws.on('message', messageJson => messageCallback(ws, messageJson));
+	// 			ws.on('close', () => {
+	// 				// Assert: all clients have been closed
+	// 				test.log(`client ${id} was closed`);
+	// 				if (numConnections === ++numCloses) {
+	// 					// close server, otherwise subsequent tests would fail
+	// 					server.close();
+	// 					done();
+	// 				}
+	// 			});
+	// 		};
 
-			for (let i = 0; i < numConnections; ++i) {
-				const ws = new WebSocket(`ws://localhost:${ports.server}/ws/block`);
-				addHandlers(ws, i);
-			}
-		};
+	// 		for (let i = 0; i < numConnections; ++i) {
+	// 			const ws = new WebSocket(`ws://localhost:${ports.server}/ws/block`);
+	// 			addHandlers(ws, i);
+	// 		}
+	// 	};
 
-		it('invalid data disconnects client', done => {
-			runInvalidClientTest(done, ws => {
-				// Act: non-json data
-				ws.send('hello');
-			});
-		});
+	// 	it('invalid data disconnects client', done => {
+	// 		runInvalidClientTest(done, ws => {
+	// 			// Act: non-json data
+	// 			ws.send('hello');
+	// 		});
+	// 	});
 
-		it('malformed request disconnects client', done => {
-			runInvalidClientTest(done, (ws, messageJson) => {
-				// Arrange:
-				const message = JSON.parse(messageJson);
-				Object.assign(message, { subscribe: 7 });
+	// 	it('malformed request disconnects client', done => {
+	// 		runInvalidClientTest(done, (ws, messageJson) => {
+	// 			// Arrange:
+	// 			const message = JSON.parse(messageJson);
+	// 			Object.assign(message, { subscribe: 7 });
 
-				// Act: subscribe must be a string
-				ws.send(JSON.stringify(message));
-			});
-		});
+	// 			// Act: subscribe must be a string
+	// 			ws.send(JSON.stringify(message));
+	// 		});
+	// 	});
 
-		it('unsupported topic subscribe request disconnects client', done => {
-			runInvalidClientTest(done, (ws, messageJson) => {
-				// Act: try to subscribe to an unsupported topic
-				const responseJson = JSON.stringify(Object.assign(JSON.parse(messageJson), { subscribe: 'chainStatistic' }));
-				ws.send(responseJson);
-			});
-		});
+	// 	it('unsupported topic subscribe request disconnects client', done => {
+	// 		runInvalidClientTest(done, (ws, messageJson) => {
+	// 			// Act: try to subscribe to an unsupported topic
+	// 			const responseJson = JSON.stringify(Object.assign(JSON.parse(messageJson), { subscribe: 'chainStatistic' }));
+	// 			ws.send(responseJson);
+	// 		});
+	// 	});
 
-		// endregion
+	// 	// endregion
 
-		// region close (server)
+	// 	// region close (server)
 
-		it('closing server closes all clients', done => {
-			// Arrange: set up the server with two ws routes
-			const server = createWebSocketServer();
-			registerRoute(server, '/ws/block1');
-			registerRoute(server, '/ws/block2');
-			server.listen(ports.server);
+	// 	it('closing server closes all clients', done => {
+	// 		// Arrange: set up the server with two ws routes
+	// 		const server = createWebSocketServer();
+	// 		registerRoute(server, '/ws/block1');
+	// 		registerRoute(server, '/ws/block2');
+	// 		server.listen(ports.server);
 
-			// - connect two clients to each route
-			const numConnections = 4;
-			let numOpens = 0;
-			let numCloses = 0;
+	// 		// - connect two clients to each route
+	// 		const numConnections = 4;
+	// 		let numOpens = 0;
+	// 		let numCloses = 0;
 
-			const addHandlers = (ws, id) => {
-				ws.on('open', () => {
-					// Act: close the server after all connections have been opened
-					if (numConnections === ++numOpens)
-						// close server, otherwise subsequent tests would fail
-						server.close();
-				});
+	// 		const addHandlers = (ws, id) => {
+	// 			ws.on('open', () => {
+	// 				// Act: close the server after all connections have been opened
+	// 				if (numConnections === ++numOpens)
+	// 					// close server, otherwise subsequent tests would fail
+	// 					server.close();
+	// 			});
 
-				ws.on('close', () => {
-					// Assert: all clients have been closed
-					test.log(`client ${id} was closed`);
-					if (numConnections === ++numCloses)
-						done();
-				});
-			};
+	// 			ws.on('close', () => {
+	// 				// Assert: all clients have been closed
+	// 				test.log(`client ${id} was closed`);
+	// 				if (numConnections === ++numCloses)
+	// 					done();
+	// 			});
+	// 		};
 
-			for (let i = 0; i < numConnections; ++i) {
-				const routePostfix = (i % 2) + 1;
-				const ws = new WebSocket(`ws://localhost:${ports.server}/ws/block${routePostfix}`);
-				addHandlers(ws, i);
-			}
-		});
+	// 		for (let i = 0; i < numConnections; ++i) {
+	// 			const routePostfix = (i % 2) + 1;
+	// 			const ws = new WebSocket(`ws://localhost:${ports.server}/ws/block${routePostfix}`);
+	// 			addHandlers(ws, i);
+	// 		}
+	// 	});
 
-		// endregion
-	});
+	// 	// endregion
+	// });
 
 	// endregion
 });

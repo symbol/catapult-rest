@@ -21,9 +21,6 @@
 
 /** @module plugins/aggregate */
 const aggregateRoutes = require('./aggregateRoutes');
-const catapult = require('catapult-sdk');
-
-const { BinaryParser } = catapult.parser;
 
 /**
  * Creates an aggregate plugin.

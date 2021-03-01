@@ -112,14 +112,13 @@ module.exports = {
 	createMultisocketEmitter: zsocketFactory => {
 		const isSubEvent = key => -1 !== key.indexOf('.');
 		const isValidSubEvent = key => key.endsWith('.close');
-		
+
 		const multisocketEmitter = {
 			on: (key, callback, emitter, subscriptions) => {
 				if (isSubEvent(key)) {
 					if (!isValidSubEvent(key))
 						throw Error(`${key} indicates an unsupported subevent`);
-				} 
-				else if (!(key in subscriptions)) {
+				} else if (!(key in subscriptions)) {
 					const zsocket = zsocketFactory(key);
 					zsocket.on('zsocket_close', () => {
 						delete subscriptions[key];
@@ -135,19 +134,20 @@ module.exports = {
 
 				emitter.removeAllListeners(key);
 				emitter.removeAllListeners(`${key}.close`);
-
 			},
 
 			listenerCount: (key, emitter) => emitter.listenerCount(key),
 
 			/**
-			 * Closes all zsockets.
+			  * @param {array} keys Keys of emitter to be removed.
+			  * @param {object} emitter event emitter
+			  * Closes all zsockets.
 			 */
 			close: (keys, emitter) => {
-				keys.forEach((k) => multisocketEmitter.removeAllListeners(k, emitter));
+				keys.forEach(k => multisocketEmitter.removeAllListeners(k, emitter));
 			}
 		};
 
 		return multisocketEmitter;
-	},
+	}
 };
