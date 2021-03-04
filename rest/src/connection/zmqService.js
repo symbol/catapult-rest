@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+const { ServerMessageHandler } = require('./serverMessageHandlers');
 const zmqUtils = require('./zmqUtils');
 const zmq = require('zeromq');
 
