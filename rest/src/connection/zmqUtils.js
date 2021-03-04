@@ -154,7 +154,7 @@ module.exports = {
 
 				const zsocket = zsockets[key];
 				delete zsockets[key];
-				if (!Object.keys(zsockets).find(k => -1 < k.indexOf(socketMatchingKey(key)))) {
+				if (!Object.keys(zsockets).find((k) => k.includes(socketMatchingKey(key)))) {
 					zsocket.close();
 					delete connectedSocket[socketMatchingKey(key)];
 				}
