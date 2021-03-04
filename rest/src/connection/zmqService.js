@@ -22,13 +22,12 @@
 const zmqUtils = require('./zmqUtils');
 const zmq = require('zeromq');
 
-const createZmqSocket = (key, zmqConfig, logger, currentSocketCount) => {
+const createZmqSocket = (key, zmqConfig, logger, connectedSocket) => {
 	const zsocket = zmq.socket('sub');
-	zsocket.key = key;
+	zsocket.key = socketMatchingKey(key);
 	zmqUtils.prepareZsocket(zsocket, zmqConfig, logger);
-
 	zsocket.connect(`tcp://${zmqConfig.host}:${zmqConfig.port}`);
-	logger.info(`Current zmq subscription count: ${currentSocketCount + 1}`);
+	connectedSocket[zsocket.key] = zsocket
 	return zsocket;
 };
 
@@ -43,6 +42,11 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
 	return { filter, handler };
 };
 
+const socketMatchingKey = key => {
+	const [topicCategory, topicParam] = key.replace('.close', '').split('/');
+	return !topicParam ? topicCategory : topicParam;
+}
+
 /**
  * Service for creating channel-specific zmq sockets.
  * @param {object} zmqConfig Configuration for configuring sockets.
@@ -52,17 +56,25 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
  * @returns {object} Newly created zmq connection service that is a stripped down EventEmitter.
  */
 module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptors, logger) =>
-	zmqUtils.createMultisocketEmitter((key, emitter, currentSocketCount) => {
-		if (currentSocketCount * 4 > (!zmqConfig.maxSubscriptions ? 500 : zmqConfig.maxSubscriptions) - 4)
+	zmqUtils.createMultisocketEmitter((key, emitter, subscribedSockets, connectedSocket) => {
+		const subscribedKeys = Object.keys(subscribedSockets);
+		if (subscribedKeys.length * 4 > (!zmqConfig.maxSubscriptions ? 500 : zmqConfig.maxSubscriptions) - 4)
 			throw new Error('Max subscriptions reached.');
 
 		logger.info(`subscribing to ${key}`);
 		const subscriptionInfo = findSubscriptionInfo(key, emitter, codec, channelDescriptors);
-
-		const zsocket = createZmqSocket(key, zmqConfig, logger, currentSocketCount);
+		const matchingKey = subscribedKeys.find((k) => k.includes(socketMatchingKey(key)))
+		if (matchingKey) {
+			//TODO: to exclude block & finalityBlock
+			subscribedSockets[matchingKey].subscribe(subscriptionInfo.filter);
+			logger.info(`zmq Subscription count: ${Object.keys(subscribedSockets).length}, Socket opened ${Object.keys(connectedSocket).length}`);
+			return subscribedSockets[matchingKey];
+		}
+		const zsocket = createZmqSocket(key, zmqConfig, logger, connectedSocket);
 		// the second param (handler) gets called with the provided args in the message, which vary depending on the defined handler type
 		// (block, transaction, transactionStatus...)
 		zsocket.subscribe(subscriptionInfo.filter);
 		zsocket.on('message', subscriptionInfo.handler);
+		logger.info(`zmq Subscription count: ${Object.keys(subscribedSockets).length}, Socket opened ${Object.keys(connectedSocket).length}`);
 		return zsocket;
 	});
