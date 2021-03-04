@@ -66,8 +66,9 @@ module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptor
 		const matchingKey = subscribedKeys.find(k => k.includes(socketMatchingKey(key)));
 		if (matchingKey) {
 			subscribedSockets[matchingKey].subscribe(subscriptionInfo.filter);
-			logger.info(`zmq Subscription count: ${Object.keys(subscribedSockets).length}, 
-				Socket opened ${Object.keys(connectedSocket).length}`);
+			logger.info(
+				`zmq Subscription count: ${Object.keys(subscribedSockets).length}, ` + 
+				`Socket opened ${Object.keys(connectedSocket).length}`);
 			return subscribedSockets[matchingKey];
 		}
 		const zsocket = createZmqSocket(key, zmqConfig, logger, connectedSocket);
@@ -75,7 +76,8 @@ module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptor
 		// (block, transaction, transactionStatus...)
 		zsocket.subscribe(subscriptionInfo.filter);
 		zsocket.on('message', subscriptionInfo.handler);
-		logger.info(`zmq Subscription count: ${Object.keys(subscribedSockets).length}, 
-			Socket opened ${Object.keys(connectedSocket).length}`);
+		logger.info(`zmq Subscription count: ${Object.keys(subscribedSockets).length}, ` +
+			`Socket opened ${Object.keys(connectedSocket).length}`
+		);
 		return zsocket;
 	});
