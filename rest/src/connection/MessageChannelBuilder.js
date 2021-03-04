@@ -79,12 +79,12 @@ class MessageChannelBuilder {
 			Buffer.of(0x54, 0x79, 0xCE, 0x31, 0xA0, 0x32, 0x48, 0x4D),
 			ServerMessageHandler.finalizedBlock
 		);
-		this.add('confirmedAdded', 'a', ServerMessageHandler.transaction);
-		this.add('unconfirmedAdded', 'u', ServerMessageHandler.transaction);
-		this.add('unconfirmedRemoved', 'r', ServerMessageHandler.transactionHash);
+		this.add('confirmedAdded', 'a', ServerMessageHandler.zmqMessageHandler);
+		this.add('unconfirmedAdded', 'u', ServerMessageHandler.zmqMessageHandler);
+		this.add('unconfirmedRemoved', 'r', ServerMessageHandler.zmqMessageHandler);
 		this.descriptors.status = {
 			filter: this.createAddressFilter('s'),
-			handler: ServerMessageHandler.transactionStatus
+			handler: ServerMessageHandler.zmqMessageHandler
 		};
 	}
 
