@@ -119,7 +119,7 @@ module.exports = {
 		const socketMatchingKey = key => {
 			const [topicCategory, topicParam] = key.replace('.close', '').split('/');
 			return !topicParam ? topicCategory : topicParam;
-		}
+		};
 		const connectedSocket = {};
 		const multisocketEmitter = {
 			on: (key, callback) => {
@@ -131,10 +131,9 @@ module.exports = {
 					zsocket.on('zsocket_close', () => {
 						// firing of close indicates socket is fully closed, so prevent it from being closed again
 						// by bypassing close in removeAllListeners
-						Object.keys(zsockets).forEach((k) => {
-							if (k.includes(socketMatchingKey(key))) {
+						Object.keys(zsockets).forEach(k => {
+							if (k.includes(socketMatchingKey(key)))
 								delete zsockets[k];
-							}
 						});
 						emitter.emit(`${key}.close`);
 						multisocketEmitter.removeAllListeners(key);
@@ -142,7 +141,6 @@ module.exports = {
 					zsockets[key] = zsocket;
 				}
 				emitter.on(key, callback);
-				
 			},
 
 			removeAllListeners: key => {
@@ -156,12 +154,10 @@ module.exports = {
 
 				const zsocket = zsockets[key];
 				delete zsockets[key];
-				if (!Object.keys(zsockets).find((k) => k.indexOf(socketMatchingKey(key)) > -1)) {
+				if (!Object.keys(zsockets).find(k => -1 < k.indexOf(socketMatchingKey(key)))) {
 					zsocket.close();
 					delete connectedSocket[socketMatchingKey(key)];
 				}
-
-				console.log(`zmq Subscription count: ${Object.keys(zsockets).length}, Socket opened ${Object.keys(connectedSocket).length}`);
 			},
 
 			listenerCount: key => emitter.listenerCount(key),

@@ -43,7 +43,7 @@ describe('server message handlers', () => {
 		const blockBuffer = Buffer.of(0xAB, 0xCD, 0xEF);
 
 		// Act:
-		ServerMessageHandler.block(codec, eventData => emitted.push(eventData))(12, blockBuffer, 56, 78, 99, 88);
+		ServerMessageHandler.zmqMessageHandler(codec, eventData => emitted.push(eventData))(12, blockBuffer, 56, 78, 99, 88);
 
 		// Assert:
 		// - 12 is a "topic" so it's not forwarded
@@ -70,7 +70,7 @@ describe('server message handlers', () => {
 		]);
 
 		// Act:
-		ServerMessageHandler.finalizedBlock(codec, eventData => emitted.push(eventData))(12, finalizedBlockBuffer, 99, 88);
+		ServerMessageHandler.zmqMessageHandler(codec, eventData => emitted.push(eventData))(12, finalizedBlockBuffer, 99, 88);
 
 		// Assert:
 		// - 12 is a "topic" so it's not forwarded
@@ -97,7 +97,7 @@ describe('server message handlers', () => {
 
 		// Act:
 		const height = Buffer.of(66, 0, 0, 0, 0, 0, 0, 0);
-		ServerMessageHandler.transaction(codec, eventData => emitted.push(eventData))(22, transactionBuffer, 44, 55, height, 77, 88, 99);
+		ServerMessageHandler.zmqMessageHandler(codec, eventData => emitted.push(eventData))(22, transactionBuffer, 44, 55, height, 77, 88, 99);
 
 		// Assert:
 		// - 22 is a "topic" so it's not forwarded
@@ -126,7 +126,7 @@ describe('server message handlers', () => {
 		const codec = createMockCodec(35);
 
 		// Act:
-		ServerMessageHandler.transactionHash(codec, eventData => emitted.push(eventData))(22, 44, 77, 88, 99);
+		ServerMessageHandler.zmqMessageHandler(codec, eventData => emitted.push(eventData))(22, 44, 77, 88, 99);
 
 		// Assert:
 		// - 22 is a "topic" so it's not forwarded
@@ -148,7 +148,7 @@ describe('server message handlers', () => {
 		]);
 
 		// Act:
-		ServerMessageHandler.transactionStatus(codec, eventData => emitted.push(eventData))(22, buffer, 99);
+		ServerMessageHandler.zmqMessageHandler(codec, eventData => emitted.push(eventData))(22, buffer, 99);
 
 		// Assert:
 		// - 22 is a "topic" so it's not forwarded

@@ -22,9 +22,6 @@
 /** @module plugins/aggregate */
 const aggregateRoutes = require('./aggregateRoutes');
 const { ServerMessageHandler } = require('../../connection/serverMessageHandlers');
-const catapult = require('catapult-sdk');
-
-const { BinaryParser } = catapult.parser;
 
 /**
  * Creates an aggregate plugin.

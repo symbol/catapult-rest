@@ -63,7 +63,7 @@ describe('aggregate plugin', () => {
 			const descriptor = registerAndExtractChannelDescriptor('partialAdded');
 
 			// Assert:
-			expect(descriptor).to.deep.equal({ name: 'partialAdded', markerChar: 'p', handler: ServerMessageHandler.transaction });
+			expect(descriptor).to.deep.equal({ name: 'partialAdded', markerChar: 'p', handler: ServerMessageHandler.zmqMessageHandler });
 		});
 
 		it('registers partialRemoved', () => {
@@ -71,7 +71,7 @@ describe('aggregate plugin', () => {
 			const descriptor = registerAndExtractChannelDescriptor('partialRemoved');
 
 			// Assert:
-			expect(descriptor).to.deep.equal({ name: 'partialRemoved', markerChar: 'q', handler: ServerMessageHandler.transactionHash });
+			expect(descriptor).to.deep.equal({ name: 'partialRemoved', markerChar: 'q', handler: ServerMessageHandler.zmqMessageHandler });
 		});
 
 		it('registers cosignature', () => {
