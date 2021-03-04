@@ -141,7 +141,7 @@ describe('message channel builder', () => {
 		describe('confirmedAdded', () => {
 			describe('filter', () => { addAddressFilterTests(0x61, builder => builder.build().confirmedAdded.filter); });
 			describe('handler', () => {
-				it('is set to transaction type', () => {
+				it('is set to zmqMessageHandler type', () => {
 					const messageChannelBuilder = new MessageChannelBuilder({}, networkIdentifier);
 					expect(messageChannelBuilder.descriptors.confirmedAdded.handler).to.equal(ServerMessageHandler.zmqMessageHandler);
 				});
@@ -182,7 +182,7 @@ describe('message channel builder', () => {
 	describe('custom channels', () => {
 		describe('with transaction handler', () => {
 			const createChannelInfo = builder => {
-				builder.add('foo', 'z', ServerMessageHandler.transaction);
+				builder.add('foo', 'z', ServerMessageHandler.zmqMessageHandler);
 				return builder.build().foo;
 			};
 			describe('filter', () => { addAddressFilterTests(0x7A, builder => createChannelInfo(builder).filter); });
@@ -197,7 +197,7 @@ describe('message channel builder', () => {
 
 		describe('with transaction hash handler', () => {
 			const createChannelInfo = builder => {
-				builder.add('foo', 'z', ServerMessageHandler.transactionHash);
+				builder.add('foo', 'z', ServerMessageHandler.zmqMessageHandler);
 				return builder.build().foo;
 			};
 			describe('filter', () => { addAddressFilterTests(0x7A, builder => createChannelInfo(builder).filter); });
@@ -252,7 +252,8 @@ describe('message channel builder', () => {
 			const builder = new MessageChannelBuilder({}, networkIdentifier);
 
 			// Assert:
-			expect(() => builder.add('foo', 'zz', ServerMessageHandler.transaction)).to.throw('channel marker must be single character');
+			expect(() => builder.add('foo', 'zz',
+				ServerMessageHandler.zmqMessageHandler)).to.throw('channel marker must be single character');
 		});
 
 		it('cannot override default channel', () => {
@@ -260,19 +261,24 @@ describe('message channel builder', () => {
 			const builder = new MessageChannelBuilder({}, networkIdentifier);
 
 			// Assert:
-			expect(() => builder.add('status', 'z', ServerMessageHandler.transaction)).to.throw('channel has already been registered');
-			expect(() => builder.add('foo', 'u', ServerMessageHandler.transaction)).to.throw('channel marker has already been registered');
+			expect(() => builder.add('status', 'z',
+				ServerMessageHandler.zmqMessageHandler)).to.throw('channel has already been registered');
+			expect(() => builder.add('foo', 'u',
+				ServerMessageHandler.zmqMessageHandler)).to.throw('channel marker has already been registered');
 		});
 
 		it('cannot be registered multiple times', () => {
 			// Arrange:
 			const builder = new MessageChannelBuilder({}, networkIdentifier);
-			builder.add('foo', 'z', ServerMessageHandler.transaction);
+			builder.add('foo', 'z', ServerMessageHandler.zmqMessageHandler);
 
 			// Assert:
-			expect(() => builder.add('foo', 'z', ServerMessageHandler.transaction)).to.throw('channel has already been registered');
-			expect(() => builder.add('foo', 'y', ServerMessageHandler.transaction)).to.throw('channel has already been registered');
-			expect(() => builder.add('bar', 'z', ServerMessageHandler.transaction)).to.throw('channel marker has already been registered');
+			expect(() => builder.add('foo', 'z',
+				ServerMessageHandler.zmqMessageHandler)).to.throw('channel has already been registered');
+			expect(() => builder.add('foo', 'y',
+				ServerMessageHandler.zmqMessageHandler)).to.throw('channel has already been registered');
+			expect(() => builder.add('bar', 'z',
+				ServerMessageHandler.zmqMessageHandler)).to.throw('channel marker has already been registered');
 		});
 	});
 });
