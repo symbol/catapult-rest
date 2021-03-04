@@ -133,7 +133,7 @@ describe('message channel builder', () => {
 			describe('handler', () => {
 				it('is set to block type', () => {
 					const messageChannelBuilder = new MessageChannelBuilder({}, networkIdentifier);
-					expect(messageChannelBuilder.descriptors.block.handler).to.equal(ServerMessageHandler.block);
+					expect(messageChannelBuilder.descriptors.block.handler).to.equal(ServerMessageHandler.zmqMessageHandler);
 				});
 			});
 		});
@@ -143,7 +143,7 @@ describe('message channel builder', () => {
 			describe('handler', () => {
 				it('is set to transaction type', () => {
 					const messageChannelBuilder = new MessageChannelBuilder({}, networkIdentifier);
-					expect(messageChannelBuilder.descriptors.confirmedAdded.handler).to.equal(ServerMessageHandler.transaction);
+					expect(messageChannelBuilder.descriptors.confirmedAdded.handler).to.equal(ServerMessageHandler.zmqMessageHandler);
 				});
 			});
 		});
@@ -153,7 +153,7 @@ describe('message channel builder', () => {
 			describe('handler', () => {
 				it('is set to transaction type', () => {
 					const messageChannelBuilder = new MessageChannelBuilder({}, networkIdentifier);
-					expect(messageChannelBuilder.descriptors.unconfirmedAdded.handler).to.equal(ServerMessageHandler.transaction);
+					expect(messageChannelBuilder.descriptors.unconfirmedAdded.handler).to.equal(ServerMessageHandler.zmqMessageHandler);
 				});
 			});
 		});
@@ -163,7 +163,7 @@ describe('message channel builder', () => {
 			describe('handler', () => {
 				it('is set to transaction type', () => {
 					const messageChannelBuilder = new MessageChannelBuilder({}, networkIdentifier);
-					expect(messageChannelBuilder.descriptors.unconfirmedRemoved.handler).to.equal(ServerMessageHandler.transactionHash);
+					expect(messageChannelBuilder.descriptors.unconfirmedRemoved.handler).to.equal(ServerMessageHandler.zmqMessageHandler);
 				});
 			});
 		});
@@ -173,7 +173,7 @@ describe('message channel builder', () => {
 			describe('handler', () => {
 				it('is set to transaction type', () => {
 					const messageChannelBuilder = new MessageChannelBuilder({}, networkIdentifier);
-					expect(messageChannelBuilder.descriptors.status.handler).to.equal(ServerMessageHandler.transactionStatus);
+					expect(messageChannelBuilder.descriptors.status.handler).to.equal(ServerMessageHandler.zmqMessageHandler);
 				});
 			});
 		});
@@ -190,7 +190,7 @@ describe('message channel builder', () => {
 				it('is set to transaction type', () => {
 					const messageChannelBuilder = new MessageChannelBuilder({}, networkIdentifier);
 					createChannelInfo(messageChannelBuilder);
-					expect(messageChannelBuilder.descriptors.foo.handler).to.equal(ServerMessageHandler.transaction);
+					expect(messageChannelBuilder.descriptors.foo.handler).to.equal(ServerMessageHandler.zmqMessageHandler);
 				});
 			});
 		});
@@ -205,7 +205,7 @@ describe('message channel builder', () => {
 				it('is set to transaction hash type', () => {
 					const messageChannelBuilder = new MessageChannelBuilder({}, networkIdentifier);
 					createChannelInfo(messageChannelBuilder);
-					expect(messageChannelBuilder.descriptors.foo.handler).to.equal(ServerMessageHandler.transactionHash);
+					expect(messageChannelBuilder.descriptors.foo.handler).to.equal(ServerMessageHandler.zmqMessageHandler);
 				});
 			});
 		});
