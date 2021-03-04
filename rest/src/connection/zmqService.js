@@ -58,8 +58,6 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
 module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptors, logger) =>
 	zmqUtils.createMultisocketEmitter((key, emitter, subscribedSockets, connectedSocket) => {
 		const subscribedKeys = Object.keys(subscribedSockets);
-		if (subscribedKeys.length * 4 > (!zmqConfig.maxSubscriptions ? 500 : zmqConfig.maxSubscriptions) - 4)
-			throw new Error('Max subscriptions reached.');
 
 		logger.info(`subscribing to ${key}`);
 		const subscriptionInfo = findSubscriptionInfo(key, emitter, codec, channelDescriptors);
@@ -72,6 +70,9 @@ module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptor
 			);
 			return subscribedSockets[matchingKey];
 		}
+		if (Object.keys(connectedSocket).length === (!zmqConfig.maxSubscriptions ? 500 : zmqConfig.maxSubscriptions))
+			throw new Error('Max subscriptions reached.');
+
 		const zsocket = createZmqSocket(key, zmqConfig, logger, connectedSocket);
 		// the second param (handler) gets called with the provided args in the message, which vary depending on the defined handler type
 		// (block, transaction, transactionStatus...)
