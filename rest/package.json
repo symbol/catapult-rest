@@ -10,7 +10,7 @@
     "version": "echo $npm_package_version",
     "start": "node _build/index.js",
     "start:cluster": "pm2 start _build/index.js --name catapult-rest -i 2",
-    "start:cluster_dev": "pm2 start _build/index.js -i 2 --name catapult-rest -- target/gateways/rest/rest.json && pm2 logs",
+    "start:cluster_dev": "pm2 start _build/index.js -i 2 --name catapult-rest -- target/gateways/rest/rest.json && pm2 monit",
     "start:dev": "nodemon src/index.js target/gateways/rest/rest.json",
     "stop:cluster": "pm2 stop all",
     "delete:cluster": "pm2 flush && pm2 delete all",
