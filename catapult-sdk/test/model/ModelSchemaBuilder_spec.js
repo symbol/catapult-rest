@@ -335,7 +335,7 @@ describe('model schema builder', () => {
 				'serverInfoData.restVersion',
 				'serverInfoData.sdkVersion',
 				'serverInfoData.symbolBootstrapVersion'
-				
+
 			]);
 		});
 
