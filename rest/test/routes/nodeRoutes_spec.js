@@ -42,7 +42,8 @@ describe('node routes', () => {
 				})
 			},
 			config: {
-				apiNode: { timeout: 1000 }
+				apiNode: { timeout: 1000 },
+				symbolBootstrapVersion: '1.0.2'
 			}
 		});
 
@@ -356,7 +357,8 @@ describe('node routes', () => {
 					payload: {
 						serverInfo: {
 							restVersion,
-							sdkVersion
+							sdkVersion,
+							symbolBootstrapVersion: '1.0.2'
 						}
 					},
 					type: 'serverInfo'

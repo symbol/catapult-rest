@@ -146,7 +146,8 @@ module.exports = {
 				payload: {
 					serverInfo: {
 						restVersion,
-						sdkVersion
+						sdkVersion,
+						symbolBootstrapVersion: services.config.symbolBootstrapVersion || 'N/A'
 					}
 				},
 				type: routeResultTypes.serverInfo

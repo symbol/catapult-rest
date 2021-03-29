@@ -81,5 +81,7 @@
     }
   },
 
-  "numBlocksTransactionFeeStats": 300
+  "numBlocksTransactionFeeStats": 300,
+
+  "symbolBootstrapVersion": ""
 }
