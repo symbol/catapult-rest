@@ -83,5 +83,9 @@
 
   "numBlocksTransactionFeeStats": 300,
 
-  "symbolBootstrapVersion": ""
+  "deployment": {
+    "deploymentTool": "",
+    "deploymentToolVersion": "",
+    "lastUpdatedDate": ""
+  }
 }
