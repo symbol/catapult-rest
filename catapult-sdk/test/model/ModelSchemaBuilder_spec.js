@@ -333,7 +333,9 @@ describe('model schema builder', () => {
 				'nodeInfo.friendlyName',
 				'nodeInfo.host',
 				'serverInfoData.restVersion',
-				'serverInfoData.sdkVersion'
+				'serverInfoData.sdkVersion',
+				'serverInfoData.symbolBootstrapVersion'
+				
 			]);
 		});
 

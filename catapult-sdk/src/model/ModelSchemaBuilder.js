@@ -248,7 +248,8 @@ class ModelSchemaBuilder {
 			},
 			serverInfoData: {
 				restVersion: ModelType.string,
-				sdkVersion: ModelType.string
+				sdkVersion: ModelType.string,
+				symbolBootstrapVersion: ModelType.string
 			},
 			stateTree: {
 				tree: { type: ModelType.array, schemaName: ModelType.binary }
