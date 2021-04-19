@@ -60,5 +60,16 @@ module.exports = {
 				next();
 			});
 		});
+
+		// CMC specific endpoint
+		server.get('/network/currency/circulating', (req, res, next) => {
+			const networkMosaicId = [ 245791924, 1425519112 ]//[ 2718049272, 1810731327 ] //6BED913FA20223F8;
+			return db.mosaicsByIds([networkMosaicId]).then(response => {
+				const supply = response[0].mosaic.supply.toString().slice(0, -6);
+				res.setHeader('content-type', 'text/plain');
+				res.send(supply);
+				next();
+			});
+		});
 	}
 };
