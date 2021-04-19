@@ -43,7 +43,7 @@ describe('mosaic plugin', () => {
 				'/mosaics',
 				'/mosaics/:mosaicId',
 				'/mosaics/:mosaicId/merkle',
-				'/network/currency/circulating/:mosaicId'
+				'/network/currency/circulating'
 			]);
 		});
 
