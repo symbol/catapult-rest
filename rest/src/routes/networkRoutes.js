@@ -132,15 +132,14 @@ module.exports = {
 
 		// CMC specific, only return the plain value of the max mosaic supply
 		server.get('/network/currency/total', (req, res, next) => readAndParseNetworkPropertiesFile()
-		.then(propertiesObject => {
-			const maxSupply = propertiesObject.chain.maxMosaicAtomicUnits.replace(/'/g, '').slice(0, -6);
-			res.setHeader('content-type', 'text/plain');
-			res.send(maxSupply);
-			next();
-		}).catch((e) => {
-			console.log(e)
-			res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
-			next();
-		}));
+			.then(propertiesObject => {
+				const maxSupply = propertiesObject.chain.maxMosaicAtomicUnits.replace(/'/g, '').slice(0, -6);
+				res.setHeader('content-type', 'text/plain');
+				res.send(maxSupply);
+				next();
+			}).catch(e => {
+				res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
+				next();
+			}));
 	}
 };
