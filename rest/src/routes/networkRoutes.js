@@ -137,7 +137,7 @@ module.exports = {
 				res.setHeader('content-type', 'text/plain');
 				res.send(maxSupply);
 				next();
-			}).catch(e => {
+			}).catch(() => {
 				res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
 				next();
 			}));
