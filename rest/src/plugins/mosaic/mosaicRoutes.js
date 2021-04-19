@@ -62,9 +62,10 @@ module.exports = {
 		});
 
 		// CMC specific endpoint
-		server.get('/network/currency/circulating', (req, res, next) => {
-			const networkMosaicId = [2718049272, 1810731327]; // 6BED913FA20223F8;
-			return db.mosaicsByIds([networkMosaicId]).then(response => {
+		server.get('/network/currency/circulating/:mosaicId', (req, res, next) => {
+			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId',
+				'uint64hex');
+			return db.mosaicsByIds([mosaicId]).then(response => {
 				const s = response[0].mosaic.supply.toString();
 				const supply = s.substring(0, s.length - 6) + "."+ s.substring(s.length - 6, s.length);
 				res.setHeader('content-type', 'text/plain');
