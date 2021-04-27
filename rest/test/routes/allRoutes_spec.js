@@ -72,7 +72,7 @@ describe('all routes', () => {
 			'/transactions/:group',
 			'/transactionStatus/:hash',
 
-			'/network/currency/supply/total'
+			'/network/currency/supply/max'
 		]);
 	});
 
