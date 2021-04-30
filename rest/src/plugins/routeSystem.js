@@ -27,6 +27,7 @@ const metadata = require('./metadata/metadata');
 const mosaic = require('./mosaic/mosaic');
 const multisig = require('./multisig/multisig');
 const namespace = require('./namespace/namespace');
+const cmc = require('./cmc/cmc');
 const receipts = require('./receipts/receipts');
 const restrictions = require('./restrictions/restrictions');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');
@@ -43,7 +44,8 @@ const plugins = {
 	namespace,
 	receipts,
 	restrictions,
-	transfer: empty
+	transfer: empty,
+	cmc
 };
 
 module.exports = {
