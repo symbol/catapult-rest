@@ -31,6 +31,7 @@ const namespace = require('./namespace');
 const receipts = require('./receipts');
 const restrictions = require('./restrictions');
 const transfer = require('./transfer');
+const networkCurrency = require('./networkCurrency');
 const ModelFormatterBuilder = require('../model/ModelFormatterBuilder');
 const ModelSchemaBuilder = require('../model/ModelSchemaBuilder');
 const ModelCodecBuilder = require('../modelBinary/ModelCodecBuilder');
@@ -46,7 +47,8 @@ const plugins = {
 	namespace,
 	receipts,
 	restrictions,
-	transfer
+	transfer,
+	networkCurrency
 };
 
 /**
