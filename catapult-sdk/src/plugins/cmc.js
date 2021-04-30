@@ -19,16 +19,16 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @module plugins/networkCurrency */
+/** @module plugins/cmc */
 
 /**
- * Creates a networkCurrency plugin.
+ * Creates a cmc plugin use for CoinMarketCap.
  * @type {module:plugins/CatapultPlugin}
  */
-const networkCurrencyPlugin = {
+const cmcPlugin = {
 	registerSchema: builder => {},
 
 	registerCodecs: codecBuilder => {}
 };
 
-module.exports = networkCurrencyPlugin;
+module.exports = cmcPlugin;
