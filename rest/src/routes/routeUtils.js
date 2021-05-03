@@ -262,7 +262,7 @@ const routeUtils = {
 
 		/**
 		 * Creates a text handler that forwards a plain text result.
-		 * @param {string} res Restify response object.
+		 * @param {object} res Restify response object.
 		 * @param {Function} next Restify next callback handler.
 		 * @returns {Function} An appropriate object handler.
 		 */

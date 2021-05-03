@@ -21,6 +21,7 @@
 
 const uncirculatedAddresses = require('./unCirculatedAccounts');
 const routeUtils = require('../../routes/routeUtils');
+const cmcUtils = require('./cmcUtils');
 const errors = require('../../server/errors');
 const AccountType = require('../AccountType');
 const ini = require('ini');
@@ -37,10 +38,6 @@ module.exports = {
 				.then(fileData => ini.parse(fileData));
 		};
 
-		const convertToRelative = (s) => {
-			return (Number(s) / Math.pow(10, 6)).toFixed(6)
-		}
-
 		server.get('/network/currency/supply/circulating', (req, res, next) => readAndParseNetworkPropertiesFile()
 			.then(async propertiesObject => {
 				/* eslint-disable global-require */
@@ -56,7 +53,7 @@ module.exports = {
 
 				const circulatingSupply = (totalSupply - totalUncirculated).toString();
 
-				sender.sendPlainText(res, next)(convertToRelative(circulatingSupply));
+				sender.sendPlainText(res, next)(cmcUtils.convertToRelative(circulatingSupply));
 			}).catch(() => {
 				res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
 				next();
@@ -69,7 +66,7 @@ module.exports = {
 				return db.mosaicsByIds([mosaicId]).then(response => {
 					const supply = response[0].mosaic.supply.toString();
 
-					sender.sendPlainText(res, next)(convertToRelative(supply));
+					sender.sendPlainText(res, next)(cmcUtils.convertToRelative(supply));
 				}).catch(() => {
 					res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
 					next();
@@ -79,9 +76,8 @@ module.exports = {
 		server.get('/network/currency/supply/max', (req, res, next) => readAndParseNetworkPropertiesFile()
 			.then(propertiesObject => {
 				const supply = propertiesObject.chain.maxMosaicAtomicUnits.replace(/'/g, '').replace('0x', '');
-
-				sender.sendPlainText(res, next)(convertToRelative(supply));
-			}).catch(() => {
+				sender.sendPlainText(res, next)(cmcUtils.convertToRelative(supply));
+			}).catch((e) => {
 				res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
 				next();
 			}));
