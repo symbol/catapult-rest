@@ -19,18 +19,18 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { expect } = require('chai');
 const cmcUtils = require('../../../src/plugins/cmc/cmcUtils');
+const { expect } = require('chai');
 
 describe('cmc utils', () => {
-    it('convertToRelative', () => {
-        // Arrange:
-        const absoluteAmout = '9000000000000000';
-        const relativeAmount = '9000000000.000000';
+	it('convertToRelative', () => {
+		// Arrange:
+		const absoluteAmout = '9000000000000000';
+		const relativeAmount = '9000000000.000000';
 
-        // Act:
-        const converted = cmcUtils.convertToRelative(absoluteAmout);
-        // Assert:
-        expect(converted).equal(relativeAmount);
-    })
-})
+		// Act:
+		const converted = cmcUtils.convertToRelative(absoluteAmout);
+		// Assert:
+		expect(converted).equal(relativeAmount);
+	});
+});

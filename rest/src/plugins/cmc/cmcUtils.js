@@ -20,9 +20,7 @@
  */
 
 const cmcUtils = {
-    convertToRelative: (absolute) => {
-        return (Number(absolute) / Math.pow(10, 6)).toFixed(6)
-    }
+	convertToRelative: absolute => (Number(absolute) / (10 ** 6)).toFixed(6)
 };
 
 module.exports = cmcUtils;

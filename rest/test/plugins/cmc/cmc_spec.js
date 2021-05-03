@@ -42,7 +42,7 @@ describe('cmc plugin', () => {
 			test.assert.assertRoutes(routes, [
 				'/network/currency/supply/circulating',
 				'/network/currency/supply/total',
-				'/network/currency/supply/max',
+				'/network/currency/supply/max'
 			]);
 		});
 	});

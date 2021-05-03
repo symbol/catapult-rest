@@ -26,18 +26,18 @@ const catapult = require('catapult-sdk');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const fs = require('fs');
+
 const { uint64 } = catapult.utils;
 
-describe.only('cmc routes', () => {
+describe('cmc routes', () => {
 	describe('network currency supply', () => {
 		const maxSupply = 9000000000000000;
 		const XYMSupply = 8998999998000000;
 
 		sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
-					callback(null, '[chain]\n'
-						+ 'maxMosaicAtomicUnits = ' + maxSupply + '\n'
+			callback(null, `${'[chain]\n'
+						+ 'maxMosaicAtomicUnits = '}${maxSupply}\n`
 						+ 'currencyMosaicId = 1234567890ABCDEF'));
-
 
 		const mosaicsSample = [{
 			id: '',
@@ -65,19 +65,22 @@ describe.only('cmc routes', () => {
 				importanceHeight: '',
 				activityBuckets: [],
 				mosaics: [
-					{ id: 0, amount: uint64.fromUint((1000000)) },
+					{ id: 0, amount: uint64.fromUint((1000000)) }
 				]
 			}
-		}]
+		}];
 
-		const dbMosaicsFake = sinon.fake(() => Promise.resolve(mosaicsSample))
-		const dbAccountsFake = sinon.fake(() => Promise.resolve(accountsSample))
+		const dbMosaicsFake = sinon.fake(() => Promise.resolve(mosaicsSample));
+		const dbAccountsFake = sinon.fake(() => Promise.resolve(accountsSample));
 
 		const mockServer = new MockServer();
 
-		const db = { mosaicsByIds: dbMosaicsFake, catapultDb: {
-			accountsByIds: dbAccountsFake
-		}};
+		const db = {
+			mosaicsByIds: dbMosaicsFake,
+			catapultDb: {
+				accountsByIds: dbAccountsFake
+			}
+		};
 
 		const services = { config: { apiNode: {} } };
 		cmcRoutes.register(mockServer.server, db, services);
@@ -95,43 +98,43 @@ describe.only('cmc routes', () => {
 
 				// Arrange:
 				const totalUncirculated = accountsSample.reduce((a, b) => a + parseInt(b.account.mosaics[0].amount.toString(), 10), 0);
-				const circulatingSupply = XYMSupply - totalUncirculated
+				const circulatingSupply = XYMSupply - totalUncirculated;
 
 				// Act:
 				return mockServer.callRoute(route, req).then(() => {
 					// Assert
 					expect(mockServer.next.calledOnce).to.equal(true);
 					expect(mockServer.send.firstCall.args[0]).to.equal(cmcUtils.convertToRelative(circulatingSupply));
-				})
-			})
+				});
+			});
 
 			it('network currency supply total', () => {
-				 const route = mockServer.getRoute('/network/currency/supply/total').get();
+				const route = mockServer.getRoute('/network/currency/supply/total').get();
 
-				 // Arrange:
-				 const xymSupply = cmcUtils.convertToRelative(mosaicsSample[0].mosaic.supply)
+				// Arrange:
+				const xymSupply = cmcUtils.convertToRelative(mosaicsSample[0].mosaic.supply);
 
-				 // Act:
-				 return mockServer.callRoute(route, req).then(() => {
-					 // Assert
-					 expect(mockServer.next.calledOnce).to.equal(true);
-					 expect(mockServer.send.firstCall.args[0]).to.equal(xymSupply);
-				 })
-			})
+				// Act:
+				return mockServer.callRoute(route, req).then(() => {
+					// Assert
+					expect(mockServer.next.calledOnce).to.equal(true);
+					expect(mockServer.send.firstCall.args[0]).to.equal(xymSupply);
+				});
+			});
 
-            it('network currency supply max', () => {
-                const route = mockServer.getRoute('/network/currency/supply/max').get();
+			it('network currency supply max', () => {
+				const route = mockServer.getRoute('/network/currency/supply/max').get();
 
 				// Arrange:
 				const mosaicMaxSupply = cmcUtils.convertToRelative(maxSupply);
 
 				// Act:
-                return mockServer.callRoute(route, req).then(() => {
+				return mockServer.callRoute(route, req).then(() => {
 					// Assert
-                    expect(mockServer.next.calledOnce).to.equal(true);
-                    expect(mockServer.send.firstCall.args[0]).to.equal(mosaicMaxSupply);
-                })
-            })
+					expect(mockServer.next.calledOnce).to.equal(true);
+					expect(mockServer.send.firstCall.args[0]).to.equal(mosaicMaxSupply);
+				});
+			});
 		});
 	});
 });

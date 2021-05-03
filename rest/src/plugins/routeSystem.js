@@ -20,6 +20,7 @@
  */
 
 const aggregate = require('./aggregate/aggregate');
+const cmc = require('./cmc/cmc');
 const empty = require('./empty');
 const lockHash = require('./lockHash/lockHash');
 const lockSecret = require('./lockSecret/lockSecret');
@@ -27,7 +28,6 @@ const metadata = require('./metadata/metadata');
 const mosaic = require('./mosaic/mosaic');
 const multisig = require('./multisig/multisig');
 const namespace = require('./namespace/namespace');
-const cmc = require('./cmc/cmc');
 const receipts = require('./receipts/receipts');
 const restrictions = require('./restrictions/restrictions');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');

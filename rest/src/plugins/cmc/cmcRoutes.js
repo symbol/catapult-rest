@@ -19,9 +19,9 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const cmcUtils = require('./cmcUtils');
 const uncirculatedAddresses = require('./unCirculatedAccounts');
 const routeUtils = require('../../routes/routeUtils');
-const cmcUtils = require('./cmcUtils');
 const errors = require('../../server/errors');
 const AccountType = require('../AccountType');
 const ini = require('ini');
@@ -30,7 +30,7 @@ const util = require('util');
 
 module.exports = {
 	register: (server, db, services) => {
- 		const sender = routeUtils.createSender('cmc');
+		const sender = routeUtils.createSender('cmc');
 
 		const readAndParseNetworkPropertiesFile = () => {
 			const readFile = util.promisify(fs.readFile);
@@ -77,7 +77,7 @@ module.exports = {
 			.then(propertiesObject => {
 				const supply = propertiesObject.chain.maxMosaicAtomicUnits.replace(/'/g, '').replace('0x', '');
 				sender.sendPlainText(res, next)(cmcUtils.convertToRelative(supply));
-			}).catch((e) => {
+			}).catch(() => {
 				res.send(errors.createInvalidArgumentError('there was an error reading the network properties file'));
 				next();
 			}));

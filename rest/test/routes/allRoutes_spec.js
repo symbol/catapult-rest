@@ -69,7 +69,7 @@ describe('all routes', () => {
 
 			'/transactions/:group/:transactionId',
 			'/transactions/:group',
-			'/transactionStatus/:hash',
+			'/transactionStatus/:hash'
 		]);
 	});
 
