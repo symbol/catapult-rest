@@ -34,11 +34,6 @@ describe('cmc routes', () => {
 		const maxSupply = 9000000000000000;
 		const XYMSupply = 8998999998000000;
 
-		sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
-			callback(null, `${'[chain]\n'
-						+ 'maxMosaicAtomicUnits = '}${maxSupply}\n`
-						+ 'currencyMosaicId = 1234567890ABCDEF'));
-
 		const mosaicsSample = [{
 			id: '',
 			mosaic: {
@@ -94,6 +89,9 @@ describe('cmc routes', () => {
 
 		describe('GET', () => {
 			it('network currency supply circulating', () => {
+				const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
+					callback(null, `[chain]\nmaxMosaicAtomicUnits = ${maxSupply}\ncurrencyMosaicId = "0x1234567890ABCDEF"`));
+
 				const route = mockServer.getRoute('/network/currency/supply/circulating').get();
 
 				// Arrange:
@@ -105,10 +103,14 @@ describe('cmc routes', () => {
 					// Assert
 					expect(mockServer.next.calledOnce).to.equal(true);
 					expect(mockServer.send.firstCall.args[0]).to.equal(cmcUtils.convertToRelative(circulatingSupply));
+					readFileStub.restore();
 				});
 			});
 
 			it('network currency supply total', () => {
+				const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
+					callback(null, '[chain]\ncurrencyMosaicId = 0x1234567890ABCDEF'));
+
 				const route = mockServer.getRoute('/network/currency/supply/total').get();
 
 				// Arrange:
@@ -119,10 +121,14 @@ describe('cmc routes', () => {
 					// Assert
 					expect(mockServer.next.calledOnce).to.equal(true);
 					expect(mockServer.send.firstCall.args[0]).to.equal(xymSupply);
+					readFileStub.restore();
 				});
 			});
 
 			it('network currency supply max', () => {
+				const readFileStub = sinon.stub(fs, 'readFile').callsFake((path, data, callback) =>
+					callback(null, `[chain]\nmaxMosaicAtomicUnits = ${maxSupply}`));
+
 				const route = mockServer.getRoute('/network/currency/supply/max').get();
 
 				// Arrange:
@@ -133,6 +139,7 @@ describe('cmc routes', () => {
 					// Assert
 					expect(mockServer.next.calledOnce).to.equal(true);
 					expect(mockServer.send.firstCall.args[0]).to.equal(mosaicMaxSupply);
+					readFileStub.restore();
 				});
 			});
 		});

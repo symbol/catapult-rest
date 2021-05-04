@@ -21,6 +21,10 @@
 
 /** @module plugins/cmc */
 
+// To ensure cmc able to load from the config, created empty plugins
+
+/* eslint-disable no-unused-vars */
+
 /**
  * Creates a cmc plugin use for CoinMarketCap.
  * @type {module:plugins/CatapultPlugin}
