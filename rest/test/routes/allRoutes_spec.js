@@ -45,6 +45,7 @@ describe('all routes', () => {
 			'/accounts',
 			'/accounts/:accountId',
 			'/accounts/:accountId/merkle',
+			'/network/currency/supply/circulating',
 
 			'/blocks',
 			'/blocks/:height',
@@ -69,7 +70,9 @@ describe('all routes', () => {
 
 			'/transactions/:group/:transactionId',
 			'/transactions/:group',
-			'/transactionStatus/:hash'
+			'/transactionStatus/:hash',
+
+			'/network/currency/supply/max'
 		]);
 	});
 
