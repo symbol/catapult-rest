@@ -57,7 +57,7 @@ class ModelSchemaBuilder {
 				transactionsHash: ModelType.binary,
 				receiptsHash: ModelType.binary,
 				stateHash: ModelType.binary,
-				beneficiaryAddress: ModelType.binary,
+				beneficiaryAddress: ModelType.encodedAddress,
 				feeMultiplier: ModelType.uint32,
 				// optional. How to create subclasses?
 				votingEligibleAccountsCount: ModelType.uint32,
