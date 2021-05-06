@@ -20,8 +20,8 @@
  */
 
 const errors = require('../server/errors');
-const MongoDb = require('mongodb');
 const catapult = require('catapult-sdk');
+const MongoDb = require('mongodb');
 
 const { Long, ObjectId } = MongoDb;
 const { address } = catapult.model;
@@ -87,7 +87,7 @@ const dbUtils = {
 	 * @param {MongoDb.Binary} addressBinary Address from MongoDb.
 	 * @returns {string} Address in Base32 format.
 	 */
-	bufferToAddressBase32: (addressBinary) => {
+	bufferToAddressBase32: addressBinary => {
 		const hexToUint8 = convert.hexToUint8(addressBinary.toString('hex'));
 		return address.addressToString(hexToUint8);
 	}

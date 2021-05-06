@@ -249,5 +249,5 @@ describe('db formatting rules', () => {
 
 		// Assert:
 		expect(result).to.equal('TDQNCOHK6KWDILABL7YLMMPMGYRORL72AS74YVQ');
-	})
+	});
 });

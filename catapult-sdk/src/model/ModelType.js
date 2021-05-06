@@ -62,7 +62,7 @@ const ModelType = {
 	boolean: SchemaType.max + 11,
 
 	/** Schema property type indicating a binary value as base32Address. */
-	encodedAddress: SchemaType.max + 12,
+	encodedAddress: SchemaType.max + 12
 };
 
 Object.assign(ModelType, SchemaType);

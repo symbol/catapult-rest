@@ -153,13 +153,13 @@ describe('db utils', () => {
 	describe('bufferToAddressBase32', () => {
 		it('can convert from buffer to base32 Address', () => {
 		// Arrange
-		const object = new Binary(Buffer.from('98E0D138EAF2AC342C015FF0B631EC3622E8AFFA04BFCC56', 'hex'));
+			const object = new Binary(Buffer.from('98E0D138EAF2AC342C015FF0B631EC3622E8AFFA04BFCC56', 'hex'));
 
-		// Act:
-		const result = dbUtils.bufferToAddressBase32(object)
+			// Act:
+			const result = dbUtils.bufferToAddressBase32(object);
 
-		// Assert:
-		expect(result).to.equal('TDQNCOHK6KWDILABL7YLMMPMGYRORL72AS74YVQ');
-		})
-	})
+			// Assert:
+			expect(result).to.equal('TDQNCOHK6KWDILABL7YLMMPMGYRORL72AS74YVQ');
+		});
+	});
 });
