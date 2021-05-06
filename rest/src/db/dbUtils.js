@@ -21,8 +21,11 @@
 
 const errors = require('../server/errors');
 const MongoDb = require('mongodb');
+const catapult = require('catapult-sdk');
 
 const { Long, ObjectId } = MongoDb;
+const { address } = catapult.model;
+const { convert } = catapult.utils;
 
 const convertToLong = value => {
 	if (Number.isInteger(value))
@@ -77,6 +80,16 @@ const dbUtils = {
 			return { [sortFieldDbRelation[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: offset } };
 		}
 		return undefined;
+	},
+
+	/**
+	 * Convert Address to Base32 format.
+	 * @param {MongoDb.Binary} addressBinary Address from MongoDb.
+	 * @returns {string} Address in Base32 format.
+	 */
+	bufferToAddressBase32: (addressBinary) => {
+		const hexToUint8 = convert.hexToUint8(addressBinary.toString('hex'));
+		return address.addressToString(hexToUint8);
 	}
 };
 
