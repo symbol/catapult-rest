@@ -203,7 +203,7 @@ describe('model formatter builder', () => {
 			expect(result).to.deep.equal({
 				id: 'objectId',
 				account: {
-					address: 'binary',
+					address: 'encodedAddress',
 					addressHeight: 'uint64',
 					publicKey: 'binary',
 					publicKeyHeight: 'uint64',
