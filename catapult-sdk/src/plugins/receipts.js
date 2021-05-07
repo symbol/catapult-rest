@@ -80,7 +80,7 @@ const receiptsPlugin = {
 		builder.addSchema('receipts.balanceChange', {
 			version: ModelType.int,
 			type: ModelType.int,
-			targetAddress: ModelType.binary,
+			targetAddress: ModelType.encodedAddress,
 			mosaicId: ModelType.uint64HexIdentifier,
 			amount: ModelType.uint64
 		});
@@ -88,8 +88,8 @@ const receiptsPlugin = {
 		builder.addSchema('receipts.balanceTransfer', {
 			version: ModelType.int,
 			type: ModelType.int,
-			senderAddress: ModelType.binary,
-			recipientAddress: ModelType.binary,
+			senderAddress: ModelType.encodedAddress,
+			recipientAddress: ModelType.encodedAddress,
 			mosaicId: ModelType.uint64HexIdentifier,
 			amount: ModelType.uint64
 		});

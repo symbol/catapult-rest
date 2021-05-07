@@ -169,7 +169,7 @@ class ModelSchemaBuilder {
 			},
 			account: {
 				version: ModelType.uint16,
-				address: ModelType.binary,
+				address: ModelType.encodedAddress,
 				addressHeight: ModelType.uint64,
 				publicKey: ModelType.binary,
 				publicKeyHeight: ModelType.uint64,
