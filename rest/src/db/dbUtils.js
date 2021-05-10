@@ -83,12 +83,27 @@ const dbUtils = {
 	},
 
 	/**
-	 * Convert Address to Base32 format.
-	 * @param {MongoDb.Binary} addressBinary Address from MongoDb.
-	 * @returns {string} Address in Base32 format.
+	 * Convert binary to resolved address
+	 * @param {MongoDb.Binary} binary Address|NamespaceId from MongoDb.
+	 * @returns {string} AddressBase32|NamespaceId
 	 */
-	bufferToAddressBase32: addressBinary => {
-		const hexToUint8 = convert.hexToUint8(addressBinary.toString('hex'));
+	bufferToResolvedAddress: binary => {
+		if (!(binary instanceof MongoDb.Binary))
+			return undefined;
+
+		const hex = binary.toString('hex');
+		const bit0 = convert.hexToUint8(hex.substr(1, 2))[0];
+
+		if (16 === (bit0 & 16)) {
+			// only 8 bytes are relevant to resolve the NamespaceId
+			const namespaceId = hex.substr(2, 16);
+
+			// retun as namespace Id
+			return convert.uint8ToHex(convert.hexToUint8Reverse(namespaceId));
+		}
+
+		// return as Address base 32
+		const hexToUint8 = convert.hexToUint8(hex);
 		return address.addressToString(hexToUint8);
 	}
 };
