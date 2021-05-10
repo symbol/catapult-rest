@@ -150,16 +150,38 @@ describe('db utils', () => {
 		});
 	});
 
-	describe('bufferToAddressBase32', () => {
+	describe('bufferToResolvedAddress', () => {
 		it('can convert from buffer to base32 Address', () => {
-		// Arrange
+			// Arrange
 			const object = new Binary(Buffer.from('98E0D138EAF2AC342C015FF0B631EC3622E8AFFA04BFCC56', 'hex'));
 
 			// Act:
-			const result = dbUtils.bufferToAddressBase32(object);
+			const result = dbUtils.bufferToResolvedAddress(object);
 
 			// Assert:
 			expect(result).to.equal('TDQNCOHK6KWDILABL7YLMMPMGYRORL72AS74YVQ');
+		});
+
+		it('can convert from buffer to namespace ID', () => {
+			// Arrange
+			const object = new Binary(Buffer.from('99caab0fd01ccf25ba000000000000000000000000000000', 'hex'));
+
+			// Act:
+			const result = dbUtils.bufferToResolvedAddress(object);
+
+			// Assert:
+			expect(result).to.equal('BA25CF1CD00FABCA');
+		});
+
+		it('cannot convert from invaild data type.', () => {
+			// Arrange
+			const object = '99caab0fd01ccf25ba000000000000000000000000000000';
+
+			// Act:
+			const result = dbUtils.bufferToResolvedAddress(object);
+
+			// Assert:
+			expect(result).to.equal(undefined);
 		});
 	});
 });
