@@ -9,6 +9,7 @@ The changelog format is based on [Keep a Changelog](https://keepachangelog.com/e
 ### Added
 
 - Tokenomics endpoints.
+- Symbol-bootstrap version in server version endpoints. This requires node operator to update rest.json configuration file with the correct bootstrap version details.
 
 ### Fixed
 
