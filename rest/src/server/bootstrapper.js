@@ -27,6 +27,7 @@ const restify = require('restify');
 const restifyErrors = require('restify-errors');
 const winston = require('winston');
 const WebSocket = require('ws');
+const fs = require('fs');
 
 const isPromise = object => object && object.catch;
 
@@ -93,22 +94,58 @@ module.exports = {
 
 	/**
 	 * Creates a REST api server.
-	 * @param {array} crossDomainConfig Configuration related to access control, contains allowed host and HTTP methods.
+	 * @param {array} config Application configuration
 	 * @param {object} formatters Formatters to use for formatting responses.
 	 * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
 	 * @returns {object} Server.
 	 */
-	createServer: (crossDomainConfig, formatters, throttlingConfig) => {
-		// create the server using a custom formatter
-		const server = restify.createServer({
+	createServer: (config, formatters, throttlingConfig) => {
+		let serverOptions = {
 			name: '', // disable server header in response
 			formatters: {
 				'application/json': formatters.json
 			}
-		});
+		};
+		if (!config.protocol)
+			winston.warn('Protocol is not configured explicitly in the configuration, defaulting to HTTPS.');
+
+		const protocol = config.protocol ? config.protocol : 'HTTPS';
+		winston.warn(`Using protocol: ${protocol}`);
+		// create http or https server based on the configuration and default will be https
+		if (config && 'HTTPS' === protocol) {
+			let sslKey; let
+				sslCertificate;
+			if (!config.sslKeyPath) {
+				throw new Error('Server default is HTTPS but no SSL Key found, '
+				+ '\'sslKeyPath\' property in the configuration must be provided.');
+			} else {
+				try {
+					sslKey = fs.readFileSync(config.sslKeyPath);
+				} catch (err) {
+					throw new Error(`SSL Key file cannot be found at the path: ${config.sslKeyPath}`);
+				}
+			}
+			if (!config.sslCertificatePath) {
+				throw new Error('Server default is HTTPS but no SSL Certificate found,'
+				+ ' \'sslCertificatePath\' property in the configuration must be provided.');
+			} else {
+				try {
+					sslCertificate = fs.readFileSync(config.sslCertificatePath);
+				} catch (err) {
+					throw new Error(`SSL Certificate file cannot be found at the path: ${config.sslCertificatePath}`);
+				}
+			}
+
+			serverOptions = { ...serverOptions, key: sslKey, certificate: sslCertificate };
+		}
+		// create the server using a custom formatter
+		const server = restify.createServer(serverOptions);
 
 		// only allow application/json
 		server.pre(catapultRestifyPlugins.body());
+
+		// crossDomainConfig Configuration related to access control, contains allowed host and HTTP methods.
+		const crossDomainConfig = config && config.crossDomain ? config.crossDomain : undefined;
 
 		const addCrossDomainHeaders = createCrossDomainHeaderAdder(crossDomainConfig || {});
 		server.use(catapultRestifyPlugins.crossDomain(addCrossDomainHeaders));

@@ -145,12 +145,12 @@ const createFormatters = options => formatters.create({
 });
 
 const createServer = options => {
-	const server = bootstrapper.createServer((options || {}).crossDomain, createFormatters(options));
+	const server = bootstrapper.createServer((options || {}), createFormatters(options));
 	servers.push(server);
 	return server;
 };
 
-const createWebSocketServer = () => createServer({ formatterName: 'ws' });
+const createWebSocketServer = () => createServer({ protocol: 'HTTP', formatterName: 'ws' });
 
 describe('server (bootstrapper)', () => {
 	afterEach(() => {
@@ -173,7 +173,7 @@ describe('server (bootstrapper)', () => {
 			const spy = sinon.spy(restify.plugins, 'throttle');
 
 			// Act:
-			bootstrapper.createServer({}, createFormatters(), throttlingConfig);
+			bootstrapper.createServer({ protocol: 'HTTP' }, createFormatters(), throttlingConfig);
 
 			// Assert:
 			expect(spy.calledOnceWith({
@@ -191,7 +191,7 @@ describe('server (bootstrapper)', () => {
 			const spy = sinon.spy(restify.plugins, 'throttle');
 
 			// Act:
-			bootstrapper.createServer({}, createFormatters());
+			bootstrapper.createServer({ protocol: 'HTTP' }, createFormatters());
 
 			// Assert:
 			expect(spy.notCalled).to.equal(true);
@@ -207,7 +207,7 @@ describe('server (bootstrapper)', () => {
 				const logSpy = sinon.spy(winston, 'warn');
 
 				// Act:
-				bootstrapper.createServer({}, createFormatters(), { burst: 20 });
+				bootstrapper.createServer({ protocol: 'HTTP' }, createFormatters(), { burst: 20 });
 				spy.restore();
 				logSpy.restore();
 
@@ -224,7 +224,7 @@ describe('server (bootstrapper)', () => {
 				const logSpy = sinon.spy(winston, 'warn');
 
 				// Act:
-				bootstrapper.createServer({}, createFormatters(), { rate: 20 });
+				bootstrapper.createServer({ protocol: 'HTTP' }, createFormatters(), { rate: 20 });
 				spy.restore();
 				logSpy.restore();
 
@@ -246,7 +246,7 @@ describe('server (bootstrapper)', () => {
 		};
 
 		const makeJsonHippie = (route, method, options) => {
-			const server = createServer(options);
+			const server = createServer({ ...options, protocol: 'HTTP' });
 			addRestRoutes(server);
 
 			const mockServer = hippie(server).json()[method](route);
@@ -421,7 +421,7 @@ describe('server (bootstrapper)', () => {
 				const spy = sinon.spy(winston, 'warn');
 
 				// Act:
-				bootstrapper.createServer(undefined, createFormatters());
+				bootstrapper.createServer({ protocol: 'HTTP' }, createFormatters());
 				spy.restore();
 
 				// Assert:
@@ -647,7 +647,10 @@ describe('server (bootstrapper)', () => {
 
 		describe('OPTIONS', () => {
 			const makeJsonHippieForOptions = route => {
-				const server = createServer({ crossDomain: { allowedMethods: ['FOO', 'OPTIONS', 'BAR'], allowedHosts: ['*'] } });
+				const server = createServer({
+					protocol: 'HTTP',
+					crossDomain: { allowedMethods: ['FOO', 'OPTIONS', 'BAR'], allowedHosts: ['*'] }
+				});
 				const routeHandler = (req, res, next) => {
 					res.send(200);
 					next();
@@ -748,6 +751,41 @@ describe('server (bootstrapper)', () => {
 						done();
 					});
 			});
+		});
+	});
+
+	describe('HTTPS', () => {
+		it('creates https server with certificate and key given', done => {
+			createServer({
+				port: 3001,
+				protocol: 'HTTPS',
+				sslKeyPath: `${__dirname}/certs/restSSL.key`,
+				sslCertificatePath: `${__dirname}/certs/restSSL.crt`
+			});
+			done();
+		});
+
+		it('throws error when the key path is missing', done => {
+			expect(() => createServer({ port: 3001, protocol: 'HTTPS', sslCertificatePath: `${__dirname}/certs/restSSL.crt` }))
+				.to.throw('Server default is HTTPS but no SSL Key found, \'sslKeyPath\' property in the configuration must be provided.');
+			done();
+		});
+
+		it('throws error when the certificate path is missing', done => {
+			expect(() => createServer({ port: 3001, protocol: 'HTTPS', sslKeyPath: `${__dirname}/certs/restSSL.key` }))
+				.to.throw('Server default is HTTPS but no SSL Certificate found, '
+				+ '\'sslCertificatePath\' property in the configuration must be provided.');
+			done();
+		});
+
+		it('starts https and throws error when the protocol is not defined', done => {
+			expect(() => createServer({ port: 3001 })).to.throw();
+			done();
+		});
+
+		it('starts http when the protocol is HTTP', done => {
+			createServer({ port: 3001, protocol: 'HTTP' });
+			done();
 		});
 	});
 
