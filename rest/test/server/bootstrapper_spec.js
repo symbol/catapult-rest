@@ -767,13 +767,13 @@ describe('server (bootstrapper)', () => {
 
 		it('throws error when the key path is missing', done => {
 			expect(() => createServer({ port: 3001, protocol: 'HTTPS', sslCertificatePath: `${__dirname}/certs/restSSL.crt` }))
-				.to.throw('Server default is HTTPS but no SSL Key found, \'sslKeyPath\' property in the configuration must be provided.');
+				.to.throw('No SSL Key found, \'sslKeyPath\' property in the configuration must be provided.');
 			done();
 		});
 
 		it('throws error when the certificate path is missing', done => {
 			expect(() => createServer({ port: 3001, protocol: 'HTTPS', sslKeyPath: `${__dirname}/certs/restSSL.key` }))
-				.to.throw('Server default is HTTPS but no SSL Certificate found, '
+				.to.throw('No SSL Certificate found, '
 				+ '\'sslCertificatePath\' property in the configuration must be provided.');
 			done();
 		});

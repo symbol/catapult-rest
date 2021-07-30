@@ -58,7 +58,8 @@ const createCrossDomainHeaderAdder = crossDomainConfig => (req, res) => {
 		if ('*' !== crossDomainResponseHeaders['Access-Control-Allow-Origin'])
 			crossDomainResponseHeaders.Vary = 'Origin';
 
-		Object.keys(crossDomainResponseHeaders).forEach(header => res.header(header, crossDomainResponseHeaders[header]));
+		Object.keys(crossDomainResponseHeaders).forEach(header =>
+			res.header(header, crossDomainResponseHeaders[header]));
 	}
 };
 
@@ -89,80 +90,95 @@ const catapultRestifyPlugins = {
 	}
 };
 
+const readSSLFileSync = (path, fileType, pathProperty) => {
+	if (!path) {
+		throw new Error(
+			`No SSL ${fileType} found, '${pathProperty}' property in the configuration must be provided.`
+		);
+	}
+	try {
+		return fs.readFileSync(path);
+	} catch (err) {
+		if ('ENOENT' === err.code) {
+			throw new Error(
+				`SSL ${fileType} file cannot be found at the path: ${path}`
+			);
+		} else {
+			throw err;
+		}
+	}
+};
+
 module.exports = {
 	createCrossDomainHeaderAdder,
 
 	/**
-	 * Creates a REST api server.
-	 * @param {array} config Application configuration
-	 * @param {object} formatters Formatters to use for formatting responses.
-	 * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
-	 * @returns {object} Server.
-	 */
+   * Creates a REST api server.
+   * @param {object} config Application configuration (see rest.json).
+   * @param {object} formatters Formatters to use for formatting responses.
+   * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
+   * @returns {object} Server.
+   */
 	createServer: (config, formatters, throttlingConfig) => {
-		let serverOptions = {
+		if (!config)
+			throw new Error('Config must be provided!');
+
+		if (!config.protocol) {
+			winston.warn(
+				'Protocol(HTTPS|HTTP) is not configured explicitly in the configuration, defaulting to HTTPS.'
+			);
+		}
+
+		const protocol = config.protocol || 'HTTPS';
+		winston.info(`Using protocol: ${protocol}`);
+
+		const serverOptions = {
 			name: '', // disable server header in response
 			formatters: {
 				'application/json': formatters.json
-			}
+			},
+			...('HTTPS' === protocol
+				? {
+					key: readSSLFileSync(config.sslKeyPath, 'Key', 'sslKeyPath'),
+					certificate: readSSLFileSync(
+						config.sslCertificatePath,
+						'Certificate',
+						'sslCertificatePath'
+					)
+				}
+				: {})
 		};
-		if (!config.protocol)
-			winston.warn('Protocol is not configured explicitly in the configuration, defaulting to HTTPS.');
 
-		const protocol = config.protocol ? config.protocol : 'HTTPS';
-		winston.warn(`Using protocol: ${protocol}`);
-		// create http or https server based on the configuration and default will be https
-		if (config && 'HTTPS' === protocol) {
-			let sslKey; let
-				sslCertificate;
-			if (!config.sslKeyPath) {
-				throw new Error('Server default is HTTPS but no SSL Key found, '
-				+ '\'sslKeyPath\' property in the configuration must be provided.');
-			} else {
-				try {
-					sslKey = fs.readFileSync(config.sslKeyPath);
-				} catch (err) {
-					throw new Error(`SSL Key file cannot be found at the path: ${config.sslKeyPath}`);
-				}
-			}
-			if (!config.sslCertificatePath) {
-				throw new Error('Server default is HTTPS but no SSL Certificate found,'
-				+ ' \'sslCertificatePath\' property in the configuration must be provided.');
-			} else {
-				try {
-					sslCertificate = fs.readFileSync(config.sslCertificatePath);
-				} catch (err) {
-					throw new Error(`SSL Certificate file cannot be found at the path: ${config.sslCertificatePath}`);
-				}
-			}
-
-			serverOptions = { ...serverOptions, key: sslKey, certificate: sslCertificate };
-		}
 		// create the server using a custom formatter
 		const server = restify.createServer(serverOptions);
 
 		// only allow application/json
 		server.pre(catapultRestifyPlugins.body());
 
-		// crossDomainConfig Configuration related to access control, contains allowed host and HTTP methods.
-		const crossDomainConfig = config && config.crossDomain ? config.crossDomain : undefined;
+		// config.crossDomain: Configuration related to access control, contains allowed host and HTTP methods.
+		if (!config.crossDomain)
+			winston.warn('CORS was not enabled - configuration incomplete');
 
-		const addCrossDomainHeaders = createCrossDomainHeaderAdder(crossDomainConfig || {});
+		const addCrossDomainHeaders = createCrossDomainHeaderAdder(
+			config.crossDomain || {}
+		);
+
 		server.use(catapultRestifyPlugins.crossDomain(addCrossDomainHeaders));
 		server.use(restify.plugins.acceptParser('application/json'));
-		server.use(restify.plugins.queryParser({ mapParams: true, parseArrays: false }));
+		server.use(
+			restify.plugins.queryParser({ mapParams: true, parseArrays: false })
+		);
 		server.use(restify.plugins.jsonBodyParser({ mapParams: true }));
-
-		if (!crossDomainConfig)
-			winston.warn('CORS was not enabled - configuration incomplete');
 
 		if (throttlingConfig) {
 			if (throttlingConfig.burst && throttlingConfig.rate) {
-				server.use(restify.plugins.throttle({
-					burst: throttlingConfig.burst,
-					rate: throttlingConfig.rate,
-					ip: true
-				}));
+				server.use(
+					restify.plugins.throttle({
+						burst: throttlingConfig.burst,
+						rate: throttlingConfig.rate,
+						ip: true
+					})
+				);
 			} else {
 				winston.warn('throttling was not enabled - configuration is invalid or incomplete');
 			}
@@ -230,19 +246,34 @@ module.exports = {
 
 		const clientGroups = [];
 		promiseAwareServer.ws = (route, callbacks) => {
-			const subscriptionManager = new SubscriptionManager(Object.assign({}, callbacks, {
-				newChannel: (channel, subscribers) =>
-					callbacks.newChannel(channel, websocketUtils.createMultisender(channel, subscribers, formatters.ws))
-			}));
+			const subscriptionManager = new SubscriptionManager(
+				Object.assign({}, callbacks, {
+					newChannel: (channel, subscribers) =>
+						callbacks.newChannel(
+							channel,
+							websocketUtils.createMultisender(
+								channel,
+								subscribers,
+								formatters.ws
+							)
+						)
+				})
+			);
 
 			const clients = new Set();
 			clientGroups.push({ clients, subscriptionManager });
 
 			wss.on(`connection${route}`, client => {
-				const messageHandler = messageJson => websocketMessageHandler.handleMessage(client, messageJson, subscriptionManager);
+				const messageHandler = messageJson =>
+					websocketMessageHandler.handleMessage(
+						client,
+						messageJson,
+						subscriptionManager
+					);
 				websocketUtils.handshake(client, messageHandler);
 
 				winston.verbose(`websocket ${client.uid}: created ${route} websocket connection`);
+
 				clients.add(client);
 
 				client.on('close', () => {
