@@ -787,6 +787,35 @@ describe('server (bootstrapper)', () => {
 			createServer({ port: 3001, protocol: 'HTTP' });
 			done();
 		});
+
+		it('handles HTTPS routes successfully', done => {
+			// to suppress self signed certificate errors
+			process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+			const httpsPort = 3001;
+			const server = createServer({
+				port: httpsPort,
+				protocol: 'HTTPS',
+				sslKeyPath: `${__dirname}/certs/restSSL.key`,
+				sslCertificatePath: `${__dirname}/certs/restSSL.crt`
+			});
+
+			addRestRoutes(server);
+			server.listen(httpsPort);
+
+			hippie()
+				.header('User-Agent', 'hippie')
+				.json()
+				.get(`https://127.0.0.1:${httpsPort}/dummy/${dummyIds.valid}`)
+				.expectStatus(200)
+				.end((err, res, body) => {
+					expect(body).to.deep.equal({
+						id: 123,
+						current: { height: [10, 0], scoreLow: [16, 0], scoreHigh: [11, 0] }
+					});
+					done();
+				});
+		});
 	});
 
 	describe('websockets', () => {
