@@ -225,6 +225,14 @@ class CatapultDb {
 		).then(this.sanitizer.renameId);
 	}
 
+	blocksAtHeights(heights) {
+		return this.queryDocumentsAndCopyIds(
+			'blocks',
+			{ 'block.height': { $in: heights } },
+			{ projection: { 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 } }
+		);
+	}
+
 	blockWithMerkleTreeAtHeight(height, merkleTreeName) {
 		const blockMerkleTreeNames = ['transactionMerkleTree', 'statementMerkleTree'];
 		const excludedMerkleTrees = {};

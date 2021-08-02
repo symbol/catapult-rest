@@ -443,6 +443,25 @@ describe('catapult db', () => {
 				block => expect(block).to.deep.equal(stripExtraneousBlockInformation(renameId(seedBlock)))
 			);
 		});
+
+		it('can retrieve blocks with transactions at heights', () => {
+			// Arrange:
+			const seedBlock1 = test.db.createDbBlock(Default_Height);
+			const seedBlock2 = test.db.createDbBlock(Default_Height + 1);
+			const seedBlock3 = test.db.createDbBlock(Default_Height + 2);
+			const blockTransactions = test.db.createDbTransactions(2, test.random.publicKey(), test.random.address());
+
+			// Assert:
+			return runBlockAtHeightDbTest(
+				{ blocks: [seedBlock1, seedBlock2, seedBlock3], transactions: blockTransactions },
+				db => db.blocksAtHeights(
+					[Long.fromNumber(Default_Height), Long.fromNumber(Default_Height + 1)]
+				),
+				blocks => expect(blocks).to.deep.equal(
+					[stripExtraneousBlockInformation(renameId(seedBlock1)), stripExtraneousBlockInformation(renameId(seedBlock2))]
+				)
+			);
+		});
 	});
 
 	describe('block at height with statement merkle tree', () => {

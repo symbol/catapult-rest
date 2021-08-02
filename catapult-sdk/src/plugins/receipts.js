@@ -43,6 +43,7 @@ const receiptsPlugin = {
 			const schemaName = `${statementType}Statement`;
 			builder.addSchema(schemaName, {
 				id: ModelType.objectId,
+				timestamp: ModelType.uint64,
 				statement: { type: ModelType.object, schemaName: `${schemaName}.statement` }
 			});
 			builder.addSchema(`${schemaName}.statement`, schema);

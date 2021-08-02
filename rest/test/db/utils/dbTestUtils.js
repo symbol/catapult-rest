@@ -269,6 +269,17 @@ const runDbTest = (dbEntities, collectionName, createDbFacade, issueDbCommand, a
 		.then(() => db.close());
 };
 
+const insertItems = (dbEntities, collectionName) => {
+	// Arrange:
+	const db = new CatapultDb(Object.assign({ networkId: testDbOptions.networkId }, DefaultPagingOptions));
+
+	// Act + Assert:
+	return db.connect(testDbOptions.url, 'test')
+		.then(() => populateCollection(db, collectionName, dbEntities))
+		.then(() => sanitizeDbEntities(collectionName, dbEntities))
+		.then(() => db.close());
+};
+
 const dbTestUtils = {
 	collection: collectionUtils,
 	db: {
@@ -284,7 +295,8 @@ const dbTestUtils = {
 		populateCollection,
 		populateDatabase,
 		sanitizeDbEntities,
-		runDbTest
+		runDbTest,
+		insertItems
 	}
 };
 Object.assign(dbTestUtils, test);

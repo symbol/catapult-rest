@@ -59,7 +59,7 @@ describe('receipts plugin', () => {
 			// - mosaicResolutionStatement
 			// - transactionStatement
 			['addressResolution', 'mosaicResolution', 'transaction'].forEach(statementType => {
-				expect(Object.keys(modelSchema[`${statementType}Statement`]).length).to.equal(2);
+				expect(Object.keys(modelSchema[`${statementType}Statement`]).length).to.equal(3);
 				expect(modelSchema[`${statementType}Statement`]).to.contain.all.keys(['statement']);
 			});
 

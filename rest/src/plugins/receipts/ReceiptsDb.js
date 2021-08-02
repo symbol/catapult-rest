@@ -19,7 +19,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { convertToLong, buildOffsetCondition } = require('../../db/dbUtils');
+const { convertToLong, buildOffsetCondition, uniqueLongList } = require('../../db/dbUtils');
 const catapult = require('catapult-sdk');
 
 const { convert, uint64 } = catapult.utils;
@@ -43,7 +43,7 @@ class ReceiptsDb {
 	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<object>} Transaction statements page.
 	 */
-	transactionStatements(filters, options) {
+	async transactionStatements(filters, options) {
 		const sortingOptions = { id: '_id' };
 
 		let conditions = {};
@@ -84,7 +84,17 @@ class ReceiptsDb {
 		}
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
-		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'transactionStatements', options);
+
+		const page = await this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'transactionStatements', options);
+		const blockHeights = uniqueLongList(page.data.map(data => data.statement.height));
+		const blocks = await this.catapultDb.blocksAtHeights(blockHeights);
+		page.data.forEach(data => {
+			const statementBlock = blocks.find(blockInfo => blockInfo.block.height.equals(data.statement.height));
+			if (!statementBlock)
+				throw new Error(`Cannot find block with height ${data.statement.height.toString()}`);
+			data.timestamp = statementBlock.block.timestamp;
+		});
+		return page;
 	}
 
 	/**

@@ -20,7 +20,7 @@
  */
 
 const CatapultDb = require('../../../src/db/CatapultDb');
-const { convertToLong } = require('../../../src/db/dbUtils');
+const { convertToLong, uniqueLongList } = require('../../../src/db/dbUtils');
 const ReceiptsDb = require('../../../src/plugins/receipts/ReceiptsDb');
 const test = require('../../db/utils/dbTestUtils');
 const catapult = require('catapult-sdk');
@@ -45,12 +45,16 @@ describe('receipts db', () => {
 		sortDirection: -1
 	};
 
-	const runReceiptsDbTest = (dbEntities, collection, issueDbCommand, assertDbCommandResult) =>
-		test.db.runDbTest(dbEntities, collection, db => new ReceiptsDb(db), issueDbCommand, assertDbCommandResult);
+	const runReceiptsDbTest = async (dbEntities, collection, issueDbCommand, assertDbCommandResult) => {
+		const blockHeights = uniqueLongList(dbEntities.map(data => data.statement.height));
+		const dbBlocks = blockHeights.map(blockHeight =>
+			test.db.createDbBlock(parseInt(blockHeight.toString(), 10)));
+		await test.db.insertItems(dbBlocks, 'blocks');
+		return test.db.runDbTest(dbEntities, collection, db => new ReceiptsDb(db), issueDbCommand, assertDbCommandResult);
+	};
 
 	const runTestAndVerifyIds = (dbReceipts, collectionName, dbQuery, expectedIds) => {
 		const expectedObjectIds = expectedIds.map(id => createObjectId(id));
-
 		return runReceiptsDbTest(
 			dbReceipts,
 			collectionName,
@@ -97,7 +101,7 @@ describe('receipts db', () => {
 				collectionName,
 				db => db.transactionStatements(filters, paginationOptions),
 				page => {
-					const expected_keys = ['id', 'statement'];
+					const expected_keys = ['id', 'statement', 'timestamp'];
 					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
 					expect(Object.keys(sampleReceipt).sort()).to.deep.equal(
 						Object.keys(page.data[0].statement.receipts[0]).sort()
@@ -181,12 +185,12 @@ describe('receipts db', () => {
 				// Arrange:
 				const dbReceipts = [
 					createTransactionStatement(10, 100, [createReceipt({ recipientAddress: testAddress1 })]),
-					createTransactionStatement(20, 110, [
+					createTransactionStatement(20, 100, [
 						createReceipt({ recipientAddress: testAddress1 }),
 						createReceipt({ recipientAddress: testAddress2 })
 					]),
-					createTransactionStatement(30, 120, [createReceipt({ recipientAddress: testAddress2 })]),
-					createTransactionStatement(40, 130, [])
+					createTransactionStatement(30, 100, [createReceipt({ recipientAddress: testAddress2 })]),
+					createTransactionStatement(40, 100, [])
 				];
 				const filters = { recipientAddress: testAddress2 };
 
