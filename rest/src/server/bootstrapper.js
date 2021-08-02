@@ -58,8 +58,7 @@ const createCrossDomainHeaderAdder = crossDomainConfig => (req, res) => {
 		if ('*' !== crossDomainResponseHeaders['Access-Control-Allow-Origin'])
 			crossDomainResponseHeaders.Vary = 'Origin';
 
-		Object.keys(crossDomainResponseHeaders).forEach(header =>
-			res.header(header, crossDomainResponseHeaders[header]));
+		Object.keys(crossDomainResponseHeaders).forEach(header => res.header(header, crossDomainResponseHeaders[header]));
 	}
 };
 
@@ -113,12 +112,12 @@ module.exports = {
 	createCrossDomainHeaderAdder,
 
 	/**
-   * Creates a REST api server.
-   * @param {object} config Application configuration (see rest.json).
-   * @param {object} formatters Formatters to use for formatting responses.
-   * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
-   * @returns {object} Server.
-   */
+	 * Creates a REST api server.
+	 * @param {object} config Application configuration (see rest.json).
+	 * @param {object} formatters Formatters to use for formatting responses.
+	 * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
+	 * @returns {object} Server.
+	 */
 	createServer: (config, formatters, throttlingConfig) => {
 		if (!config)
 			throw new Error('Config must be provided!');
@@ -165,20 +164,16 @@ module.exports = {
 
 		server.use(catapultRestifyPlugins.crossDomain(addCrossDomainHeaders));
 		server.use(restify.plugins.acceptParser('application/json'));
-		server.use(
-			restify.plugins.queryParser({ mapParams: true, parseArrays: false })
-		);
+		server.use(restify.plugins.queryParser({ mapParams: true, parseArrays: false }));
 		server.use(restify.plugins.jsonBodyParser({ mapParams: true }));
 
 		if (throttlingConfig) {
 			if (throttlingConfig.burst && throttlingConfig.rate) {
-				server.use(
-					restify.plugins.throttle({
-						burst: throttlingConfig.burst,
-						rate: throttlingConfig.rate,
-						ip: true
-					})
-				);
+				server.use(restify.plugins.throttle({
+					burst: throttlingConfig.burst,
+					rate: throttlingConfig.rate,
+					ip: true
+				}));
 			} else {
 				winston.warn('throttling was not enabled - configuration is invalid or incomplete');
 			}
@@ -246,34 +241,19 @@ module.exports = {
 
 		const clientGroups = [];
 		promiseAwareServer.ws = (route, callbacks) => {
-			const subscriptionManager = new SubscriptionManager(
-				Object.assign({}, callbacks, {
-					newChannel: (channel, subscribers) =>
-						callbacks.newChannel(
-							channel,
-							websocketUtils.createMultisender(
-								channel,
-								subscribers,
-								formatters.ws
-							)
-						)
-				})
-			);
+			const subscriptionManager = new SubscriptionManager(Object.assign({}, callbacks, {
+				newChannel: (channel, subscribers) =>
+					callbacks.newChannel(channel, websocketUtils.createMultisender(channel, subscribers, formatters.ws))
+			}));
 
 			const clients = new Set();
 			clientGroups.push({ clients, subscriptionManager });
 
 			wss.on(`connection${route}`, client => {
-				const messageHandler = messageJson =>
-					websocketMessageHandler.handleMessage(
-						client,
-						messageJson,
-						subscriptionManager
-					);
+				const messageHandler = messageJson => websocketMessageHandler.handleMessage(client, messageJson, subscriptionManager);
 				websocketUtils.handshake(client, messageHandler);
 
 				winston.verbose(`websocket ${client.uid}: created ${route} websocket connection`);
-
 				clients.add(client);
 
 				client.on('close', () => {

@@ -789,7 +789,7 @@ describe('server (bootstrapper)', () => {
 		});
 
 		it('handles HTTPS routes successfully', done => {
-			// to suppress self signed certificate errors
+			// For unit testing, the unit test client ignores self-signed certificate errors.
 			process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 			const httpsPort = 3001;
