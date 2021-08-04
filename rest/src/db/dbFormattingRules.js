@@ -19,7 +19,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { longToUint64, bufferToResolvedAddress } = require('./dbUtils');
+const { longToUint64, bufferToUnresolvedAddress } = require('./dbUtils');
 const catapult = require('catapult-sdk');
 const { Binary } = require('mongodb');
 
@@ -50,5 +50,5 @@ module.exports = {
 	[ModelType.uint64HexIdentifier]: value => uint64.toHex(value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value)),
 	[ModelType.int]: value => value.valueOf(),
 	[ModelType.boolean]: value => value,
-	[ModelType.encodedAddress]: value => bufferToResolvedAddress(value)
+	[ModelType.encodedAddress]: value => bufferToUnresolvedAddress(value)
 };

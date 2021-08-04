@@ -150,13 +150,13 @@ describe('db utils', () => {
 		});
 	});
 
-	describe('bufferToResolvedAddress', () => {
+	describe('bufferToUnresolvedAddress', () => {
 		it('can convert from buffer to base32 Address', () => {
 			// Arrange
 			const object = new Binary(Buffer.from('98E0D138EAF2AC342C015FF0B631EC3622E8AFFA04BFCC56', 'hex'));
 
 			// Act:
-			const result = dbUtils.bufferToResolvedAddress(object);
+			const result = dbUtils.bufferToUnresolvedAddress(object);
 
 			// Assert:
 			expect(result).to.equal('TDQNCOHK6KWDILABL7YLMMPMGYRORL72AS74YVQ');
@@ -167,7 +167,7 @@ describe('db utils', () => {
 			const object = new Binary(Buffer.from('99caab0fd01ccf25ba000000000000000000000000000000', 'hex'));
 
 			// Act:
-			const result = dbUtils.bufferToResolvedAddress(object);
+			const result = dbUtils.bufferToUnresolvedAddress(object);
 
 			// Assert:
 			expect(result).to.equal('BA25CF1CD00FABCA');
@@ -178,7 +178,7 @@ describe('db utils', () => {
 			const object = '99caab0fd01ccf25ba000000000000000000000000000000';
 
 			// Act:
-			const result = dbUtils.bufferToResolvedAddress(object);
+			const result = dbUtils.bufferToUnresolvedAddress(object);
 
 			// Assert:
 			expect(result).to.equal(undefined);
