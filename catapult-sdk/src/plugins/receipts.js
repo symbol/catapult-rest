@@ -50,7 +50,7 @@ const receiptsPlugin = {
 
 		addStatementSchema('addressResolution', {
 			height: ModelType.uint64,
-			unresolved: ModelType.binary,
+			unresolved: ModelType.encodedAddress,
 			resolutionEntries: { type: ModelType.array, schemaName: 'receipts.entry.address' }
 		});
 		addStatementSchema('mosaicResolution', {
@@ -67,7 +67,7 @@ const receiptsPlugin = {
 		// addressResolution statements
 		builder.addSchema('receipts.entry.address', {
 			source: { type: ModelType.object, schemaName: 'receipts.source' },
-			resolved: ModelType.binary
+			resolved: ModelType.encodedAddress
 		});
 
 		// mosaicResolution statements
