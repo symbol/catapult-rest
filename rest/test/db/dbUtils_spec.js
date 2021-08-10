@@ -164,7 +164,7 @@ describe('db utils', () => {
 
 		it('can convert from buffer to namespace ID', () => {
 			// Arrange
-			const object = new Binary(Buffer.from('99caab0fd01ccf25ba000000000000000000000000000000', 'hex'));
+			const object = new Binary(Buffer.from('99CAAB0FD01CCF25BA000000000000000000000000000000', 'hex'));
 
 			// Act:
 			const result = dbUtils.bufferToUnresolvedAddress(object);
@@ -173,9 +173,9 @@ describe('db utils', () => {
 			expect(result).to.equal('BA25CF1CD00FABCA');
 		});
 
-		it('cannot convert from invaild data type.', () => {
+		it('cannot convert from invalid data type', () => {
 			// Arrange
-			const object = '99caab0fd01ccf25ba000000000000000000000000000000';
+			const object = '99CAAB0FD01CCF25BA000000000000000000000000000000';
 
 			// Act:
 			const result = dbUtils.bufferToUnresolvedAddress(object);

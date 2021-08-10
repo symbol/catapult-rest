@@ -83,7 +83,7 @@ const dbUtils = {
 	},
 
 	/**
-	 * Convert binary to resolved address
+	 * Convert binary to Unresolved address
 	 * @param {MongoDb.Binary} binary Address|NamespaceId from MongoDb.
 	 * @returns {string} AddressBase32|NamespaceId
 	 */
@@ -99,7 +99,7 @@ const dbUtils = {
 			const namespaceId = hex.substr(2, 16);
 
 			// retun as namespace Id
-			return convert.uint8ToHex(convert.hexToUint8Reverse(namespaceId));
+			return convert.uint8ToHex(convert.hexToUint8(namespaceId).reverse());
 		}
 
 		// return as Address base 32

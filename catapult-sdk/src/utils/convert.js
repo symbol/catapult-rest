@@ -215,8 +215,7 @@ const convert = {
 		return (input & 0xFFFFFFFF) >>> 0;
 	},
 
-	/**
-     * Reversed convertion hex string to a uint8 array.
+	/** Reversed convertion hex string to a uint8 array.
      * @param {string} input A hex encoded string.
      * @returns {Uint8Array} A uint8 array corresponding to the input.
      */
