@@ -213,7 +213,7 @@ const convert = {
 			throw Error(`input '${input}' is out of range`);
 
 		return (input & 0xFFFFFFFF) >>> 0;
-	},
+	}
 };
 
 module.exports = convert;
