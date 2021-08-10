@@ -152,4 +152,26 @@ describe('message formatting rules', () => {
 		// Assert:
 		expect(result).to.deep.equal(true);
 	});
+
+	it('can format encodedAddress type (Address)', () => {
+		// Arrange:
+		const object = test.factory.createBinary(Buffer.from('98E0D138EAF2AC342C015FF0B631EC3622E8AFFA04BFCC56', 'hex'));
+
+		// Act:
+		const result = formattingRules[ModelType.encodedAddress](object);
+
+		// Assert:
+		expect(result).to.deep.equal('TDQNCOHK6KWDILABL7YLMMPMGYRORL72AS74YVQ');
+	});
+
+	it('can format encodedAddress type (NamespaceId)', () => {
+		// Arrange:
+		const object = test.factory.createBinary(Buffer.from('99CAAB0FD01CCF25BA000000000000000000000000000000', 'hex'));
+
+		// Act:
+		const result = formattingRules[ModelType.encodedAddress](object);
+
+		// Assert:
+		expect(result).to.deep.equal('BA25CF1CD00FABCA');
+	});
 });
