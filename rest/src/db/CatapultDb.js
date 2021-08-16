@@ -226,6 +226,9 @@ class CatapultDb {
 	}
 
 	blocksAtHeights(heights) {
+		if (!heights.length)
+			return Promise.resolve([]);
+
 		return this.queryDocumentsAndCopyIds(
 			'blocks',
 			{ 'block.height': { $in: heights } },

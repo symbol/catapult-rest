@@ -462,6 +462,23 @@ describe('catapult db', () => {
 				)
 			);
 		});
+
+		it('can retrieve empty blocks when no heights', () => {
+			// Arrange:
+			const seedBlock1 = test.db.createDbBlock(Default_Height);
+			const blockTransactions = test.db.createDbTransactions(2, test.random.publicKey(), test.random.address());
+
+			// Assert:
+			return runBlockAtHeightDbTest(
+				{ blocks: [seedBlock1], transactions: blockTransactions },
+				db => db.blocksAtHeights(
+					[]
+				),
+				blocks => expect(blocks).to.deep.equal(
+					[]
+				)
+			);
+		});
 	});
 
 	describe('block at height with statement merkle tree', () => {
