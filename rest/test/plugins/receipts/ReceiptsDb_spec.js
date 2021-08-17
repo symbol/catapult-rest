@@ -49,7 +49,7 @@ describe('receipts db', () => {
 		const blockHeights = uniqueLongList(dbEntities.map(data => data.statement.height));
 		const dbBlocks = blockHeights.map(blockHeight =>
 			test.db.createDbBlock(parseInt(blockHeight.toString(), 10)));
-		await test.db.insertItems(dbBlocks, 'blocks');
+		await test.db.insertEntities(dbBlocks, 'blocks');
 		return test.db.runDbTest(dbEntities, collection, db => new ReceiptsDb(db), issueDbCommand, assertDbCommandResult);
 	};
 
@@ -185,12 +185,12 @@ describe('receipts db', () => {
 				// Arrange:
 				const dbReceipts = [
 					createTransactionStatement(10, 100, [createReceipt({ recipientAddress: testAddress1 })]),
-					createTransactionStatement(20, 100, [
+					createTransactionStatement(20, 110, [
 						createReceipt({ recipientAddress: testAddress1 }),
 						createReceipt({ recipientAddress: testAddress2 })
 					]),
-					createTransactionStatement(30, 100, [createReceipt({ recipientAddress: testAddress2 })]),
-					createTransactionStatement(40, 100, [])
+					createTransactionStatement(30, 120, [createReceipt({ recipientAddress: testAddress2 })]),
+					createTransactionStatement(40, 130, [])
 				];
 				const filters = { recipientAddress: testAddress2 };
 

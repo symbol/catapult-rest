@@ -81,8 +81,8 @@ const dbUtils = {
 
 	/**
 	 * Creates copy of the array without duplicated longs.
-	 * @param {Array} duplicatedIds of {Long} objects.
-	 * @returns {Array} copy of the original list without duplicated values.
+	 * @param {Long[]} duplicatedIds of {Long} objects.
+	 * @returns {Long[]} copy of the original list without duplicated values.
 	 */
 	uniqueLongList: duplicatedIds => duplicatedIds.filter((height, index) =>
 		index === duplicatedIds.findIndex(anotherHeight => anotherHeight.equals(height)))

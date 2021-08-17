@@ -225,14 +225,20 @@ class CatapultDb {
 		).then(this.sanitizer.renameId);
 	}
 
-	blocksAtHeights(heights) {
+	/**
+	 * Returns the blocks (or a projection of the blocks) for the given heights.
+	 * @param {Long[]} heights the array of long heights
+	 * @param {object} projection optional projection, by default it excludes the transactionMerkleTree and statementMerkleTree fields
+	 * @returns {Promise} with the blocks objects or projections.
+	 */
+	blocksAtHeights(heights, projection) {
 		if (!heights.length)
 			return Promise.resolve([]);
 
 		return this.queryDocumentsAndCopyIds(
 			'blocks',
 			{ 'block.height': { $in: heights } },
-			{ projection: { 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 } }
+			{ projection: projection || { 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 } }
 		);
 	}
 

@@ -131,6 +131,7 @@ const createDbBlock = height => {
 		timestamp: Long.fromNumber(23456),
 		height: Long.fromNumber(height),
 		difficulty: Long.fromNumber(45678),
+		feeMultiplier: 100,
 		previousBlockHash: new Binary(test.random.hash()),
 		transactionsHash: new Binary(test.random.hash())
 	};
@@ -269,7 +270,7 @@ const runDbTest = (dbEntities, collectionName, createDbFacade, issueDbCommand, a
 		.then(() => db.close());
 };
 
-const insertItems = (dbEntities, collectionName) => {
+const insertEntities = (dbEntities, collectionName) => {
 	// Arrange:
 	const db = new CatapultDb(Object.assign({ networkId: testDbOptions.networkId }, DefaultPagingOptions));
 
@@ -296,7 +297,7 @@ const dbTestUtils = {
 		populateDatabase,
 		sanitizeDbEntities,
 		runDbTest,
-		insertItems
+		insertEntities
 	}
 };
 Object.assign(dbTestUtils, test);

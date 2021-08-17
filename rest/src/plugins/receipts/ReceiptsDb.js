@@ -87,11 +87,13 @@ class ReceiptsDb {
 
 		const page = await this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'transactionStatements', options);
 		const blockHeights = uniqueLongList(page.data.map(data => data.statement.height));
-		const blocks = await this.catapultDb.blocksAtHeights(blockHeights);
+		const blocks = await this.catapultDb.blocksAtHeights(blockHeights, { 'block.timestamp': 1, 'block.height': 1 });
 		page.data.forEach(data => {
 			const statementBlock = blocks.find(blockInfo => blockInfo.block.height.equals(data.statement.height));
 			if (!statementBlock)
 				throw new Error(`Cannot find block with height ${data.statement.height.toString()}`);
+			if (!statementBlock.block.timestamp)
+				throw new Error(`Cannot find timestamp in block with height ${data.statement.height.toString()}`);
 			data.timestamp = statementBlock.block.timestamp;
 		});
 		return page;
