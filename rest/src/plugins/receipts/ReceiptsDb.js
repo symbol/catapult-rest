@@ -43,7 +43,7 @@ class ReceiptsDb {
 	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
 	 * @returns {Promise.<object>} Transaction statements page.
 	 */
-	async transactionStatements(filters, options) {
+	transactionStatements(filters, options) {
 		const sortingOptions = { id: '_id' };
 
 		let conditions = {};
@@ -85,18 +85,8 @@ class ReceiptsDb {
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 
-		const page = await this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, 'transactionStatements', options);
-		const blockHeights = uniqueLongList(page.data.map(data => data.statement.height));
-		const blocks = await this.catapultDb.blocksAtHeights(blockHeights, { 'block.timestamp': 1, 'block.height': 1 });
-		page.data.forEach(data => {
-			const statementBlock = blocks.find(blockInfo => blockInfo.block.height.equals(data.statement.height));
-			if (!statementBlock)
-				throw new Error(`Cannot find block with height ${data.statement.height.toString()}`);
-			if (!statementBlock.block.timestamp)
-				throw new Error(`Cannot find timestamp in block with height ${data.statement.height.toString()}`);
-			data.timestamp = statementBlock.block.timestamp;
-		});
-		return page;
+		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions,
+			'transactionStatements', options).then(page => this.addMeta(page));
 	}
 
 	/**
@@ -121,7 +111,41 @@ class ReceiptsDb {
 			conditions['statement.height'] = convertToLong(height);
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
-		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions, `${artifact}ResolutionStatements`, options);
+		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions,
+			`${artifact}ResolutionStatements`, options).then(page => this.addMeta(page));
+	}
+
+	/**
+	 * It retrieves and add the meta field to the statements. The meta includes the block's timestamp.
+	 *
+	 * @param {object} page the page wihtout meta in the items.
+	 * @returns {Promise<{pagination, data}>} the page with the added meta to the items.
+	 */
+	async addMeta(page) {
+		const blockHeights = uniqueLongList(
+			page.data.map(pageItem => pageItem.statement.height)
+		);
+		const blocks = await this.catapultDb.blocksAtHeights(blockHeights,
+			{ 'block.timestamp': 1, 'block.height': 1 });
+		const data = page.data.map(pageItem => {
+			const statementBlock = blocks.find(
+				blockInfo => blockInfo.block.height.equals(
+					pageItem.statement.height
+				)
+			);
+			if (!statementBlock) {
+				throw new Error(
+					`Cannot find block with height ${pageItem.statement.height.toString()}`
+				);
+			}
+			if (!statementBlock.block.timestamp) {
+				throw new Error(
+					`Cannot find timestamp in block with height ${pageItem.statement.height.toString()}`
+				);
+			}
+			return { meta: { timestamp: statementBlock.block.timestamp }, ...pageItem };
+		});
+		return { data, pagination: page.pagination };
 	}
 }
 

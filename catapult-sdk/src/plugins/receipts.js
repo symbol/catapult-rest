@@ -43,7 +43,7 @@ const receiptsPlugin = {
 			const schemaName = `${statementType}Statement`;
 			builder.addSchema(schemaName, {
 				id: ModelType.objectId,
-				timestamp: ModelType.uint64,
+				meta: { type: ModelType.object, schemaName: 'statement.meta' },
 				statement: { type: ModelType.object, schemaName: `${schemaName}.statement` }
 			});
 			builder.addSchema(`${schemaName}.statement`, schema);
@@ -63,6 +63,10 @@ const receiptsPlugin = {
 			height: ModelType.uint64,
 			source: { type: ModelType.object, schemaName: 'receipts.source' },
 			receipts: { type: ModelType.array, schemaName: entity => getBasicReceiptType(entity.type) }
+		});
+
+		builder.addSchema('statement.meta', {
+			timestamp: ModelType.uint64
 		});
 
 		// addressResolution statements

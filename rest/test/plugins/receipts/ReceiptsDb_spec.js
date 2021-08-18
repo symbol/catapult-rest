@@ -101,7 +101,7 @@ describe('receipts db', () => {
 				collectionName,
 				db => db.transactionStatements(filters, paginationOptions),
 				page => {
-					const expected_keys = ['id', 'statement', 'timestamp'];
+					const expected_keys = ['id', 'meta', 'statement'];
 					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
 					expect(Object.keys(sampleReceipt).sort()).to.deep.equal(
 						Object.keys(page.data[0].statement.receipts[0]).sort()
@@ -444,9 +444,10 @@ describe('receipts db', () => {
 						collectionName,
 						db => db.artifactStatements(100, artifact.type, paginationOptions),
 						page => {
-							const expected_keys = ['id', 'statement'];
+							const expected_keys = ['id', 'meta', 'statement'];
 							expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
 							expect(page.data[0].statement).to.deep.equal(sampleResolutionStatement.statement);
+							expect(page.data[0].meta).to.deep.equal({ timestamp: convertToLong(23456) });
 						}
 					);
 				});
