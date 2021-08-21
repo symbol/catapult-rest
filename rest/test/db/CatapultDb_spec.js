@@ -443,7 +443,7 @@ describe('catapult db', () => {
 		});
 	});
 
-	describe('', () => {
+	describe('blocks at heights', () => {
 		it('can retrieve empty blocks when no heights', () => {
 			// Arrange:
 			const seedBlock1 = test.db.createDbBlock(Default_Height);

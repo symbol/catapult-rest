@@ -86,7 +86,7 @@ class ReceiptsDb {
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 
 		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions,
-			'transactionStatements', options).then(page => this.addMeta(page));
+			'transactionStatements', options).then(page => this.addBlockMeta(page));
 	}
 
 	/**
@@ -112,16 +112,18 @@ class ReceiptsDb {
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		return this.catapultDb.queryPagedDocuments(conditions, [], sortConditions,
-			`${artifact}ResolutionStatements`, options).then(page => this.addMeta(page));
+			`${artifact}ResolutionStatements`, options).then(page => this.addBlockMeta(page));
 	}
 
 	/**
-	 * It retrieves and add the meta field to the statements. The meta includes the block's timestamp.
+	 * It retrives and adds the blocks information to the statements' meta.
 	 *
-	 * @param {object} page the page wihtout meta in the items.
-	 * @returns {Promise<{pagination, data}>} the page with the added meta to the items.
+	 * The block information includes the its timestamp
+	 *
+	 * @param {object} page the page without meta in the items.
+	 * @returns {Promise<{pagination, data}>} the page with the added block's meta to the items.
 	 */
-	async addMeta(page) {
+	async addBlockMeta(page) {
 		const blockHeights = uniqueLongList(
 			page.data.map(pageItem => pageItem.statement.height)
 		);
@@ -143,7 +145,8 @@ class ReceiptsDb {
 					`Cannot find timestamp in block with height ${pageItem.statement.height.toString()}`
 				);
 			}
-			return { meta: { timestamp: statementBlock.block.timestamp }, ...pageItem };
+			// creates a copy of the page item with the added timestamp to the meta field.
+			return { meta: { ...pageItem.meta, timestamp: statementBlock.block.timestamp }, ...pageItem };
 		});
 		return { data, pagination: page.pagination };
 	}
