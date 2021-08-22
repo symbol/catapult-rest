@@ -151,7 +151,7 @@ describe('db utils', () => {
 	});
 
 	describe('bufferToUnresolvedAddress', () => {
-		it('can convert from buffer to base32 Address', () => {
+		it('can convert from buffer to Address', () => {
 			// Arrange
 			const object = new Binary(Buffer.from('98E0D138EAF2AC342C015FF0B631EC3622E8AFFA04BFCC56', 'hex'));
 
@@ -160,17 +160,6 @@ describe('db utils', () => {
 
 			// Assert:
 			expect(result).to.equal('TDQNCOHK6KWDILABL7YLMMPMGYRORL72AS74YVQ');
-		});
-
-		it('can convert from buffer to namespace ID', () => {
-			// Arrange
-			const object = new Binary(Buffer.from('99CAAB0FD01CCF25BA000000000000000000000000000000', 'hex'));
-
-			// Act:
-			const result = dbUtils.bufferToUnresolvedAddress(object);
-
-			// Assert:
-			expect(result).to.equal('BA25CF1CD00FABCA');
 		});
 
 		it('cannot convert from invalid data type', () => {
