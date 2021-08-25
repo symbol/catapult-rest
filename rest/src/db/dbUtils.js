@@ -25,7 +25,6 @@ const MongoDb = require('mongodb');
 
 const { Long, ObjectId } = MongoDb;
 const { address } = catapult.model;
-const { convert } = catapult.utils;
 
 const convertToLong = value => {
 	if (Number.isInteger(value))
