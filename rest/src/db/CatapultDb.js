@@ -22,7 +22,7 @@
 /** @module db/CatapultDb */
 
 const connector = require('./connector');
-const { convertToLong, buildOffsetCondition } = require('./dbUtils');
+const { convertToLong, buildOffsetCondition, uniqueLongList } = require('./dbUtils');
 const MultisigDb = require('../plugins/multisig/MultisigDb');
 const catapult = require('catapult-sdk');
 const MongoDb = require('mongodb');
@@ -401,12 +401,18 @@ class CatapultDb {
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
 		const conditions = await buildConditions();
 
-		return this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options);
+		return this.queryPagedDocuments(conditions, removedFields, sortConditions, TransactionGroup[group], options).then(async page => {
+			const data = await this.addBlockMetaToTransactionList(page.data);
+			return ({
+				...page,
+				data
+			});
+		});
 	}
 
 	transactionsByIdsImpl(collectionName, conditions) {
 		return this.queryDocumentsAndCopyIds(collectionName, conditions, { projection: { 'meta.addresses': 0 } })
-			.then(documents => Promise.all(documents.map(document => {
+			.then(list => this.addBlockMetaToTransactionList(list)).then(documents => Promise.all(documents.map(document => {
 				if (!document || !isAggregateType(document))
 					return document;
 
@@ -414,13 +420,67 @@ class CatapultDb {
 					dependentDocuments.forEach(dependentDocument => {
 						if (!document.transaction.transactions)
 							document.transaction.transactions = [];
-
+						if (document.meta.timestamp && document.meta.feeMultiplier) {
+							dependentDocument.meta.timestamp = document.meta.timestamp;
+							dependentDocument.meta.feeMultiplier = document.meta.feeMultiplier;
+						}
 						document.transaction.transactions.push(dependentDocument);
 					});
 
 					return document;
 				});
 			})));
+	}
+
+	/**
+	 * It retrieves and adds the blocks information to the transactions' meta.
+	 *
+	 * The block information includes its timestamp and feeMultiplier
+	 *
+	 * @param {object[]} list the list without the added block information.
+	 * @returns {Promise<object[]>} this list with the added block information.
+	 */
+	async addBlockMetaToTransactionList(list) {
+		const isValidHeight = height => height && '0' !== height.toString();
+
+		const blockHeights = uniqueLongList(
+			list.map(item => item.meta.height).filter(isValidHeight)
+		);
+		const blocks = await this.blocksAtHeights(blockHeights,
+			{ 'block.timestamp': 1, 'block.height': 1, 'block.feeMultiplier': 1 });
+
+		return list.map(item => {
+			const { height } = item.meta;
+			if (!isValidHeight(height))
+				return item;
+			const block = blocks.find(
+				blockInfo => blockInfo.block.height.equals(
+					height
+				)
+			);
+			if (!block) {
+				throw new Error(
+					`Cannot find block with height ${height.toString()}`
+				);
+			}
+			if (!block.block.timestamp === undefined) {
+				throw new Error(
+					`Cannot find timestamp in block with height ${height.toString()}`
+				);
+			}
+			if (block.block.feeMultiplier === undefined) {
+				throw new Error(
+					`Cannot find feeMultiplier in block with height ${height.toString()}`
+				);
+			}
+			// it adds timestamp and feeMultiplier
+			item.meta = {
+				...item.meta,
+				timestamp: block.block.timestamp,
+				feeMultiplier: block.block.feeMultiplier
+			};
+			return item;
+		});
 	}
 
 	transactionsByIds(group, ids) {
