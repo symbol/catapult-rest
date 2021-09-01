@@ -91,8 +91,7 @@ const dbUtils = {
 			return undefined;
 		// return as Address base 32
 		return address.addressToString(binary.buffer);
-	}
-};
+	},
 
 	/**
 	 * Creates copy of the array without duplicated longs.
