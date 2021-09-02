@@ -420,7 +420,7 @@ class CatapultDb {
 					dependentDocuments.forEach(dependentDocument => {
 						if (!document.transaction.transactions)
 							document.transaction.transactions = [];
-						if (document.meta.timestamp && document.meta.feeMultiplier) {
+						if (document.meta.timestamp !== undefined && document.meta.feeMultiplier !== undefined) {
 							dependentDocument.meta.timestamp = document.meta.timestamp;
 							dependentDocument.meta.feeMultiplier = document.meta.feeMultiplier;
 						}
@@ -432,25 +432,39 @@ class CatapultDb {
 			})));
 	}
 
+	addBlockMetaToTransactionList(list) {
+		return this.addBlockMetaToEntityList(list, ['timestamp', 'feeMultiplier'],
+			item => item.meta.height);
+	}
+
 	/**
-	 * It retrieves and adds the blocks information to the transactions' meta.
+	 * It retrieves and adds the blocks information to the entities' meta.
 	 *
 	 * The block information includes its timestamp and feeMultiplier
 	 *
-	 * @param {object[]} list the list without the added block information.
+	 * @param {object[]} list the entity list without the added block information.
+	 * @param {string[]} fields the list of fields to be be copied from the block's to the entity's meta.
+	 * @param {Function} getHeight a function that returns the block's height of a given entity.
 	 * @returns {Promise<object[]>} this list with the added block information.
 	 */
-	async addBlockMetaToTransactionList(list) {
-		const isValidHeight = height => height && '0' !== height.toString();
+	async addBlockMetaToEntityList(list, fields, getHeight) {
+		const isValidHeight = height => height && 0 !== height.toInt();
 
 		const blockHeights = uniqueLongList(
-			list.map(item => item.meta.height).filter(isValidHeight)
+			list.map(item => getHeight(item)).filter(isValidHeight)
 		);
-		const blocks = await this.blocksAtHeights(blockHeights,
-			{ 'block.timestamp': 1, 'block.height': 1, 'block.feeMultiplier': 1 });
+
+		const projection = {
+			'block.height': 1,
+			...fields.reduce((acc, field) => {
+				acc[`block.${field}`] = 1;
+				return acc;
+			}, {})
+		};
+		const blocks = await this.blocksAtHeights(blockHeights, projection);
 
 		return list.map(item => {
-			const { height } = item.meta;
+			const height = getHeight(item);
 			if (!isValidHeight(height))
 				return item;
 			const block = blocks.find(
@@ -463,22 +477,16 @@ class CatapultDb {
 					`Cannot find block with height ${height.toString()}`
 				);
 			}
-			if (!block.block.timestamp === undefined) {
-				throw new Error(
-					`Cannot find timestamp in block with height ${height.toString()}`
-				);
-			}
-			if (block.block.feeMultiplier === undefined) {
-				throw new Error(
-					`Cannot find feeMultiplier in block with height ${height.toString()}`
-				);
-			}
-			// it adds timestamp and feeMultiplier
-			item.meta = {
-				...item.meta,
-				timestamp: block.block.timestamp,
-				feeMultiplier: block.block.feeMultiplier
-			};
+			item.meta = item.meta || {};
+			fields.forEach(field => {
+				const value = block.block[field];
+				if (value === undefined) {
+					throw new Error(
+						`Cannot find ${field} in block with height ${height.toString()}`
+					);
+				}
+				item.meta[field] = value;
+			});
 			return item;
 		});
 	}
