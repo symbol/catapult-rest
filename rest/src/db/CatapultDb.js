@@ -432,15 +432,20 @@ class CatapultDb {
 			})));
 	}
 
+	/**
+	 * It retrieves and adds the block information to the transactions' meta.
+	 *
+	 * The block information includes its timestamp and feeMultiplier
+	 *
+	 * @param {object[]} list the transaction list without the added block information.
+	 * @returns {Promise<object[]>} the list with the added block information.
+	 */
 	addBlockMetaToTransactionList(list) {
-		return this.addBlockMetaToEntityList(list, ['timestamp', 'feeMultiplier'],
-			item => item.meta.height);
+		return this.addBlockMetaToEntityList(list, ['timestamp', 'feeMultiplier'], item => item.meta.height);
 	}
 
 	/**
-	 * It retrieves and adds the blocks information to the entities' meta.
-	 *
-	 * The block information includes its timestamp and feeMultiplier
+	 * It retrieves and adds the block information to the entities' meta.
 	 *
 	 * @param {object[]} list the entity list without the added block information.
 	 * @param {string[]} fields the list of fields to be be copied from the block's to the entity's meta.
