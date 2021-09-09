@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 ENV NODE_VERSION=12.18.1
-ENV NVM_DIR=/root/.nvm
+ENV NVM_DIR=/usr/local/.nvm
 
 RUN mkdir -p ${NVM_DIR}
 RUN apt-get update && apt-get install -y curl
