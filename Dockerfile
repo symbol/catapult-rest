@@ -18,6 +18,5 @@ RUN npm install -g yarn
 
 WORKDIR /app
 COPY . /app/catapult-rest
-RUN cd catapult-rest \
-    && ./yarn_setup.sh
+RUN cd catapult-rest && ./yarn_setup.sh
 WORKDIR /app/catapult-rest/rest
