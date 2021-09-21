@@ -422,7 +422,11 @@ caseless@~0.12.0:
 
 "catapult-sdk@link:../catapult-sdk":
   version "0.0.0"
-  uid ""
+  dependencies:
+    js-sha3 "^0.8.0"
+    long "^4.0.0"
+    ripemd160 "^2.0.2"
+    tweetnacl "^1.0.1"
 
 chai@^4.2.0:
   version "4.3.4"
@@ -2096,9 +2100,9 @@ minimist@^1.2.0, minimist@^1.2.5:
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
 
 mixme@^0.5.0:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/mixme/-/mixme-0.5.1.tgz#b3da79a563b2da46efba9519830059e4c2a9e40f"
-  integrity sha512-NaeZIckeBFT7i0XBEpGyFcAE0/bLcQ9MHErTpnU3bLWVE5WZbxG5Y3fDsMxYGifTo5khDA42OquXCC2ngKJB+g==
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/mixme/-/mixme-0.5.3.tgz#21ae46e65e8fb43d1ef82b8a83f6c3cc1dfc5cd0"
+  integrity sha512-nD6vsvdlby6aU6U90zP77JBn8FkKUb4YDoatb5RvI0N2kxP3C+MOUqtypf/BtQMnVtrXshb//DOU4O8cjWw+Ow==
 
 mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@^0.5.4, mkdirp@~0.5.1:
   version "0.5.5"
