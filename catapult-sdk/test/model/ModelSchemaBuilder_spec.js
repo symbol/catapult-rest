@@ -275,6 +275,7 @@ describe('model schema builder', () => {
 				'transaction.deadline',
 				'transaction.maxFee',
 				'transactionMetadata.height',
+				'transactionMetadata.timestamp',
 
 				'transactionStatus.deadline',
 				'transactionStatus.height',
@@ -406,6 +407,7 @@ describe('model schema builder', () => {
 				'finalizationProof.finalizationEpoch',
 				'finalizationProof.finalizationPoint',
 				'messageGroup.stage',
+				'transactionMetadata.feeMultiplier',
 				'activityBucket.beneficiaryCount',
 				'votingPublicKey.startEpoch',
 				'votingPublicKey.endEpoch'
