@@ -20,9 +20,11 @@
  */
 
 const errors = require('../server/errors');
+const catapult = require('catapult-sdk');
 const MongoDb = require('mongodb');
 
 const { Long, ObjectId } = MongoDb;
+const { address } = catapult.model;
 
 const convertToLong = value => {
 	if (Number.isInteger(value))
@@ -77,7 +79,32 @@ const dbUtils = {
 			return { [sortFieldDbRelation[options.sortField]]: { [1 === options.sortDirection ? '$gt' : '$lt']: offset } };
 		}
 		return undefined;
-	}
-};
+	},
 
+	/**
+	 * Convert binary to Unresolved address
+	 * @param {MongoDb.Binary} binary Address|NamespaceId from MongoDb.
+	 * @returns {string} AddressBase32|NamespaceId
+	 */
+	bufferToUnresolvedAddress: binary => {
+		if (!binary)
+			return undefined;
+
+		if ((binary instanceof MongoDb.Binary))
+			return address.addressToString(binary.buffer);
+
+		if ((binary instanceof Uint8Array))
+			return address.addressToString(binary);
+
+		throw new Error(`Cannot convert binary address, unknown ${binary.constructor.name} type`);
+	},
+
+	/**
+	 * Creates copy of the array without duplicated longs.
+	 * @param {Long[]} duplicatedIds of {Long} objects.
+	 * @returns {Long[]} copy of the original list without duplicated values.
+	 */
+	uniqueLongList: duplicatedIds => duplicatedIds.filter((height, index) =>
+		index === duplicatedIds.findIndex(anotherHeight => anotherHeight.equals(height)))
+};
 module.exports = dbUtils;
