@@ -87,23 +87,23 @@ const dbUtils = {
      * @param {boolean} formatAddressUsingBase32 if base32 format should be used when formatting an address. Hex otherwise.
      * @returns {string} the address in base32 format or hex format depending on formatAddressUsingBase32
      */
-	 bufferToUnresolvedAddress: (binary, formatAddressUsingBase32) => {
-        if (!binary)
-            return undefined;
+	bufferToUnresolvedAddress: (binary, formatAddressUsingBase32) => {
+		if (!binary)
+			return undefined;
 
-        const getBuffer = () => {
-            if ((binary instanceof MongoDb.Binary))
-                return binary.buffer;
+		const getBuffer = () => {
+			if ((binary instanceof MongoDb.Binary))
+				return binary.buffer;
 
-            if ((binary instanceof Uint8Array))
-                return binary;
+			if ((binary instanceof Uint8Array))
+				return binary;
 
-            throw new Error(
-                `Cannot convert binary address, unknown ${binary.constructor.name} type`
-            );
-        };
-        return formatAddressUsingBase32 ? address.addressToString(getBuffer()) : catapult.utils.convert.uint8ToHex(getBuffer());
-    },
+			throw new Error(
+				`Cannot convert binary address, unknown ${binary.constructor.name} type`
+			);
+		};
+		return formatAddressUsingBase32 ? address.addressToString(getBuffer()) : catapult.utils.convert.uint8ToHex(getBuffer());
+	},
 
 	/**
 	 * Creates copy of the array without duplicated longs.

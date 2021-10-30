@@ -24,7 +24,7 @@ const { convertToLong } = require('../../src/db/dbUtils');
 const { expect } = require('chai');
 const MongoDb = require('mongodb');
 
-const { ObjectId, Binary } = MongoDb;
+const { ObjectId } = MongoDb;
 
 describe('db utils', () => {
 	describe('convertToLong', () => {
