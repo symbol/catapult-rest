@@ -86,7 +86,7 @@ const dbUtils = {
      * @param {MongoDb.Binary} binary Address|NamespaceId from MongoDb.
      * @returns {string} the address in base32 format
      */
-	bufferToUnresolvedAddress: (binary) => {
+	bufferToUnresolvedAddress: binary => {
 		if (!binary)
 			return undefined;
 
