@@ -21,9 +21,14 @@
 
 const { ServerMessageHandler } = require('../../src/connection/serverMessageHandlers');
 const test = require('../testUtils');
+const catapult = require('catapult-sdk');
 const { expect } = require('chai');
+const { EventEmitter } = require('ws');
+
+const { address } = catapult.model;
 
 describe('server message handlers', () => {
+	const addressBuffer = Buffer.from(address.stringToAddress('TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A'));
 	const createMockCodec = value => {
 		const mock = {
 			// only some message handlers require codec, objects passed to codec.deserialize() are collected in following array
@@ -41,9 +46,12 @@ describe('server message handlers', () => {
 		const emitted = [];
 		const codec = createMockCodec(34);
 		const blockBuffer = Buffer.of(0xAB, 0xCD, 0xEF);
-
+		const emitter = new EventEmitter();
+		emitter.on('block', data => emitted.push(data));
 		// Act:
-		ServerMessageHandler.block(codec, eventData => emitted.push(eventData))(12, blockBuffer, 56, 78, 99, 88);
+		ServerMessageHandler.zmqMessageHandler(codec, emitter)(
+			Buffer.of(0x49, 0x6A, 0xCA, 0x80, 0xE4, 0xD8, 0xF2, 0x9F), blockBuffer, 56, 78, 99, 88
+		);
 
 		// Assert:
 		// - 12 is a "topic" so it's not forwarded
@@ -68,9 +76,13 @@ describe('server message handlers', () => {
 			Buffer.of(66, 0, 0, 0, 0, 0, 0, 0), // height
 			Buffer.alloc(test.constants.sizes.hash256, 41) // hash
 		]);
+		const emitter = new EventEmitter();
+		emitter.on('finalizedBlock', data => emitted.push(data));
 
 		// Act:
-		ServerMessageHandler.finalizedBlock(codec, eventData => emitted.push(eventData))(12, finalizedBlockBuffer, 99, 88);
+		ServerMessageHandler.zmqMessageHandler(codec, emitter)(
+			Buffer.of(0x54, 0x79, 0xCE, 0x31, 0xA0, 0x32, 0x48, 0x4D), finalizedBlockBuffer, 99, 88
+		);
 
 		// Assert:
 		// - 12 is a "topic" so it's not forwarded
@@ -94,10 +106,14 @@ describe('server message handlers', () => {
 		const emitted = [];
 		const codec = createMockCodec(33);
 		const transactionBuffer = Buffer.of(0xEF, 0xCD, 0xAB);
+		const emitter = new EventEmitter();
+		emitter.on('confirmedAdded/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', data => emitted.push(data));
 
 		// Act:
 		const height = Buffer.of(66, 0, 0, 0, 0, 0, 0, 0);
-		ServerMessageHandler.transaction(codec, eventData => emitted.push(eventData))(22, transactionBuffer, 44, 55, height, 77, 88, 99);
+		ServerMessageHandler.zmqMessageHandler(codec, emitter)(Buffer.concat(
+			[Buffer.of('a'.charCodeAt(0)), addressBuffer]
+		), transactionBuffer, 44, 55, height, 77, 88, 99);
 
 		// Assert:
 		// - 22 is a "topic" so it's not forwarded
@@ -124,9 +140,13 @@ describe('server message handlers', () => {
 		// Arrange:
 		const emitted = [];
 		const codec = createMockCodec(35);
+		const emitter = new EventEmitter();
+		emitter.on('unconfirmedRemoved/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', data => emitted.push(data));
 
 		// Act:
-		ServerMessageHandler.transactionHash(codec, eventData => emitted.push(eventData))(22, 44, 77, 88, 99);
+		ServerMessageHandler.zmqMessageHandler(codec, emitter)(
+			Buffer.concat([Buffer.of('r'.charCodeAt(0)), addressBuffer]), 44, 77, 88, 99
+		);
 
 		// Assert:
 		// - 22 is a "topic" so it's not forwarded
@@ -147,8 +167,13 @@ describe('server message handlers', () => {
 			Buffer.of(55, 0, 0, 0) // status
 		]);
 
+		const emitter = new EventEmitter();
+		emitter.on('status/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', data => emitted.push(data));
+
 		// Act:
-		ServerMessageHandler.transactionStatus(codec, eventData => emitted.push(eventData))(22, buffer, 99);
+		ServerMessageHandler.zmqMessageHandler(codec, emitter)(
+			Buffer.concat([Buffer.of('s'.charCodeAt(0)), addressBuffer]), buffer, 99
+		);
 
 		// Assert:
 		// - 22 is a "topic" so it's not forwarded

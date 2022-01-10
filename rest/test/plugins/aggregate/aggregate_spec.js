@@ -23,10 +23,25 @@ const { ServerMessageHandler } = require('../../../src/connection/serverMessageH
 const aggregate = require('../../../src/plugins/aggregate/aggregate');
 const { test } = require('../../routes/utils/routeTestUtils');
 const pluginTest = require('../utils/pluginTestUtils');
+const catapult = require('catapult-sdk');
 const { expect } = require('chai');
+const { EventEmitter } = require('ws');
+
+const { address } = catapult.model;
 
 describe('aggregate plugin', () => {
 	pluginTest.assertThat.pluginDoesNotCreateDb(aggregate);
+	const createMockCodec = value => {
+		const mock = {
+			// only some message handlers require codec, objects passed to codec.deserialize() are collected in following array
+			collected: [],
+			deserialize: (parser, options) => {
+				mock.collected.push({ parser, options });
+				return value;
+			}
+		};
+		return mock;
+	};
 
 	describe('register transaction states', () => {
 		it('registers partial state', () => {
@@ -63,7 +78,7 @@ describe('aggregate plugin', () => {
 			const descriptor = registerAndExtractChannelDescriptor('partialAdded');
 
 			// Assert:
-			expect(descriptor).to.deep.equal({ name: 'partialAdded', markerChar: 'p', handler: ServerMessageHandler.transaction });
+			expect(descriptor).to.deep.equal({ name: 'partialAdded', markerChar: 'p', handler: ServerMessageHandler.zmqMessageHandler });
 		});
 
 		it('registers partialRemoved', () => {
@@ -71,7 +86,7 @@ describe('aggregate plugin', () => {
 			const descriptor = registerAndExtractChannelDescriptor('partialRemoved');
 
 			// Assert:
-			expect(descriptor).to.deep.equal({ name: 'partialRemoved', markerChar: 'q', handler: ServerMessageHandler.transactionHash });
+			expect(descriptor).to.deep.equal({ name: 'partialRemoved', markerChar: 'q', handler: ServerMessageHandler.zmqMessageHandler });
 		});
 
 		it('registers cosignature', () => {
@@ -86,8 +101,7 @@ describe('aggregate plugin', () => {
 		it('registers cosignature with handler that forwards to emit callback', () => {
 			// Arrange:
 			const emitted = [];
-			const { handler } = registerAndExtractChannelDescriptor('cosignature');
-
+			const codec = createMockCodec(33);
 			// Act:
 			const buffer = Buffer.concat([
 				Buffer.of(0x34, 0x54, 0x55, 0xFF, 0xFA, 0x0E, 0xCC, 0xB7),
@@ -95,7 +109,14 @@ describe('aggregate plugin', () => {
 				Buffer.alloc(test.constants.sizes.signature, 44),
 				Buffer.alloc(test.constants.sizes.hash256, 55)
 			]);
-			handler({}, eventData => emitted.push(eventData))(22, buffer, 99);
+			const addressBuffer = Buffer.from(address.stringToAddress('TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A'));
+			const emitter = new EventEmitter();
+			emitter.on('cosignature/TAHNZXQBC57AA7KJTMGS3PJPZBXN7DV5JHJU42A', data => emitted.push(data));
+
+			// Act:
+			ServerMessageHandler.zmqMessageHandler(codec, emitter)(
+				Buffer.concat([Buffer.of('c'.charCodeAt(0)), addressBuffer]), buffer, 99
+			);
 
 			// Assert:
 			// - 22 is a "topic" so it's not forwarded

@@ -116,24 +116,30 @@ module.exports = {
 		const zsockets = {};
 		const isSubEvent = key => -1 !== key.indexOf('.');
 		const isValidSubEvent = key => key.endsWith('.close');
+		const socketMatchingKey = key => {
+			const [topicCategory, topicParam] = key.replace('.close', '').split('/');
+			return !topicParam ? topicCategory : topicParam;
+		};
+		const connectedSocket = {};
 		const multisocketEmitter = {
 			on: (key, callback) => {
 				if (isSubEvent(key)) {
 					if (!isValidSubEvent(key))
 						throw Error(`${key} indicates an unsupported subevent`);
 				} else if (!(key in zsockets)) {
-					const zsocket = zsocketFactory(key, emitter, multisocketEmitter.zsocketCount());
+					const zsocket = zsocketFactory(key, emitter, zsockets, connectedSocket);
 					zsocket.on('zsocket_close', () => {
 						// firing of close indicates socket is fully closed, so prevent it from being closed again
 						// by bypassing close in removeAllListeners
-						delete zsockets[key];
-
+						Object.keys(zsockets).forEach(k => {
+							if (k.includes(socketMatchingKey(key)))
+								delete zsockets[k];
+						});
 						emitter.emit(`${key}.close`);
 						multisocketEmitter.removeAllListeners(key);
 					});
 					zsockets[key] = zsocket;
 				}
-
 				emitter.on(key, callback);
 			},
 
@@ -148,7 +154,10 @@ module.exports = {
 
 				const zsocket = zsockets[key];
 				delete zsockets[key];
-				zsocket.close();
+				if (!Object.keys(zsockets).find(k => k.includes(socketMatchingKey(key)))) {
+					zsocket.close();
+					delete connectedSocket[socketMatchingKey(key)];
+				}
 			},
 
 			listenerCount: key => emitter.listenerCount(key),

@@ -73,18 +73,18 @@ class MessageChannelBuilder {
 		// add basic descriptors
 		this.descriptors.block = createBlockDescriptor(
 			Buffer.of(0x49, 0x6A, 0xCA, 0x80, 0xE4, 0xD8, 0xF2, 0x9F),
-			ServerMessageHandler.block
+			ServerMessageHandler.zmqMessageHandler
 		);
 		this.descriptors.finalizedBlock = createBlockDescriptor(
 			Buffer.of(0x54, 0x79, 0xCE, 0x31, 0xA0, 0x32, 0x48, 0x4D),
-			ServerMessageHandler.finalizedBlock
+			ServerMessageHandler.zmqMessageHandler
 		);
-		this.add('confirmedAdded', 'a', ServerMessageHandler.transaction);
-		this.add('unconfirmedAdded', 'u', ServerMessageHandler.transaction);
-		this.add('unconfirmedRemoved', 'r', ServerMessageHandler.transactionHash);
+		this.add('confirmedAdded', 'a', ServerMessageHandler.zmqMessageHandler);
+		this.add('unconfirmedAdded', 'u', ServerMessageHandler.zmqMessageHandler);
+		this.add('unconfirmedRemoved', 'r', ServerMessageHandler.zmqMessageHandler);
 		this.descriptors.status = {
 			filter: this.createAddressFilter('s'),
-			handler: ServerMessageHandler.transactionStatus
+			handler: ServerMessageHandler.zmqMessageHandler
 		};
 	}
 

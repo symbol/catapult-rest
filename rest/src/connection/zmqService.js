@@ -18,17 +18,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+const { ServerMessageHandler } = require('./serverMessageHandlers');
 const zmqUtils = require('./zmqUtils');
 const zmq = require('zeromq');
 
-const createZmqSocket = (key, zmqConfig, logger, currentSocketCount) => {
-	const zsocket = zmq.socket('sub');
-	zsocket.key = key;
-	zmqUtils.prepareZsocket(zsocket, zmqConfig, logger);
+const socketMatchingKey = key => {
+	const [topicCategory, topicParam] = key.replace('.close', '').split('/');
+	return !topicParam ? topicCategory : topicParam;
+};
 
+const createZmqSocket = (key, zmqConfig, logger, connectedSocket) => {
+	const zsocket = zmq.socket('sub');
+	zsocket.key = socketMatchingKey(key);
+	zmqUtils.prepareZsocket(zsocket, zmqConfig, logger);
 	zsocket.connect(`tcp://${zmqConfig.host}:${zmqConfig.port}`);
-	logger.info(`Current zmq subscription count: ${currentSocketCount + 1}`);
+	connectedSocket[zsocket.key] = zsocket;
 	return zsocket;
 };
 
@@ -38,7 +42,7 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
 		throw new Error(`unknown topic category ${topicCategory}`);
 
 	const descriptor = channelDescriptors[topicCategory];
-	const handler = descriptor.handler(codec, data => { emitter.emit(key, data); });
+	const handler = ServerMessageHandler.zmqMessageHandler(codec, emitter);
 	const filter = descriptor.filter(topicParam);
 	return { filter, handler };
 };
@@ -52,17 +56,29 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
  * @returns {object} Newly created zmq connection service that is a stripped down EventEmitter.
  */
 module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptors, logger) =>
-	zmqUtils.createMultisocketEmitter((key, emitter, currentSocketCount) => {
-		if (currentSocketCount === (!zmqConfig.maxSubscriptions ? 500 : zmqConfig.maxSubscriptions))
-			throw new Error('Max subscriptions reached.');
+	zmqUtils.createMultisocketEmitter((key, emitter, subscribedSockets, connectedSocket) => {
+		const subscribedKeys = Object.keys(subscribedSockets);
 
 		logger.info(`subscribing to ${key}`);
 		const subscriptionInfo = findSubscriptionInfo(key, emitter, codec, channelDescriptors);
+		const matchingKey = subscribedKeys.find(k => k.includes(socketMatchingKey(key)));
+		if (matchingKey) {
+			subscribedSockets[matchingKey].subscribe(subscriptionInfo.filter);
+			logger.info(
+				`zmq Subscription count: ${Object.keys(subscribedSockets).length}, `
+				+ `Socket opened ${Object.keys(connectedSocket).length}`
+			);
+			return subscribedSockets[matchingKey];
+		}
+		if (Object.keys(connectedSocket).length === (!zmqConfig.maxSubscriptions ? 500 : zmqConfig.maxSubscriptions))
+			throw new Error('Max subscriptions reached.');
 
-		const zsocket = createZmqSocket(key, zmqConfig, logger, currentSocketCount);
+		const zsocket = createZmqSocket(key, zmqConfig, logger, connectedSocket);
 		// the second param (handler) gets called with the provided args in the message, which vary depending on the defined handler type
 		// (block, transaction, transactionStatus...)
 		zsocket.subscribe(subscriptionInfo.filter);
 		zsocket.on('message', subscriptionInfo.handler);
+		logger.info(`zmq Subscription count: ${Object.keys(subscribedSockets).length}, `
+			+ `Socket opened ${Object.keys(connectedSocket).length}`);
 		return zsocket;
 	});
